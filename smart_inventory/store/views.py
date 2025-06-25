@@ -81,9 +81,18 @@ def processOrder(request):
 
     if total == order.get_cart_total:
         order.complete = True
-    order.save()
+        order.save()
 
-    if order.shipping == True:
+        # ↓↓↓ Намаляване на инвентара
+        for item in order.orderitem_set.all():
+            product = item.product
+            if product.stock_quantity >= item.quantity:
+                product.stock_quantity -= item.quantity
+                product.save()
+            else:
+                return JsonResponse('Недостатъчна наличност за продукта: ' + product.name, safe=False, status=400)
+
+    if order.shipping:
         ShippingAddress.objects.create(
             customer=customer,
             order=order,
@@ -93,4 +102,4 @@ def processOrder(request):
             zipcode=data['shipping']['zipcode'],
         )
 
-    return JsonResponse('Payment submitted..', safe=False)
+    return JsonResponse('Поръчката е приета', safe=False)
