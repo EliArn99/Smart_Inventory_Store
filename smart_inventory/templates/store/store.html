@@ -1,26 +1,40 @@
-
 {% extends 'store/main.html' %}
 {% load static %}
 {% block content %}
-	<div class="row">
-		{% for product in products %}
-		<div class="col-lg-4">
-			<img class="thumbnail" src="{{product.imageURL}}">
-			<div class="box-element product">
-				<h6><strong>{{product.name}}</strong></h6>
-				<hr>
+    <div class="row">
+        {% for product in products %}
+            <div class="col-lg-4">
+                <div class="box-element product">
+                    <img class="thumbnail" src="{{ product.imageURL }}" alt="{{ product.name }}">
 
-				<div style="display: flex; gap:1em; justify-content: space-between;">
-					<div>
-						<button data-product="{{product.id}}" data-action="add" class="btn btn-outline-secondary add-btn update-cart">Add to Cart</button>
-						<a class="btn btn-outline-success" href="#">View</a>
-					</div>
+                    <h6><strong>{{ product.name }}</strong></h6>
+                    <hr>
 
-					<h4><strong>${{product.price}}</strong></h4>
-				</div>
-			</div>
-		</div>
-		{% endfor %}
-	</div>
+                    <p>
+                        {% if product.stock_quantity == 0 %}
+                            <span style="color: red;">Изчерпано</span>
+                        {% elif product.stock_quantity <= 15 %}
+                            <span style="color: orange;">Последни бройки</span>
+                        {% else %}
+                            <span style="color: green;">Налично</span>
+                        {% endif %}
+                    </p>
 
+                    <div style="display: flex; gap:1em; justify-content: space-between;">
+                        <div>
+                            {% if product.stock_quantity > 0 %}
+                                <button data-product="{{ product.id }}" data-action="add"
+                                        class="btn btn-outline-secondary add-btn update-cart">Добави
+                                </button>
+                            {% else %}
+                                <button class="btn btn-outline-secondary" disabled>Изчерпано</button>
+                            {% endif %}
+                            <a class="btn btn-outline-success" href="#">Преглед</a>
+                        </div>
+                        <h4><strong>${{ product.price }}</strong></h4>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
 {% endblock content %}
