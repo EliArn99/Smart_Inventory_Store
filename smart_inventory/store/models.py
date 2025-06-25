@@ -18,6 +18,8 @@ class Product(models.Model):
     price = models.FloatField()
     digital = models.BooleanField(default=False, null=True, blank=True)
     image = models.ImageField(null=True, blank=True)
+    stock_quantity = models.PositiveIntegerField(default=0)
+
 
     def __str__(self):
         return self.name
