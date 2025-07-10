@@ -1,40 +1,74 @@
-{% extends 'store/main.html' %}
+{% extends 'store/base.html' %}
 {% load static %}
+
+{% block title %}
+    {% if category %}{{ category.name }}{% else %}All Products{% endif %} - Ecom Store
+{% endblock %}
+
 {% block content %}
-    <div class="row">
-        {% for product in products %}
-            <div class="col-lg-4">
-                <div class="box-element product">
-                    <img class="thumbnail" src="{{ product.imageURL }}" alt="{{ product.name }}">
+<div class="row">
+    <!-- Category Sidebar -->
+    <div class="col-lg-3 col-md-4 mb-4">
+        <div class="box-element p-3 category-sidebar">
+            <h4 class="mb-3 text-center">Categories</h4>
+            <div class="list-group">
+                <a href="{% url 'store:store' %}" class="list-group-item list-group-item-action {% if not category %}active{% endif %}">All Products</a>
+                {% for cat in categories %}
+                    <a href="{% url 'store:product_list_by_category' cat.slug %}" class="list-group-item list-group-item-action {% if category and category.slug == cat.slug %}active{% endif %}">{{ cat.name }}</a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
 
-                    <h6><strong>{{ product.name }}</strong></h6>
-                    <hr>
+    <!-- Product Listing Area -->
+    <div class="col-lg-9 col-md-8">
+        <h2 class="mb-4 product-listing-header">
+            {% if category %}
+                {{ category.name }}
+            {% else %}
+                All Products
+            {% endif %}
+        </h2>
 
-                    <p>
-                        {% if product.stock_quantity == 0 %}
-                            <span style="color: red;">Изчерпано</span>
-                        {% elif product.stock_quantity <= 15 %}
-                            <span style="color: orange;">Последни бройки</span>
+        <div class="row">
+            {% for product in products %}
+            <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
+                <div class="card h-100 product-card">
+                    <a href="{{ product.get_absolute_url }}">
+                        {# Corrected image logic: Use product.imageURL for reliable display #}
+                        {% if product.imageURL %}
+                            <img class="card-img-top thumbnail" src="{{ product.imageURL }}" alt="{{ product.name }}">
                         {% else %}
-                            <span style="color: green;">Налично</span>
+                            <img class="card-img-top thumbnail" src="{% static 'images/placeholder.png' %}" alt="No image">
                         {% endif %}
-                    </p>
-
-                    <div style="display: flex; gap:1em; justify-content: space-between;">
-                        <div>
-                            {% if product.stock_quantity > 0 %}
-                                <button data-product="{{ product.id }}" data-action="add"
-                                        class="btn btn-outline-secondary add-btn update-cart">Добави
-                                </button>
-                            {% else %}
-                                <button class="btn btn-outline-secondary" disabled>Изчерпано</button>
-                            {% endif %}
-                            <a class="btn btn-outline-success" href="#">Преглед</a>
+                    </a>
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title product-name">
+                            <a href="{{ product.get_absolute_url }}">{{ product.name }}</a>
+                        </h5>
+                        <p class="card-text product-description">{{ product.description|truncatewords:12 }}</p>
+                        <div class="mt-auto d-flex justify-content-between align-items-center">
+                            <div class="product-actions">
+                                {% if product.stock > 0 %}
+                                    <button data-product="{{ product.id }}" data-action="add" class="btn btn-update add-btn update-cart">Add to Cart</button>
+                                {% else %}
+                                    <button class="btn btn-secondary" disabled>Out of Stock</button>
+                                {% endif %}
+                                <a class="btn btn-outline-info view-btn" href="{{ product.get_absolute_url }}">View</a>
+                            </div>
+                            <h4 class="product-price">{{ product.price|floatformat:2 }} лв.</h4>
                         </div>
-                        <h4><strong>${{ product.price }}</strong></h4>
                     </div>
                 </div>
             </div>
-        {% endfor %}
+            {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info text-center" role="alert">
+                    No products available in this category.
+                </div>
+            </div>
+            {% endfor %}
+        </div>
     </div>
+</div>
 {% endblock content %}
