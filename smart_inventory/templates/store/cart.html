@@ -1,53 +1,72 @@
-
-{% extends 'store/main.html' %}
+{% extends 'store/base.html' %}
 {% load static %}
+
+{% block title %}Shopping Cart - Ecom Store{% endblock %}
+
 {% block content %}
-	<div class="row">
-		<div class="col-lg-12">
-			<div class="box-element">
+    {# ТОЗИ РЕД Е ПРЕМАХНАТ: <link rel="stylesheet" href="{% static 'css/base.css'%}"> #}
+<div class="row">
+    <div class="col-lg-12">
+        <div class="box-element p-4 mb-4">
+            <a class="btn btn-outline-dark continue-shopping-btn" href="{% url 'store:store' %}">&#x2190; Continue Shopping</a>
 
-				<a  class="btn btn-outline-dark" href="{% url 'store' %}">&#x2190; Continue Shopping</a>
+            <hr class="my-4">
 
-				<br>
-				<br>
-				<table class="table">
-					<tr>
-						<th><h5>Items: <strong>{{order.get_cart_items}}</strong></h5></th>
-						<th><h5>Total:<strong> ${{order.get_cart_total|floatformat:2}}</strong></h5></th>
-						<th>
-							<a  style="float:right; margin:5px;" class="btn btn-success" href="{% url 'checkout' %}">Checkout</a>
-						</th>
-					</tr>
-				</table>
+            <table class="table table-borderless summary-table">
+                <thead>
+                    <tr>
+                        <th scope="col" class="text-start"><h5>Items: <strong class="text-primary">{{ order.get_cart_items }}</strong></h5></th>
+                        <th scope="col" class="text-end"><h5>Total: <strong class="text-success">{{ order.get_cart_total|floatformat:2 }} лв.</strong></h5></th>
+                        <th scope="col" class="text-end">
+                            <a style="margin:5px 0;" class="btn btn-success checkout-btn" href="{% url 'store:checkout' %}">Checkout</a>
+                        </th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
 
-			</div>
+        <div class="box-element p-4 cart-details-section">
+            <div class="cart-row header-row d-none d-md-flex">
+                <div class="flex-column-2"></div>
+                <div class="flex-column-2"><strong>Item</strong></div>
+                <div class="flex-column-1"><strong>Price</strong></div>
+                <div class="flex-column-1"><strong>Quantity</strong></div>
+                <div class="flex-column-1"><strong>Total</strong></div>
+            </div>
 
-			<br>
-			<div class="box-element">
-				<div class="cart-row">
-					<div style="flex:2"></div>
-					<div style="flex:2"><strong>Item</strong></div>
-					<div style="flex:1"><strong>Price</strong></div>
-					<div style="flex:1"><strong>Quantity</strong></div>
-					<div style="flex:1"><strong>Total</strong></div>
-				</div>
-				{% for item in items %}
-				<div class="cart-row">
-					<div style="flex:2"><img class="row-image" src="{{item.product.imageURL}}"></div>
-					<div style="flex:2"><p>{{item.product.name}}</p></div>
-					<div style="flex:1"><p>${{item.product.price|floatformat:2}}</p></div>
-					<div style="flex:1">
-						<p class="quantity">{{item.quantity}}</p>
-						<div class="quantity">
-							<img data-product="{{item.product.id}}" data-action="add" class="chg-quantity update-cart" src="{% static  'images/arrow-up.png' %}">
-					
-							<img data-product="{{item.product.id}}" data-action="remove" class="chg-quantity update-cart" src="{% static  'images/arrow-down.png' %}">
-						</div>
-					</div>
-					<div style="flex:1"><p>${{item.get_total|floatformat:2}}</p></div>
-				</div>
-				{% endfor %}
-			</div>
-		</div>
-	</div>
+            {% for item in items %}
+            <div class="cart-row item-row d-flex flex-wrap flex-md-nowrap align-items-center mb-3 pb-3">
+                <div class="flex-column-2 item-image-col">
+                    {% if item.product.imageURL %}
+                        <img class="row-image" src="{{ item.product.imageURL }}" alt="{{ item.product.name }}">
+                    {% else %}
+                        <img class="row-image" src="{% static 'images/placeholder.png' %}" alt="No image">
+                    {% endif %}
+                </div>
+                <div class="flex-column-2 item-name-col">
+                    <p class="mb-0">{{ item.product.name }}</p>
+                </div>
+                <div class="flex-column-1 item-price-col">
+                    <p class="mb-0">{{ item.product.price|floatformat:2 }} лв.</p>
+                </div>
+                <div class="flex-column-1 item-quantity-col">
+                    <p class="quantity mb-0">{{ item.quantity }}</p>
+                    <div class="quantity-controls d-flex align-items-center justify-content-center">
+                        <img data-product="{{ item.product.id }}" data-action="add" class="chg-quantity update-cart" src="{% static 'images/arrow-up.png' %}" alt="Add">
+                        <img data-product="{{ item.product.id }}" data-action="remove" class="chg-quantity update-cart" src="{% static 'images/arrow-down.png' %}" alt="Remove">
+                    </div>
+                </div>
+                <div class="flex-column-1 item-total-col">
+                    <p class="mb-0">{{ item.get_total|floatformat:2 }} лв.</p>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center p-5">
+                <p class="lead">Your cart is empty. <a href="{% url 'store:store' %}">Start shopping now!</a></p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
 {% endblock content %}
