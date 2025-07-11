@@ -1,0 +1,58 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }} - Ecom Store{% endblock %}
+
+{% block content %}
+<div class="row product-detail-container">
+    {# Left Column: Product Image #}
+    <div class="col-lg-6 col-md-6 mb-4">
+        <div class="box-element p-3 product-image-wrapper">
+            {% if product.imageURL %}
+                <img class="img-fluid product-detail-image" src="{{ product.imageURL }}" alt="{{ product.name }}">
+            {% else %}
+                <img class="img-fluid product-detail-image" src="{% static 'images/placeholder.png' %}" alt="No image">
+            {% endif %}
+        </div>
+    </div>
+
+    {# Right Column: Product Details and Actions #}
+    <div class="col-lg-6 col-md-6 mb-4">
+        <div class="box-element p-4 product-info-wrapper">
+            <a class="btn btn-outline-dark back-to-store-btn mb-3" href="{% url 'store:store' %}">&#x2190; Back to Store</a>
+            <hr>
+            <h1 class="product-detail-name mb-3">{{ product.name }}</h1>
+            <p class="lead product-detail-price mb-4">{{ product.price|floatformat:2 }} лв.</p>
+
+            <p class="product-detail-category mb-2"><strong>Category:</strong> <a href="{% url 'store:product_list_by_category' product.category.slug %}">{{ product.category.name }}</a></p>
+            <p class="product-detail-availability mb-4">
+                <strong>Availability:</strong>
+                {% if product.stock > 0 %}
+                    In stock (<span class="text-success">{{ product.stock }}</span> pcs.)
+                {% else %}
+                    <span class="text-danger">Out of stock</span>
+                {% endif %}
+            </p>
+
+            <div class="product-detail-description mb-4">
+                <h5 class="mb-2">Description:</h5>
+                <p>{{ product.description|linebreaksbr }}</p>
+            </div>
+
+            <div class="d-grid gap-2 product-detail-actions">
+                {% if product.stock > 0 %}
+                    {# The "Add to Cart" button with data attributes for cart.js #}
+                    <button data-product="{{ product.id }}" data-action="add" class="btn btn-success btn-lg btn-update update-cart">Add to Cart</button>
+                {% else %}
+                    <button class="btn btn-secondary btn-lg" disabled>Out of Stock</button>
+                {% endif %}
+            </div>
+
+            <hr class="my-4">
+            <h4 class="customer-reviews-header">Customer Reviews</h4>
+            <p class="text-muted">No reviews for this product yet.</p>
+            {# TODO: Add actual review section here later #}
+        </div>
+    </div>
+</div>
+{% endblock content %}
