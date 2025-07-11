@@ -1,13 +1,16 @@
+{# TODO: WORK ON THE PROFILE OF THE USER #}
+{# TODO: FIX THE LOGIN/LOGOUT & REGISTER #}
 <!DOCTYPE html>
 {% load static %}
 <html lang="en">
 <head>
-    <title>{% block title %}Ecom Store{% endblock %}</title>
+    <title>{% block title %}My Store{% endblock %}</title>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 
     <link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}">
 
@@ -31,14 +34,15 @@
             }
             return cookieValue;
         }
+
         var csrftoken = getToken('csrftoken'); // CSRF token for authenticated AJAX requests
 
         // Function to get a specific cookie by name
         function getCookie(name) {
             var cookieArr = document.cookie.split(";");
-            for(var i = 0; i < cookieArr.length; i++) {
+            for (var i = 0; i < cookieArr.length; i++) {
                 var cookiePair = cookieArr[i].split("=");
-                if(name == cookiePair[0].trim()) {
+                if (name == cookiePair[0].trim()) {
                     return decodeURIComponent(cookiePair[1]);
                 }
             }
@@ -52,7 +56,7 @@
             cart = {}; // Initialize as empty object
             console.log('Cart Created!', cart);
             // Set the cookie with proper domain and path for broader accessibility
-            document.cookie ='cart=' + JSON.stringify(cart) + ";domain=;path=/";
+            document.cookie = 'cart=' + JSON.stringify(cart) + ";domain=;path=/";
         }
         console.log('Cart:', cart);
 
@@ -60,61 +64,70 @@
 </head>
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand" href="{% url 'store:store' %}">Ecom</a> {# Use store:store for clarity with app_name #}
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="{% url 'store:store' %}">My Store</a> {# Use store:store for clarity with app_name #}
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
 
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item active">
-                    <a class="nav-link" href="{% url 'store:store' %}">Store <span class="sr-only">(current)</span></a>
-                </li>
-                {# You can add category links here later if you want a dropdown #}
-                {# For example: #}
-                 <li class="nav-item dropdown">
-                   <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                     Categories
-                   </a>
-                   <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                     {% for category in categories %}
-                       <a class="dropdown-item" href="{% url 'store:product_list_by_category' category.slug %}">{{ category.name }}</a>
-                     {% endfor %}
-                   </div>
-                 </li>
-
-            </ul>
-            <div class="form-inline my-2 my-lg-0">
-                {% if request.user.is_authenticated %}
-                    <span class="nav-item text-light mr-3">Hello, {{ request.user.username }}</span>
-                    <a href="{% url 'logout' %}" class="btn btn-outline-light mr-2">Logout</a>
-                {% else %}
-                    <a href="{% url 'login' %}" class="btn btn-warning mr-2">Login</a>
-                    {# TODO: FIX this error #}
-{#                    <a href="{% url 'register' %}" class="btn btn-info">Register</a>#}
-                {% endif %}
-
-                <a href="{% url 'store:cart' %}">
-                    <img id="cart-icon" src="{% static 'images/cart.png' %}">
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+                <a class="nav-link" href="{% url 'store:store' %}">Store <span class="sr-only">(current)</span></a>
+            </li>
+            {# You can add category links here later if you want a dropdown #}
+            {# For example: #}
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+                   aria-haspopup="true" aria-expanded="false">
+                    Categories
                 </a>
-                <p id="cart-total">{{cartItems}}</p>
-            </div>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    {% for category in categories %}
+                        <a class="dropdown-item"
+                           href="{% url 'store:product_list_by_category' category.slug %}">{{ category.name }}</a>
+                    {% endfor %}
+                </div>
+            </li>
+
+        </ul>
+        <div class="form-inline my-2 my-lg-0">
+            {% if request.user.is_authenticated %}
+                <span class="nav-item text-light mr-3">Hello, {{ request.user.username }}</span>
+                <a href="{% url 'logout' %}" class="btn btn-outline-light mr-2">Logout</a>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn btn-warning mr-2">Login</a>
+                {# TODO: FIX this error #}
+                {#                    <a href="{% url 'register' %}" class="btn btn-info">Register</a>#}
+            {% endif %}
+
+            <a href="{% url 'store:cart' %}">
+                <img id="cart-icon" src="{% static 'images/cart.png' %}">
+            </a>
+            <p id="cart-total">{{ cartItems }}</p>
         </div>
-    </nav>
-
-    <div class="container">
-        <br>
-        {% block content %}
-        {% endblock content %}
     </div>
+</nav>
 
-    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+<div class="container">
+    <br>
+    {% block content %}
+    {% endblock content %}
+</div>
 
-    <script type="text/javascript" src="{% static 'js/cart.js' %}"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
 
-    {% block extra_js %}{% endblock %}
+<script type="text/javascript" src="{% static 'js/cart.js' %}"></script>
+
+{% block extra_js %}{% endblock %}
 </body>
 </html>
