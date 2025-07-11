@@ -35,7 +35,7 @@
                         <input class="form-control" type="text" name="zipcode" placeholder="Zip code..">
                     </div>
                     <div class="form-field">
-                        <input class="form-control" type="text" name="country" placeholder="Country.."> {# Corrected placeholder #}
+                        <input class="form-control" type="text" name="country" placeholder="Country..">
                     </div>
                 </div>
 
@@ -46,7 +46,8 @@
 
         <div class="box-element p-4 hidden payment-section" id="payment-info">
             <small class="text-muted mb-3 d-block">Payment Options</small>
-            {# <button id="make-payment" class="btn btn-primary btn-block">Make payment</button> #}
+            {# Можете да премахнете този бутон, ако използвате само PayPal #}
+             <button id="make-payment" class="btn btn-primary btn-block">Make payment</button> 
             <div id="paypal-button-container"></div>
         </div>
     </div>
@@ -86,8 +87,8 @@
 </div>
 
 {% block extra_js %}
-    {# PayPal SDK Script #}
-    <script src="https://www.paypal.com/sdk/js?client-id=YOUR-CLIENT-ID&currency=USD&disable-funding=credit"></script>
+    {# PayPal SDK Script - REPLACE YOUR-CLIENT-ID with your actual PayPal Client ID #}
+    <script src="https://www.paypal.com/sdk/js?client-id=YOUR-CLIENT-ID&currency=USD&disable-funding=credit"></script> {# <-- ЗАМЕНЕТЕ ТУК #}
 
     <script>
         var total = '{{ order.get_cart_total }}';
@@ -98,7 +99,7 @@
                 color: 'blue',
                 shape: 'rect',
                 label: 'pay',
-                height: 40, // Adjust button height
+                height: 40,
             },
             createOrder: function(data, actions) {
                 return actions.order.create({
@@ -113,15 +114,23 @@
                 return actions.order.capture().then(function(details) {
                     submitFormData();
                 });
+            },
+            onCancel: function (data) {
+                console.log('Payment cancelled', data);
+                alert('Payment cancelled.'); // Можете да покажете по-добро съобщение
+            },
+            onError: function (err) {
+                console.error('Payment error', err);
+                alert('An error occurred during payment. Please try again.'); // Можете да покажете по-добро съобщение
             }
         }).render('#paypal-button-container');
     </script>
 
     <script type="text/javascript">
-        var shipping = '{{ order.shipping|lower }}'; // Convert to lowercase string 'true' or 'false'
-        var user = '{{ request.user }}'; // Ensure this is correctly passed from base.html
+        var shipping = '{{ order.shipping|lower }}';
+        var user = '{{ request.user }}';
 
-        if (shipping == 'false'){ // Compare with lowercase string
+        if (shipping == 'false'){
              document.getElementById('shipping-info').innerHTML = '';
         }
 
@@ -143,7 +152,7 @@
         });
 
         function submitFormData(){
-            console.log('Payment button clicked');
+            console.log('Submitting form data after payment approval...');
 
             var userFormData = {
                 'name':null,
@@ -156,15 +165,15 @@
                 'city':null,
                 'state':null,
                 'zipcode':null,
-                'country':null, // Added country
+                'country':null,
             };
 
-            if (shipping == 'true'){ // Compare with lowercase string
+            if (shipping == 'true'){
                 shippingInfo.address = form.address.value;
                 shippingInfo.city = form.city.value;
                 shippingInfo.state = form.state.value;
                 shippingInfo.zipcode = form.zipcode.value;
-                shippingInfo.country = form.country.value; // Get country value
+                shippingInfo.country = form.country.value;
             }
 
             if (user == 'AnonymousUser'){
@@ -179,7 +188,7 @@
             fetch(url, {
                 method:'POST',
                 headers:{
-                    'Content-Type':'application/json', // Corrected typo 'applicaiton/json'
+                    'Content-Type':'application/json',
                     'X-CSRFToken':csrftoken,
                 },
                 body:JSON.stringify({'form':userFormData, 'shipping':shippingInfo}),
@@ -187,19 +196,21 @@
             .then((response) => response.json())
             .then((data) => {
                 console.log('Success:', data);
-                alert('Transaction completed'); // Consider a custom modal instead of alert()
+                // Instead of alert(), consider a custom modal or redirect to a success page
+                // alert('Transaction completed');
 
                 cart = {}; // Clear cart in JS
                 document.cookie ='cart=' + JSON.stringify(cart) + ";domain=;path=/"; // Clear cart cookie
 
-                window.location.href = "{% url 'store:store' %}"; // Redirect to store page
+                // Redirect to a success page or the store page
+                window.location.href = "{% url 'store:store' %}";
 
             })
-            .catch((error) => { // Added error handling
+            .catch((error) => {
                 console.error('Error:', error);
-                alert('An error occurred during transaction.');
+                alert('An error occurred during transaction. Please check console for details.');
             });
         }
     </script>
-    {% endblock extra_js %}
-    {% endblock %}
+{% endblock extra_js %}
+{% endblock %}
