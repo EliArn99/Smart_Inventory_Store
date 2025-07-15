@@ -22,7 +22,7 @@ class CategoryAdmin(admin.ModelAdmin):
                     obj.image.url))
         return "-"
 
-    thumbnail_image.short_description = 'Image Preview'  #
+    thumbnail_image.short_description = 'Image Preview'  
 
 
 @admin.register(Product)
