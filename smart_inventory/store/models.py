@@ -166,3 +166,12 @@ class WishlistItem(models.Model):
 
     def __str__(self):
         return f"{self.product.name} in {self.customer.name}'s Wishlist"
+
+
+class Wishlist(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='wishlist')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Wishlist of {self.user.username}"
+
