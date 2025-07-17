@@ -5,7 +5,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 import json
 import datetime
-from .models import Customer, Category, Product, Order, OrderItem, ShippingAddress, WishlistItem
+from .models import Customer, Category, Product, Order, OrderItem, ShippingAddress, WishlistItem, Wishlist
 from .utils import cookieCart, cartData, guestOrder  # Ще трябва да създадете utils.py
 from django.contrib.auth import login, logout, authenticate
 
@@ -154,7 +154,7 @@ def processOrder(request):
             city=data['shipping']['city'],
             state=data['shipping']['state'],
             zipcode=data['shipping']['zipcode'],
-            # country=data['shipping']['country'], # Може да добавите и държава, ако я събирате
+            # country=data['shipping']['country'], 
         )
 
     return JsonResponse('Payment submitted..', safe=False)
@@ -190,28 +190,24 @@ def user_profile(request):
     cartItems = data['cartItems']
     categories = Category.objects.all()
 
-    customer_profile = request.user.customer # Get the associated Customer object
-
+    customer_profile = request.user.customer  # Get the associated Customer object
 
     context = {
-            'cartItems': cartItems,
-            'categories': categories,
-            'customer_profile': customer_profile,
-            'user': request.user, # The Django User object
-        }
+        'cartItems': cartItems,
+        'categories': categories,
+        'customer_profile': customer_profile,
+        'user': request.user,  # The Django User object
+    }
     return render(request, 'store/profile.html', context)
 
 
 @csrf_exempt
-@login_required(login_url='login') # Only authenticated users can add/remove from wishlist
+@login_required(login_url='login')
 def add_to_wishlist(request):
-    """
-    AJAX endpoint to add or remove a product from the user's wishlist.
-    """
     if request.method == 'POST':
         data = json.loads(request.body)
         product_id = data.get('productId')
-        action = data.get('action') # 'add_wish' or 'remove_wish'
+        action = data.get('action')  # 'add_wish' or 'remove_wish'
 
         if not product_id or not action:
             return JsonResponse({'error': 'Invalid request data'}, status=400)
@@ -220,7 +216,6 @@ def add_to_wishlist(request):
         product = get_object_or_404(Product, id=product_id)
 
         if action == 'add_wish':
-            # Add to wishlist if not already there
             wishlist_item, created = WishlistItem.objects.get_or_create(customer=customer, product=product)
             if created:
                 message = 'Product added to wishlist.'
@@ -228,7 +223,6 @@ def add_to_wishlist(request):
                 message = 'Product already in wishlist.'
             return JsonResponse({'message': message, 'action': 'added'}, status=200)
         elif action == 'remove_wish':
-            # Remove from wishlist if it exists
             deleted_count, _ = WishlistItem.objects.filter(customer=customer, product=product).delete()
             if deleted_count > 0:
                 message = 'Product removed from wishlist.'
@@ -240,17 +234,14 @@ def add_to_wishlist(request):
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
-@login_required(login_url='login') # Only authenticated users can view their wishlist
+@login_required(login_url='login')
 def wishlist_page(request):
-    """
-    Displays the user's wishlist page.
-    """
     data = cartData(request)
     cartItems = data['cartItems']
     categories = Category.objects.all()
 
     customer = request.user.customer
-    wishlist_items = WishlistItem.objects.filter(customer=customer).select_related('product') # Eager load product details
+    wishlist_items = WishlistItem.objects.filter(customer=customer).select_related('product')
 
     context = {
         'cartItems': cartItems,
@@ -258,3 +249,56 @@ def wishlist_page(request):
         'wishlist_items': wishlist_items,
     }
     return render(request, 'store/wishlist.html', context)
+
+
+
+@login_required
+def wishlist_view(request):
+    """
+    Renders the wishlist page, showing all products saved by the user.
+    """
+    wishlist, created = Wishlist.objects.get_or_create(user=request.user)
+    wishlist_items = wishlist.items.all() # Access items via the related_name
+    context = {'wishlist_items': wishlist_items}
+    return render(request, 'store/wishlist.html', context)
+
+
+@login_required
+def updateWishlist(request):
+    """
+    Handles AJAX requests to add or remove products from the user's wishlist.
+    """
+    data = json.loads(request.body)
+    productId = data['productId']
+    action = data['action']
+
+    customer = request.user
+    product = get_object_or_404(Product, id=productId)
+    wishlist, created = Wishlist.objects.get_or_create(user=customer)
+
+    if action == 'add_wish':
+        # Add product to wishlist
+        wishlistItem, created = WishlistItem.objects.get_or_create(wishlist=wishlist, product=product)
+        if not created:
+            # If item already exists, you might want to do nothing or send a specific message
+            print(f"Product {product.name} already in wishlist.")
+            message = "Product already in wishlist."
+        else:
+            print(f"Product {product.name} added to wishlist.")
+            message = "Product added to wishlist."
+        return JsonResponse({'message': message, 'status': 'added'}, safe=False)
+
+    elif action == 'remove_wish':
+        # Remove product from wishlist
+        try:
+            wishlistItem = WishlistItem.objects.get(wishlist=wishlist, product=product)
+            wishlistItem.delete()
+            print(f"Product {product.name} removed from wishlist.")
+            message = "Product removed from wishlist."
+            return JsonResponse({'message': message, 'status': 'removed'}, safe=False)
+        except WishlistItem.DoesNotExist:
+            print(f"Product {product.name} not found in wishlist.")
+            message = "Product not found in wishlist."
+            return JsonResponse({'message': message, 'status': 'not_found'}, safe=False)
+
+    return JsonResponse({'message': 'Invalid action'}, status=400)
