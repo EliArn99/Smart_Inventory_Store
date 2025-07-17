@@ -27,4 +27,6 @@ urlpatterns = [
     path('product/<int:id>/<slug:slug>/', views.product_detail, name='product_detail'),
     path('add_to_wishlist/', views.add_to_wishlist, name="add_to_wishlist"),
     path('wishlist/', views.wishlist_page, name="wishlist"),
+    path('update_wishlist/', views.updateWishlist, name='update_wishlist'),  # For AJAX requests
+
 ]
