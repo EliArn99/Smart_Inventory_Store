@@ -1,133 +1,92 @@
-{# TODO: WORK ON THE PROFILE OF THE USER #}
-{# TODO: FIX THE LOGIN/LOGOUT & REGISTER #}
 <!DOCTYPE html>
 {% load static %}
-<html lang="en">
+<html lang="bg">
 <head>
-    <title>{% block title %}My Store{% endblock %}</title>
-
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Онлайн Книжарница</title>
 
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 
-    <link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}">
-
-    <script type="text/javascript">
-        // This 'user' variable tells our JavaScript if the user is authenticated.
-        // It's a string 'AnonymousUser' or the actual username for authenticated users.
-        var user = '{{ request.user }}';
-
-        // Function to get CSRF token from cookies
-        function getToken(name) {
-            var cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                var cookies = document.cookie.split(';');
-                for (var i = 0; i < cookies.length; i++) {
-                    var cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
+    <!-- Custom CSS за цветовете -->
+    <style>
+        body {
+            background-color: #f8f9fa; /* Светъл сив фон за контраст */
         }
-
-        var csrftoken = getToken('csrftoken'); // CSRF token for authenticated AJAX requests
-
-        // Function to get a specific cookie by name
-        function getCookie(name) {
-            var cookieArr = document.cookie.split(";");
-            for (var i = 0; i < cookieArr.length; i++) {
-                var cookiePair = cookieArr[i].split("=");
-                if (name == cookiePair[0].trim()) {
-                    return decodeURIComponent(cookiePair[1]);
-                }
-            }
-            return null;
+        .navbar {
+            background-color: #3B153A; /* Дълбоко лилаво за навигационната лента */
         }
-
-        // Initialize cart from cookie, or create an empty one if not found
-        var cart = JSON.parse(getCookie('cart')); // Parse existing cart data
-
-        if (cart == undefined || cart == null) { // Check for undefined or null
-            cart = {}; // Initialize as empty object
-            console.log('Cart Created!', cart);
-            // Set the cookie with proper domain and path for broader accessibility
-            document.cookie = 'cart=' + JSON.stringify(cart) + ";domain=;path=/";
+        .navbar-brand, .nav-link {
+            color: #F0C987 !important; /* Златисто жълто за текст на навигацията */
         }
-        console.log('Cart:', cart);
+        .nav-link:hover {
+            color: #fff !important; /* Бял цвят при hover */
+        }
+        .btn-accent {
+            background-color: #F0C987; /* Златисто жълто за бутоните */
+            color: #3B153A; /* Дълбоко лилаво за текста на бутона */
+            border: none;
+        }
+        .btn-accent:hover {
+            background-color: #e6c17d; /* По-тъмен жълт при hover */
+            color: #3B153A;
+        }
+        .container {
+            padding-top: 20px;
+        }
+        .card {
+            border: none;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        #cart-total {
+            color: #F0C987;
+        }
+    </style>
 
-    </script>
+    {% block extra_head %}{% endblock %}
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <a class="navbar-brand" href="{% url 'store:store' %}">My Store</a> {# Use store:store for clarity with app_name #}
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
+    <!-- Навигационна лента -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'store:store' %}">Книжарница</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="{% url 'store:store' %}">Начало</a>
+                    </li>
+                </ul>
 
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav mr-auto">
-            <li class="nav-item active">
-                <a class="nav-link" href="{% url 'store:store' %}">Store <span class="sr-only">(current)</span></a>
-            </li>
-            {# You can add category links here later if you want a dropdown #}
-            {# For example: #}
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
-                   aria-haspopup="true" aria-expanded="false">
-                    Categories
-                </a>
-                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    {% for category in categories %}
-                        <a class="dropdown-item"
-                           href="{% url 'store:product_list_by_category' category.slug %}">{{ category.name }}</a>
-                    {% endfor %}
+                <div class="d-flex align-items-center">
+                    <a class="btn btn-accent me-2" href="#">Вход</a>
+                    <a href="{% url 'store:cart' %}">
+                        <img id="cart-icon" src="{% static 'images/shopping-cart.png' %}" alt="Количка" style="width: 25px; height: 25px;">
+                    </a>
+                    <p id="cart-total" class="ms-2 mb-0">0</p>
                 </div>
-            </li>
-
-        </ul>
-        <div class="form-inline my-2 my-lg-0">
-            {% if request.user.is_authenticated %}
-                <span class="nav-item text-light mr-3">Hello, {{ request.user.username }}</span>
-                <a href="{% url 'logout' %}" class="btn btn-outline-light mr-2">Logout</a>
-            {% else %}
-                <a href="{% url 'login' %}" class="btn btn-warning mr-2">Login</a>
-                {# TODO: FIX this error #}
-                {#                    <a href="{% url 'register' %}" class="btn btn-info">Register</a>#}
-            {% endif %}
-
-            <a href="{% url 'store:cart' %}">
-                <img id="cart-icon" src="{% static 'images/cart.png' %}">
-            </a>
-            <p id="cart-total">{{ cartItems }}</p>
+            </div>
         </div>
+    </nav>
+
+    <!-- Основно съдържание на страницата -->
+    <div class="container">
+        {% block content %}
+            <!-- Съдържанието на другите страници ще се постави тук -->
+        {% endblock %}
     </div>
-</nav>
 
-<div class="container">
-    <br>
-    {% block content %}
-    {% endblock content %}
-</div>
+    <!-- Bootstrap 5 JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
-<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
-        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
-        crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
-        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
-        crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
-        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
-        crossorigin="anonymous"></script>
+    <!-- Custom JavaScript -->
+    <script type="text/javascript" src="{% static 'js/cart.js' %}"></script>
+    {% block extra_js %}{% endblock %}
 
-<script type="text/javascript" src="{% static 'js/cart.js' %}"></script>
-
-{% block extra_js %}{% endblock %}
 </body>
 </html>
