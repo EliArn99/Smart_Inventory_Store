@@ -1,74 +1,126 @@
 {% extends 'store/base.html' %}
 {% load static %}
 
-{% block title %}
-    {% if category %}{{ category.name }}{% else %}All Products{% endif %} - Ecom Store
+{% block extra_head %}
+<style>
+    /* Премахваме предишните медийни заявки, за да запазим вертикалния дизайн */
+    .book-card {
+        background-color: #fff;
+        border: 1px solid #e0e0e0;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        height: 100%; /* Гарантираме, че всички карти са с еднаква височина в реда */
+    }
+    .book-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+    .book-image {
+        position: relative;
+        padding-top: 150%; /* Задаваме съотношение на изображението 2:3 */
+        overflow: hidden;
+    }
+    .book-image img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+    .book-card:hover .book-image img {
+        transform: scale(1.1);
+    }
+    .book-info {
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+    .book-title {
+        font-size: 1.1rem;
+        color: #3B153A;
+        font-weight: 700;
+        margin-bottom: 5px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+    .book-author {
+        font-size: 0.85rem;
+        color: #6c757d;
+        font-style: italic;
+        margin-bottom: 10px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+    .book-description {
+        font-size: 0.8rem;
+        color: #495057;
+        margin-bottom: 15px;
+        flex-grow: 1;
+    }
+    .book-footer {
+        padding: 15px;
+        border-top: 1px solid #e9ecef;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: #f8f9fa;
+        gap: 10px;
+    }
+    .book-price {
+        font-size: 1.2rem;
+        color: #3B153A;
+        font-weight: 700;
+        align-self: flex-start;
+    }
+    .btn-add-cart {
+        background-color: #F0C987;
+        color: #3B153A;
+        border: none;
+        font-weight: 600;
+        padding: 8px 16px;
+        border-radius: 8px;
+        transition: background-color 0.3s;
+        width: 100%;
+    }
+    .btn-add-cart:hover {
+        background-color: #e6c17d;
+        color: #3B153A;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
 <div class="row">
-    <!-- Category Sidebar -->
-    <div class="col-lg-3 col-md-4 mb-4">
-        <div class="box-element p-3 category-sidebar">
-            <h4 class="mb-3 text-center">Categories</h4>
-            <div class="list-group">
-                <a href="{% url 'store:store' %}" class="list-group-item list-group-item-action {% if not category %}active{% endif %}">All Products</a>
-                {% for cat in categories %}
-                    <a href="{% url 'store:product_list_by_category' cat.slug %}" class="list-group-item list-group-item-action {% if category and category.slug == cat.slug %}active{% endif %}">{{ cat.name }}</a>
-                {% endfor %}
+    {% for book in books %}
+    <div class="col-lg-2 col-md-4 col-sm-6 mb-4">
+        <div class="book-card">
+            <div class="book-image">
+                <img src="{{ book.imageURL }}" onerror="this.onerror=null;this.src='{% static 'images/placeholder.png' %}'" alt="{{ book.name }}">
+            </div>
+            <div class="book-info">
+                <h4 class="book-title">{{ book.name }}</h4>
+                <h5 class="book-author">{{ book.author|default:"Неизвестен автор" }}</h5>
+                <p class="book-description">{{ book.description|truncatechars:70 }}</p>
+            </div>
+            <div class="book-footer">
+                <span class="book-price">{{ book.price|floatformat:2 }} лв.</span>
+                <button data-product="{{ book.id }}" data-action="add" class="btn btn-add-cart update-cart">Добави в количката</button>
             </div>
         </div>
     </div>
-
-    <!-- Product Listing Area -->
-    <div class="col-lg-9 col-md-8">
-        <h2 class="mb-4 product-listing-header">
-            {% if category %}
-                {{ category.name }}
-            {% else %}
-                All Products
-            {% endif %}
-        </h2>
-
-        <div class="row">
-            {% for product in products %}
-            <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
-                <div class="card h-100 product-card">
-                    <a href="{{ product.get_absolute_url }}">
-                        {# Corrected image logic: Use product.imageURL for reliable display #}
-                        {% if product.imageURL %}
-                            <img class="card-img-top thumbnail" src="{{ product.imageURL }}" alt="{{ product.name }}">
-                        {% else %}
-                            <img class="card-img-top thumbnail" src="{% static 'images/placeholder.png' %}" alt="No image">
-                        {% endif %}
-                    </a>
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title product-name">
-                            <a href="{{ product.get_absolute_url }}">{{ product.name }}</a>
-                        </h5>
-                        <p class="card-text product-description">{{ product.description|truncatewords:12 }}</p>
-                        <div class="mt-auto d-flex justify-content-between align-items-center">
-                            <div class="product-actions">
-                                {% if product.stock > 0 %}
-                                    <button data-product="{{ product.id }}" data-action="add" class="btn btn-update add-btn update-cart">Add to Cart</button>
-                                {% else %}
-                                    <button class="btn btn-secondary" disabled>Out of Stock</button>
-                                {% endif %}
-                                <a class="btn btn-outline-info view-btn" href="{{ product.get_absolute_url }}">View</a>
-                            </div>
-                            <h4 class="product-price">{{ product.price|floatformat:2 }} лв.</h4>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% empty %}
-            <div class="col-12">
-                <div class="alert alert-info text-center" role="alert">
-                    No products available in this category.
-                </div>
-            </div>
-            {% endfor %}
-        </div>
+    {% empty %}
+    <div class="col-12">
+        <h3 class="text-center text-muted mt-5">Няма налични книги в момента.</h3>
     </div>
+    {% endfor %}
 </div>
 {% endblock content %}
