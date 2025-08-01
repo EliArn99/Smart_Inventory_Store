@@ -78,9 +78,9 @@ WSGI_APPLICATION = 'Smart_Inventory_Store.wsgi.application'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "store1",
-        "USER": "Eli",
-        "PASSWORD": "Arnautskaj",
+        "NAME": "",
+        "USER": "",
+        "PASSWORD": "",
         "HOST": "127.0.0.1",
         "PORT": "5432",
     }
@@ -131,6 +131,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Authentication settings
-LOGIN_REDIRECT_URL = '/'  
-LOGIN_URL = 'login'       
+LOGIN_REDIRECT_URL = '/'
+LOGIN_URL = 'login'
 
