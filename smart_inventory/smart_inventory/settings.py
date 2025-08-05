@@ -78,9 +78,9 @@ WSGI_APPLICATION = 'Smart_Inventory_Store.wsgi.application'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "",
-        "USER": "",
-        "PASSWORD": "",
+        "NAME": "bookstore",
+        "USER": "Eli",
+        "PASSWORD": "Arnautskaj",
         "HOST": "127.0.0.1",
         "PORT": "5432",
     }
