@@ -1,5 +1,5 @@
 import json
-from .models import Product, Order, OrderItem, Customer
+from .models import *
 
 
 def cookieCart(request):
@@ -7,43 +7,37 @@ def cookieCart(request):
         cart = json.loads(request.COOKIES['cart'])
     except:
         cart = {}
-    # print('CART:', cart) 
+        print('CART:', cart)
 
     items = []
     order = {'get_cart_total': 0, 'get_cart_items': 0, 'shipping': False}
+    cartItems = order['get_cart_items']
 
     for i in cart:
         try:
-            if int(cart[i]['quantity']) > 0:
-                product = Product.objects.get(id=i)
-                total = (product.price * int(cart[i]['quantity']))  
+            if (cart[i]['quantity'] > 0):  # items with negative quantity = lot of freebies
+                cartItems += cart[i]['quantity']
+
+                product = Book.objects.get(id=i)
+                total = (product.price * cart[i]['quantity'])
 
                 order['get_cart_total'] += total
-                order['get_cart_items'] += int(cart[i]['quantity']) 
+                order['get_cart_items'] += cart[i]['quantity']
 
                 item = {
-                    'product': {
-                        'id': product.id,
-                        'name': product.name,
-                        'price': product.price,
-                        'imageURL': product.imageURL,
-                    },
-                    'quantity': int(cart[i]['quantity']),  # Ensure quantity is int
-                    'get_total': total,
+                    'id': product.id,
+                    'product': {'id': product.id, 'name': product.name, 'price': product.price,
+                                'imageURL': product.imageURL}, 'quantity': cart[i]['quantity'],
+                    'digital': product.digital, 'get_total': total,
                 }
                 items.append(item)
 
                 if product.digital == False:
                     order['shipping'] = True
-        except Product.DoesNotExist:
-            
-            print(f"Product with ID {i} not found, skipping.")
-            pass
-        except Exception as e:
-            print(f"Error processing item {i} in cookie cart: {e}")
+        except:
             pass
 
-    return {'cartItems': order['get_cart_items'], 'order': order, 'items': items}  # Return final get_cart_items
+    return {'cartItems': cartItems, 'order': order, 'items': items}
 
 
 def cartData(request):
@@ -71,24 +65,20 @@ def guestOrder(request, data):
     customer, created = Customer.objects.get_or_create(
         email=email,
     )
-    if created or customer.name != name:
-        customer.name = name
-        customer.save()
+    customer.name = name
+    customer.save()
 
     order = Order.objects.create(
         customer=customer,
         complete=False,
     )
 
-    for item_data in items: # Renamed 'item' to 'item_data' to avoid confusion with OrderItem
-        product = Product.objects.get(id=item_data['product']['id']) # Access product ID correctly
-        quantity = int(item_data['quantity'])
-        if quantity > 0:
-            OrderItem.objects.create(
-                product=product,
-                order=order,
-                quantity=quantity,
-            )
-        else:
-            print(f"Skipping order item for product {product.name} due to non-positive quantity: {quantity}")
+    for item in items:
+        product = Book.objects.get(id=item['id'])
+        orderItem = OrderItem.objects.create(
+            product=product,
+            order=order,
+            quantity=(item['quantity'] if item['quantity'] > 0 else -1 * item['quantity']),
+            # negative quantity = freebies
+        )
     return customer, order
