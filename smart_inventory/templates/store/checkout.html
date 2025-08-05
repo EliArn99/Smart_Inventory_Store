@@ -1,5 +1,330 @@
 {% extends 'store/base.html' %}
-<h3>CHECKOUT</h3>
+{% load static %}
+
+{% block extra_head %}
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .checkout-container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .form-section, .summary-section {
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-section {
+            flex: 2;
+        }
+
+        .summary-section {
+            flex: 1;
+        }
+
+        .section-header {
+            color: #3B153A;
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        #form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .form-field {
+            margin-bottom: 1rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #3B153A;
+            box-shadow: 0 0 5px rgba(59, 21, 58, 0.2);
+        }
+
+        #form-button {
+            background-color: #3B153A;
+            color: #fff;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #form-button:hover {
+            background-color: #2e102d;
+        }
+
+        .btn-back-to-cart {
+            background-color: transparent;
+            border: 2px solid #3B153A;
+            color: #3B153A;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        .btn-back-to-cart:hover {
+            background-color: #3B153A;
+            color: #F0C987;
+        }
+
+        .order-summary-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .order-summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .order-summary-item .row-image {
+            width: 50px;
+            height: 75px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-right: 15px;
+        }
+
+        .order-total-info {
+            padding-top: 1rem;
+            border-top: 2px solid #e9ecef;
+            margin-top: 1rem;
+        }
+
+        .order-total-info h5 {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.1rem;
+            color: #3B153A;
+            margin-bottom: 0.5rem;
+        }
+
+        #payment-info {
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 768px) {
+            .checkout-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+{% endblock %}
+
 {% block content %}
-            <!-- Съдържанието на другите страници ще се постави тук -->
-        {% endblock %}
+    <div class="checkout-container">
+        <div class="form-section">
+            <a class="btn-back-to-cart" href="{% url 'store:cart' %}">&#x2190; Назад към количката</a>
+            <div id="form-wrapper">
+                <form id="form">
+                    <div id="user-info">
+                        <p class="section-header">Информация за потребителя</p>
+                        <div class="form-field">
+                            <input required class="form-control" type="text" name="name" placeholder="Име..">
+                        </div>
+                        <div class="form-field">
+                            <input required class="form-control" type="email" name="email" placeholder="Имейл..">
+                        </div>
+                    </div>
+                    
+                    <div id="shipping-info">
+                        <hr>
+                        <p class="section-header">Информация за доставка</p>
+                        <hr>
+                        <div class="form-field">
+                            <input class="form-control" type="text" name="address" placeholder="Адрес..">
+                        </div>
+                        <div class="form-field">
+                            <input class="form-control" type="text" name="city" placeholder="Град..">
+                        </div>
+                        <div class="form-field">
+                            <input class="form-control" type="text" name="state" placeholder="Област..">
+                        </div>
+                        <div class="form-field">
+                            <input class="form-control" type="text" name="zipcode" placeholder="Пощенски код..">
+                        </div>
+                        <div class="form-field">
+                            <input class="form-control" type="text" name="country" placeholder="Държава..">
+                        </div>
+                    </div>
+
+                    <hr>
+                    <input id="form-button" class="btn btn-success btn-block" type="submit" value="Продължи">
+                </form>
+            </div>
+
+            <div id="payment-info" class="hidden">
+                <p class="section-header">Опции за плащане</p>
+                <div id="paypal-button-container"></div>
+            </div>
+        </div>
+
+        <div class="summary-section">
+            <p class="section-header">Резюме на поръчката</p>
+            <div class="order-items-container">
+                {% for item in items %}
+                <div class="order-summary-item">
+                    <div style="flex:2">
+                        <img class="row-image" src="{{item.product.imageURL}}">
+                    </div>
+                    <div style="flex:4">
+                        <p>{{item.product.name}}</p>
+                    </div>
+                    <div style="flex:1">
+                        <p>x{{item.quantity}}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="order-total-info">
+                <h5>Продукти:<span> {{order.get_cart_items}}</span></h5>
+                <h5>Общо:<span> {{order.get_cart_total|floatformat:2}} лв.</span></h5>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.paypal.com/sdk/js?client-id=sb&currency=USD"></script>
+
+    <script>
+        var user = "{{ request.user }}";
+        var csrftoken = "{{ csrf_token }}"; // Използваме вградения csrf_token
+        var shipping = '{{order.shipping}}';
+        var total = '{{order.get_cart_total}}';
+
+        // Render the PayPal button into #paypal-button-container
+        paypal.Buttons({
+            style: {
+                color:  'blue',
+                shape:  'rect',
+            },
+
+            // Set up the transaction
+            createOrder: function(data, actions) {
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: {
+                            value: total
+                        }
+                    }]
+                });
+            },
+
+            // Finalize the transaction
+            onApprove: function(data, actions) {
+                return actions.order.capture().then(function(details) {
+                    submitFormData(details.payer.name.given_name, data.orderID);
+                });
+            }
+
+        }).render('#paypal-button-container');
+
+        // JavaScript логиката от оригиналния шаблон
+        if (shipping == 'False'){
+           document.getElementById('shipping-info').innerHTML = '';
+        }
+
+        if (user != 'AnonymousUser'){
+           document.getElementById('user-info').innerHTML = '';
+        }
+
+        if (shipping == 'False' && user != 'AnonymousUser'){
+           document.getElementById('form-wrapper').classList.add("hidden");
+           document.getElementById('payment-info').classList.remove("hidden");
+        }
+
+        var form = document.getElementById('form');
+        form.addEventListener('submit', function(e){
+            e.preventDefault();
+            console.log('Form Submitted...');
+            document.getElementById('form-button').classList.add("hidden");
+            document.getElementById('payment-info').classList.remove("hidden");
+         });
+     
+         function submitFormData(given_name, transactionId){
+            console.log('Payment button clicked');
+            var userFormData = {
+              'name': given_name || form.name.value,
+              'email': form.email.value,
+              'total': total,
+              'transaction_id': transactionId,
+           };
+ 
+           var shippingInfo = {
+              'address':null,
+              'city':null,
+              'state':null,
+              'zipcode':null,
+           };
+ 
+           if (shipping != 'False'){
+               shippingInfo.address = form.address.value;
+               shippingInfo.city = form.city.value;
+               shippingInfo.state = form.state.value;
+               shippingInfo.zipcode = form.zipcode.value;
+            }
+ 
+            if (user == 'AnonymousUser'){
+               userFormData.name = form.name.value;
+               userFormData.email = form.email.value;
+            }
+ 
+            console.log('Shipping Info:', shippingInfo);
+            console.log('User Info:', userFormData);
+ 
+            var url = "/process_order/";
+            fetch(url, {
+               method:'POST',
+               headers:{
+                  'Content-Type':'application/json',
+                  'X-CSRFToken':csrftoken,
+               }, 
+               body:JSON.stringify({'form':userFormData, 'shipping':shippingInfo}),
+            })
+            .then((response) => response.json())
+            .then((data) => {
+              console.log('Success:', data);
+ 
+              cart = {};
+              document.cookie ='cart=' + JSON.stringify(cart) + ";domain=;path=/";
+ 
+              window.location.href = "{% url 'store:store' %}";
+            });
+         }
+     </script>
+{% endblock content %}
