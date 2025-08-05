@@ -1,5 +1,178 @@
 {% extends 'store/base.html' %}
-<h3>cart</h3>
+{% load static %}
+
 {% block content %}
-            <!-- Съдържанието на другите страници ще се постави тук -->
-        {% endblock %}
+<div class="row">
+    <div class="col-lg-12">
+        <div class="box-element">
+            <a class="btn btn-outline-dark" href="{% url 'store:store' %}">&#x2190; Continue Shopping</a>
+            <br><br>
+            <table class="table">
+                <tr>
+                    <th><h5>Items: <strong>{{ order.get_cart_items }}</strong></h5></th>
+                    <th><h5>Total: <strong>${{ order.get_cart_total|floatformat:2 }}</strong></h5></th>
+                    <th>
+                        <a style="float:right; margin:5px;" class="btn btn-success" href="{% url 'store:checkout' %}">Checkout</a>
+                    </th>
+                </tr>
+            </table>
+        </div>
+
+        <br>
+        <div class="box-element">
+            <div class="cart-row">
+                <div style="flex:2"></div>
+                <div style="flex:2"><strong>Item</strong></div>
+                <div style="flex:1"><strong>Price</strong></div>
+                <div style="flex:1"><strong>Quantity</strong></div>
+                <div style="flex:1"><strong>Total</strong></div>
+            </div>
+
+            {% for item in items %}
+            <div class="cart-row">
+                <div style="flex:2">
+                    <img class="row-image" src="{{ item.product.imageURL }}">
+                </div>
+                <div style="flex:2">
+                    <p>{{ item.product.name }}</p>
+                </div>
+                <div style="flex:1">
+                    <p>${{ item.product.price|floatformat:2 }}</p>
+                </div>
+                <div style="flex:1">
+                    <p class="quantity">{{ item.quantity }}</p>
+                    <div class="quantity">
+                        <img data-product="{{ item.product.id }}" data-action="add" class="chg-quantity update-cart" src="{% static 'images/arrow-up.png' %}">
+                        <img data-product="{{ item.product.id }}" data-action="remove" class="chg-quantity update-cart" src="{% static 'images/arrow-down.png' %}">
+                    </div>
+                </div>
+                <div style="flex:1">
+                    <p>${{ item.get_total|floatformat:2 }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- CSS стилове могат да останат същите или да се преместят в отделен CSS файл -->
+
+
+
+    <style>
+        cart-icon {
+            width: 28px;
+            display: inline-block;
+            margin-left: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        #cart-icon:hover {
+            transform: scale(1.1);
+        }
+
+        #cart-total {
+            display: block;
+            text-align: center;
+            color: #fff;
+            background-color: var(--accent-color);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 24px;
+            position: relative;
+            top: -8px;
+            left: -8px;
+        }
+
+        /* Grid Layout */
+        .col-lg-4, .col-lg-6, .col-lg-8, .col-lg-12 {
+            margin-top: 15px;
+        }
+
+        /* Cart Page Styles */
+        .cart-row {
+            display: flex;
+            align-items: center;
+            padding: 15px 0;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .row-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .quantity {
+            display: inline-block;
+            font-weight: 700;
+            padding: 0 15px;
+            font-size: 1.1rem;
+        }
+
+        .chg-quantity {
+            width: 16px;
+            cursor: pointer;
+            display: block;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .chg-quantity:hover {
+            opacity: 0.7;
+            transform: scale(1.1);
+        }
+
+        /* Form Elements */
+        .form-field {
+            width: 100%;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            border: 1px solid var(--gray-light);
+            border-radius: 4px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-field:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        /* Utility Classes */
+        .hidden {
+            display: none !important;
+        }
+
+        .text-primary {
+            color: var(--primary-color) !important;
+        }
+
+        .bg-primary {
+            background-color: var(--primary-color) !important;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.3rem;
+            }
+
+            .btn {
+                padding: 0.4rem 1rem;
+                font-size: 0.8rem;
+            }
+
+            #cart-icon {
+                width: 24px;
+                margin-left: 15px;
+            }
+        }
+
+    </style>
+{% endblock content %}
