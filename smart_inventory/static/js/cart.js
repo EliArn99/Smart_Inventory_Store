@@ -1,3 +1,4 @@
+
 var updateBtns = document.getElementsByClassName("update-cart");
 
 for (i = 0; i < updateBtns.length; i++) {
@@ -18,7 +19,7 @@ for (i = 0; i < updateBtns.length; i++) {
 function updateUserOrder(productId, action) {
     console.log("User is authenticated, sending data...");
 
-    var url = "/update_item/";
+    var url = "/store/update_item/";
 
     fetch(url, {
         method: "POST",
@@ -26,14 +27,27 @@ function updateUserOrder(productId, action) {
             "Content-Type": "application/json",
             "X-CSRFToken": csrftoken,
         },
-        body: JSON.stringify({ productId: productId, action: action }),
+        body: JSON.stringify({ bookId: productId, action: action }),
     })
-        .then((response) => {
-            return response.json();
-        })
-        .then((data) => {
+    .then((response) => {
+        return response.json();
+    })
+    .then((data) => {
+        console.log("Data from server:", data);
+
+        var cartTotalElement = document.getElementById("cart-total");
+        if (cartTotalElement) {
+            cartTotalElement.textContent = data.cartItems;
+        }
+
+        if (window.location.pathname === '/cart/') {
             location.reload();
-        });
+        }
+
+    })
+    .catch((error) => {
+        console.error("Error:", error);
+    });
 }
 
 function addCookieItem(productId, action) {
@@ -60,77 +74,3 @@ function addCookieItem(productId, action) {
 
     location.reload();
 }
-
-
-
-
-document.addEventListener('DOMContentLoaded', function() {
-    var updateWishlistBtns = document.getElementsByClassName('update-wishlist');
-
-    for (var i = 0; i < updateWishlistBtns.length; i++) {
-        updateWishlistBtns[i].addEventListener('click', function(e) {
-            // *** THIS LINE IS CRUCIAL ***
-            e.preventDefault(); // Prevents the default browser action (GET request)
-
-            var productId = this.dataset.product;
-            var action = this.dataset.action;
-
-            console.log('WISHLIST PRODUCT ID:', productId, 'ACTION:', action);
-
-            // Ensure 'user' is correctly defined globally in base.html
-            if (user === 'AnonymousUser') {
-                console.log('User is not authenticated for wishlist. Redirecting to login...');
-                window.location.href = '/login/';
-                return;
-            }
-
-            updateUserWishlist(productId, action);
-        });
-    }
-});
-
-// Example in store/main.js or within a <script> tag in base.html
-// Ensure this script runs after the DOM is loaded.
-
-var updateWishlistBtns = document.getElementsByClassName('update-wishlist');
-
-for (i = 0; i < updateWishlistBtns.length; i++) {
-    updateWishlistBtns[i].addEventListener('click', function(e){
-        e.preventDefault(); // Prevent the default anchor behavior (i.e., prevent href="#" from reloading/scrolling)
-        var productId = this.dataset.product;
-        var action = this.dataset.action;
-        console.log('productId:', productId, 'action:', action);
-
-        // This function should be defined somewhere, similar to your 'updateUserOrder' for cart
-        updateUserWishlist(productId, action);
-    });
-}
-
-function updateUserWishlist(productId, action){
-    console.log('User is logged in, sending data...');
-
-    var url = '/update_wishlist/'; // Make sure this matches your urls.py
-
-    fetch(url, {
-        method:'POST',
-        headers:{
-            'Content-Type':'application/json',
-            'X-CSRFToken':csrftoken, // Make sure 'csrftoken' is defined and retrieved
-        },
-        body:JSON.stringify({'productId':productId, 'action':action})
-    })
-    .then((response) => {
-       return response.json();
-    })
-    .then((data) => {
-        console.log('data:', data);
-        alert(data.message); // Provide user feedback
-        // You might want to change the icon or text here based on success/failure
-        // location.reload(); // Uncomment if you want to refresh the page after adding/removing
-    })
-    .catch((error) => {
-        console.error('Error:', error);
-        alert('An error occurred while updating wishlist.');
-    });
-}
-
