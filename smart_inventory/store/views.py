@@ -1,77 +1,92 @@
-from django.http import JsonResponse
-from django.shortcuts import render
-from .models import *
+from django.http import JsonResponse, HttpResponseBadRequest
+from django.shortcuts import render, get_object_or_404
+from django.views.decorators.http import require_POST
+
+from .models import Book, Order, OrderItem
 import json
+from .utils import cartData
 
 
-# Главна страница на книжарницата.
 def store(request):
+    data = cartData(request)
+    cartItems = data['cartItems']
     books = Book.objects.all()
-    context = {'books': books}
+    context = {'books': books, 'cartItems': cartItems}
     return render(request, 'store/store.html', context)
 
 
-# Страница за количката.
 def cart(request):
-    # if request.user.is_authenticated:
-    #     customer = request.user.customer
-    #     order, created = Order.objects.get_or_create(customer=customer, complete=False)
-    #     items = order.orderitem_set.all()
-    # else:
-    #     # Временно решение за нерегистрирани потребители
-    #     items = []
-    #     order = {'get_cart_total': 0, 'get_cart_items': 0, 'shipping': False}
-    #
-    # context = {'items': items, 'order': order}
-    return render(request, 'store/cart.html')
+    data = cartData(request)
+    cartItems = data['cartItems']
+    order = data['order']
+    items = data['items']
+
+    context = {'items': items, 'order': order, 'cartItems': cartItems}
+    return render(request, 'store/cart.html', context)
 
 
-# Страница за финализиране на поръчката.
 def checkout(request):
-    # if request.user.is_authenticated:
-    #     customer = request.user.customer
-    #     order, created = Order.objects.get_or_create(customer=customer, complete=False)
-    #     items = order.orderitem_set.all()
-    # else:
-    #     # Временно решение за нерегистрирани потребители
-    #     items = []
-    #     order = {'get_cart_total': 0, 'get_cart_items': 0, 'shipping': False}
-    #
-    # context = {'items': items, 'order': order}
-    return render(request, 'store/checkout.html')
+    data = cartData(request)
+    cartItems = data['cartItems']
+    order = data['order']
+    items = data['items']
+
+    context = {'items': items, 'order': order, 'cartItems': cartItems}
+    return render(request, 'store/checkout.html', context)
 
 
-# AJAX endpoint за обновяване на продукти в количката.
+@require_POST
 def updateItem(request):
-    data = json.loads(request.body)
-    bookId = data['bookId']
-    action = data['action']
+    try:
+        data = json.loads(request.body)
+        bookId = data.get('bookId')
+        action = data.get('action')
 
-    print('Action:', action)
-    print('Book Id:', bookId)
+        if not bookId or not action:
+            return HttpResponseBadRequest("Invalid request data.")
 
-    customer = request.user.customer
-    book = Book.objects.get(id=bookId)
-    order, created = Order.objects.get_or_create(customer=customer, complete=False)
+        book = get_object_or_404(Book, pk=bookId)
 
-    orderItem, created = OrderItem.objects.get_or_create(order=order, product=book)
+        if not request.user.is_authenticated:
+            return HttpResponseBadRequest("User not authenticated.")
 
-    if action == 'add':
-        orderItem.quantity = (orderItem.quantity + 1)
-    elif action == 'remove':
-        orderItem.quantity = (orderItem.quantity - 1)
+        customer = request.user.customer
+        # Използваме filter().first() за да вземем най-новата недовършена поръчка
+        order = Order.objects.filter(customer=customer, complete=False).first()
+        if not order:
+            order = Order.objects.create(customer=customer, complete=False)
 
-    orderItem.save()
+        orderItem, created = OrderItem.objects.get_or_create(order=order, product=book)
 
-    if orderItem.quantity <= 0:
-        orderItem.delete()
+        if action == 'add':
+            orderItem.quantity = (orderItem.quantity + 1)
+        elif action == 'remove':
+            orderItem.quantity = (orderItem.quantity - 1)
 
-    return JsonResponse('Item was added', safe=False)
+        orderItem.save()
+
+        if orderItem.quantity <= 0:
+            orderItem.delete()
+
+        cartItems = order.get_cart_items
+
+        return JsonResponse({'cartItems': cartItems}, safe=False)
+
+    except json.JSONDecodeError:
+        return HttpResponseBadRequest("Invalid JSON.")
+    except Exception as e:
+        print(f"Error in updateItem view: {e}")
+        return JsonResponse({'error': str(e)}, status=500)
 
 
-# AJAX endpoint за обработка на поръчка.
 def processOrder(request):
-    data = json.loads(request.body)
-    # Тук ще се добави логиката за обработка на поръчката.
-    # Например: запазване на адреса за доставка, маркиране на поръчката като завършена и т.н.
     return JsonResponse('Payment submitted..', safe=False)
+
+
+def get_cart_data(request):
+    data = cartData(request)
+    data['order']['get_cart_total'] = float(data['order']['get_cart_total'])
+    for item in data['items']:
+        item['product']['price'] = float(item['product']['price'])
+        item['get_total'] = float(item['get_total'])
+    return JsonResponse(data, safe=False)
