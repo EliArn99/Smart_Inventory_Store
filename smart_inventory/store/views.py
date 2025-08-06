@@ -2,7 +2,7 @@ from django.http import JsonResponse, HttpResponseBadRequest
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.http import require_POST
 
-from .models import Book, Order, OrderItem
+from .models import Book, Order, OrderItem, Customer
 import json
 from .utils import cartData
 
@@ -39,22 +39,30 @@ def checkout(request):
 def updateItem(request):
     try:
         data = json.loads(request.body)
+        print("Received data:", data)
+
         bookId = data.get('bookId')
         action = data.get('action')
 
         if not bookId or not action:
-            return HttpResponseBadRequest("Invalid request data.")
+            return JsonResponse({"error": "Invalid request data: bookId or action missing."}, status=400)
 
         book = get_object_or_404(Book, pk=bookId)
 
         if not request.user.is_authenticated:
-            return HttpResponseBadRequest("User not authenticated.")
+            return JsonResponse({"error": "User not authenticated."}, status=400)
 
-        customer = request.user.customer
-        # Използваме filter().first() за да вземем най-новата недовършена поръчка
+        try:
+            customer = request.user.customer
+        except Customer.DoesNotExist:
+            customer = Customer.objects.create(user=request.user, name=request.user.username, email=request.user.email)
+            print(f"Created new customer for user: {customer.name}")
+
+
         order = Order.objects.filter(customer=customer, complete=False).first()
         if not order:
             order = Order.objects.create(customer=customer, complete=False)
+            print(f"Created new order for customer: {customer.name}")
 
         orderItem, created = OrderItem.objects.get_or_create(order=order, product=book)
 
@@ -62,21 +70,31 @@ def updateItem(request):
             orderItem.quantity = (orderItem.quantity + 1)
         elif action == 'remove':
             orderItem.quantity = (orderItem.quantity - 1)
+        else:
+            return JsonResponse({"error": "Invalid action specified."}, status=400)
 
         orderItem.save()
+        print(f"OrderItem for {book.name} updated. New quantity: {orderItem.quantity}")
 
         if orderItem.quantity <= 0:
             orderItem.delete()
+            print(f"OrderItem for {book.name} deleted as quantity is 0 or less.")
 
+        # Актуализираме броя на артикулите в количката
         cartItems = order.get_cart_items
+        print(f"Cart items after update: {cartItems}")
 
         return JsonResponse({'cartItems': cartItems}, safe=False)
 
     except json.JSONDecodeError:
-        return HttpResponseBadRequest("Invalid JSON.")
+        print("Invalid JSON received.")
+        return JsonResponse({"error": "Invalid JSON format in request body."}, status=400)
+    except Book.DoesNotExist:
+        print(f"Book with ID {bookId} not found.")
+        return JsonResponse({"error": f"Book with ID {bookId} not found."}, status=404) # 404 Not Found
     except Exception as e:
         print(f"Error in updateItem view: {e}")
-        return JsonResponse({'error': str(e)}, status=500)
+        return JsonResponse({'error': str(e)}, status=500) # 500 Internal Server Error
 
 
 def processOrder(request):
