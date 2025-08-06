@@ -128,7 +128,8 @@
                     ...
                     <div class="book-footer">
                         <span class="book-price">${{ book.price|floatformat:2 }} лв.</span>
-                        <button data-book="{{ book.id }}" data-action="add" class="btn btn-add-cart update-cart">Добави
+                        {# Променено от data-book на data-product, за да съответства на cart.js #}
+                        <button data-product="{{ book.id }}" data-action="add" class="btn btn-add-cart update-cart">Добави
                             в количката
                         </button>
                     </div>
@@ -142,3 +143,5 @@
         {% endfor %}
     </div>
 {% endblock content %}
+
+
