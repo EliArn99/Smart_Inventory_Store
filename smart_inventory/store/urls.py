@@ -7,9 +7,10 @@ app_name = 'store'  # Namespace for the app
 
 urlpatterns = [
     path('', views.store, name="store"),
+    path('category/<slug:category_slug>/', views.store, name='books_by_category'),
+    path('book/<int:pk>/', views.book_detail, name='book_detail'),
 
     path('cart/', views.cart, name="cart"),
-
     path('checkout/', views.checkout, name="checkout"),
 
     # AJAX endpoint for updating cart items (add/remove)
@@ -17,5 +18,7 @@ urlpatterns = [
 
     # AJAX endpoint for processing an order
     path('process_order/', views.processOrder, name="process_order"),
+    path('profile/', views.profile_details, name="profile_details"),
+    path('register/', views.register, name='register'),
 
 ]
