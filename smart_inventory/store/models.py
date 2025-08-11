@@ -11,6 +11,20 @@ class Customer(models.Model):
         return self.name
 
 
+class Category(models.Model):
+    name = models.CharField(max_length=200, unique=True)
+    slug = models.SlugField(max_length=200, unique=True)
+
+    class Meta:
+        verbose_name_plural = 'Categories'
+
+    def __str__(self):
+        return self.name
+
+    def get_absolute_url(self):
+        return f'/category/{self.slug}/'
+
+
 class Book(models.Model):
     name = models.CharField(max_length=200, null=True)
     author = models.CharField(max_length=200, null=True)
@@ -18,6 +32,7 @@ class Book(models.Model):
     image = models.ImageField(null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     digital = models.BooleanField(default=False, null=True, blank=False)
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)  # New
 
     def __str__(self):
         return self.name
