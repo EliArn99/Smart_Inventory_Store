@@ -1,0 +1,41 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-5">
+            <img src="{{ book.imageURL }}" 
+                 onerror="this.onerror=null;this.src='{% static 'images/placeholder.png' %}'"
+                 class="img-fluid rounded shadow-lg" 
+                 alt="{{ book.name }}">
+        </div>
+        
+        <div class="col-md-7">
+            <h1 class="display-4 fw-bold">{{ book.name }}</h1>
+            <p class="lead text-muted fst-italic">{{ book.author|default:"Неизвестен автор" }}</p>
+            
+            <hr>
+            
+            <h3 class="my-4">Описание</h3>
+            <p>{{ book.description|linebreaksbr }}</p>
+            
+            <div class="d-flex align-items-center my-4">
+                <span class="fs-2 fw-bolder me-3">{{ book.price|floatformat:2 }} лв.</span>
+                <button data-product="{{ book.id }}" 
+                        data-action="add"
+                        class="btn btn-primary btn-lg update-cart">
+                    <i class="fas fa-cart-plus me-2"></i> Добави в количката
+                </button>
+            </div>
+            
+            {% if book.category %}
+                <p class="text-muted mt-3">
+                    Категория: <a href="{% url 'store:books_by_category' book.category.slug %}">{{ book.category.name }}</a>
+                </p>
+            {% endif %}
+            
+        </div>
+    </div>
+</div>
+{% endblock content %}
