@@ -3,9 +3,10 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.http import require_POST
+from pyexpat.errors import messages
 
 from .forms import CustomUserCreationForm
-from .models import Book, Order, OrderItem, Customer, Category
+from .models import Book, Order, OrderItem, Customer, Category, WishlistItem
 import json
 from .utils import cartData, cookieCart
 
@@ -59,10 +60,8 @@ def updateItem(request):
     bookId = data.get('bookId')
     action = data.get('action')
 
-    # Взимаме продукта
     book = get_object_or_404(Book, pk=bookId)
 
-    # Логика за логнат потребител
     if request.user.is_authenticated:
         customer = request.user.customer
         order, created = Order.objects.get_or_create(customer=customer, complete=False)
@@ -80,7 +79,6 @@ def updateItem(request):
         cartItems = order.get_cart_items
         return JsonResponse({'cartItems': cartItems}, safe=False)
 
-    # Логика за гост
     else:
         print('User is not authenticated')
         cookieData = cookieCart(request)
@@ -112,12 +110,10 @@ def get_cart_data(request):
     return JsonResponse(data, safe=False)
 
 
-@login_required  # Добави този декоратор за защита на страницата
+@login_required
 def profile_details(request):
-    # Тук можеш да добавиш логика за извличане на данни, свързани с потребителя
-    # Например, неговите поръчки или други данни от модела Customer
     customer = request.user.customer
-    orders = customer.order_set.all()  # Ако искаш да покажеш история на поръчките
+    orders = customer.order_set.all()
 
     context = {
         'customer': customer,
@@ -134,8 +130,7 @@ def register(request):
             login(request, user)
             return redirect('store:store')
 
-    # КОРИГИРАНА ЛОГИКА
-    else:  # Ако заявката е GET или формата е невалидна
+    else:
         form = CustomUserCreationForm()
 
     context = {'form': form}
@@ -143,10 +138,8 @@ def register(request):
 
 
 def book_detail(request, pk):
-    # Използваме get_object_or_404, за да вземем книгата
-    # Ако книга с този ID не съществува, автоматично ще върне 404
     book = get_object_or_404(Book, pk=pk)
-    data = cartData(request) # Ако искате да показвате количката и тук
+    data = cartData(request)
     cartItems = data['cartItems']
 
     context = {
@@ -154,3 +147,50 @@ def book_detail(request, pk):
         'cartItems': cartItems
     }
     return render(request, 'store/book_detail.html', context)
+
+
+@login_required
+@require_POST
+def update_wishlist(request):
+    try:
+        data = json.loads(request.body)
+        book_id = data.get('bookId')
+        action = data.get('action')
+
+        if not all([book_id, action]):
+            return JsonResponse({'error': 'Missing bookId or action'}, status=400)
+
+        book = Book.objects.get(id=book_id)
+        wishlist_item, created = WishlistItem.objects.get_or_create(user=request.user, book=book)
+
+        if action == 'add':
+            if created:
+                message = 'Книгата е добавена в списъка с желания.'
+                added = True
+            else:
+                message = 'Книгата вече е в списъка с желания.'
+                added = True
+        elif action == 'remove':
+            if not created:
+                wishlist_item.delete()
+                message = 'Книгата е премахната от списъка с желания.'
+                added = False
+            else:
+                message = 'Книгата не е в списъка с желания.'
+                added = False
+        else:
+            return JsonResponse({'error': 'Invalid action'}, status=400)
+
+        return JsonResponse({'message': message, 'added': added, 'book_id': book_id})
+
+    except Book.DoesNotExist:
+        return JsonResponse({'error': 'Book not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required(login_url='login')
+def wishlist_view(request):
+    user_wishlist = WishlistItem.objects.filter(user=request.user)
+    context = {'wishlist_items': user_wishlist}
+    return render(request, 'store/wishlist.html', context)
