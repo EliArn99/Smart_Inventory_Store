@@ -3,8 +3,6 @@
 
 {% block extra_head %}
     <style>
-        /* (Оставете вашите CSS стилове без промяна) */
-        /* ... */
         .category-sidebar {
             background-color: #f8f9fa;
             border-radius: 12px;
@@ -44,8 +42,7 @@
             transform: translateX(5px);
         }
 
-        /* (Останалите ви CSS стилове тук) */
-        /* Book Card Styles */
+
         .book-card {
             background-color: #fff;
             border: none;
@@ -205,6 +202,28 @@
             margin: 0 auto 25px;
         }
 
+        .btn-wishlist {
+            background-color: transparent;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            padding: 8px 12px;
+        }
+
+        .btn-wishlist:hover {
+            background-color: #f8f9fa;
+            border-color: #ced4da;
+        }
+
+        .btn-wishlist i {
+            color: #ced4da; /* Цвят на празно сърце */
+            transition: color 0.2s ease;
+        }
+
+        .btn-wishlist i.fas {
+            color: var(--danger); /* Червен цвят за пълно сърце */
+        }
+
         /* Responsive adjustments */
         @media (max-width: 1199px) {
             .book-title {
@@ -276,11 +295,29 @@
 
                             <div class="book-footer">
                                 <span class="book-price">{{ book.price|floatformat:2 }} лв.</span>
-                                <button data-product="{{ book.id }}"
-                                        data-action="add"
-                                        class="btn btn-add-cart update-cart">
-                                    <i class="fas fa-cart-plus me-1"></i>Добави
-                                </button>
+
+                                <div class="d-flex align-items-center">
+                                    {% if user.is_authenticated %}
+                                        {% with book_in_wishlist=book.wishlistitem_set.all|length %}
+                                            <button data-book="{{ book.id }}"
+                                                    data-action="{% if book_in_wishlist %}remove{% else %}add{% endif %}"
+                                                    class="btn btn-wishlist me-2">
+                                                <i class="{% if book_in_wishlist %}fas text-danger{% else %}far{% endif %} fa-heart"></i>
+                                            </button>
+                                        {% endwith %}
+                                    {% else %}
+                                        <a href="{% url 'login' %}?next={{ request.path }}"
+                                           class="btn btn-wishlist me-2">
+                                            <i class="far fa-heart"></i>
+                                        </a>
+                                    {% endif %}
+
+                                    <button data-product="{{ book.id }}"
+                                            data-action="add"
+                                            class="btn btn-add-cart update-cart">
+                                        <i class="fas fa-cart-plus me-1"></i>Добави
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
