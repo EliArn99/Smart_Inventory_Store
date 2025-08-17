@@ -2,40 +2,112 @@
 {% load static %}
 
 {% block content %}
-<div class="container my-5">
-    <div class="row">
-        <div class="col-md-5">
-            <img src="{{ book.imageURL }}" 
-                 onerror="this.onerror=null;this.src='{% static 'images/placeholder.png' %}'"
-                 class="img-fluid rounded shadow-lg" 
-                 alt="{{ book.name }}">
-        </div>
-        
-        <div class="col-md-7">
-            <h1 class="display-4 fw-bold">{{ book.name }}</h1>
-            <p class="lead text-muted fst-italic">{{ book.author|default:"Неизвестен автор" }}</p>
-            
-            <hr>
-            
-            <h3 class="my-4">Описание</h3>
-            <p>{{ book.description|linebreaksbr }}</p>
-            
-            <div class="d-flex align-items-center my-4">
-                <span class="fs-2 fw-bolder me-3">{{ book.price|floatformat:2 }} лв.</span>
-                <button data-product="{{ book.id }}" 
-                        data-action="add"
-                        class="btn btn-primary btn-lg update-cart">
-                    <i class="fas fa-cart-plus me-2"></i> Добави в количката
-                </button>
+    <div class="container my-5">
+        <div class="row">
+            <div class="col-md-5">
+                <img src="{{ book.imageURL }}"
+                     onerror="this.onerror=null;this.src='{% static 'images/placeholder.png' %}'"
+                     class="img-fluid rounded shadow-lg"
+                     alt="{{ book.name }}">
             </div>
-            
-            {% if book.category %}
-                <p class="text-muted mt-3">
-                    Категория: <a href="{% url 'store:books_by_category' book.category.slug %}">{{ book.category.name }}</a>
-                </p>
-            {% endif %}
-            
+
+            <div class="col-md-7">
+                <h1 class="display-4 fw-bold">{{ book.name }}</h1>
+                <p class="lead text-muted fst-italic">{{ book.author|default:"Неизвестен автор" }}</p>
+
+                <hr>
+
+                <h3 class="my-4">Описание</h3>
+                <p>{{ book.description|linebreaksbr }}</p>
+
+                <div class="d-flex align-items-center my-4">
+                    {% if book.stock > 0 %}
+                        <span class="fs-2 fw-bolder me-3">{{ book.price|floatformat:2 }} лв.</span>
+                        <button data-product="{{ book.id }}"
+                                data-action="add"
+                                class="btn btn-primary btn-lg update-cart">
+                            <i class="fas fa-cart-plus me-2"></i> Добави в количката
+                        </button>
+                    {% else %}
+                        <span class="fs-2 fw-bolder me-3 text-danger">Изчерпана наличност</span>
+                        <button class="btn btn-secondary btn-lg" disabled>
+                            <i class="fas fa-times me-2"></i> Не е налично
+                        </button>
+                    {% endif %}
+                </div>
+
+                {% if book.stock <= 15 and book.stock > 0 %}
+                    <div class="alert alert-warning mt-2 d-flex align-items-center" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Внимание:</strong> Последни бройки! Побързайте!
+                    </div>
+                {% endif %}
+
+                {% if book.category %}
+                    <p class="text-muted mt-3">
+                        Категория: <a
+                            href="{% url 'store:books_by_category' book.category.slug %}">{{ book.category.name }}</a>
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+
+        <hr>
+        <div class="row">
+            <div class="col-lg-8">
+                <h3>Ревюта и оценки</h3>
+
+                {% if user.is_authenticated %}
+                    <div class="card p-3 mb-4">
+                        <h4>Оставете вашето ревю</h4>
+                        {% if messages %}
+                            <ul class="messages">
+                                {% for message in messages %}
+                                    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        <form action="{% url 'store:book_detail' book.pk %}" method="post">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="id_rating">Оценка (1-5):</label>
+                                {{ form.rating }}
+                            </div>
+                            <div class="form-group mt-2">
+                                <label for="id_comment">Коментар:</label>
+                                {{ form.comment }}
+                            </div>
+                            <button type="submit" class="btn btn-primary mt-3">Изпрати ревю</button>
+                        </form>
+                    </div>
+                {% else %}
+                    <p>
+                        За да оставите ревю, моля, <a href="{% url 'login' %}?next={{ request.path }}">влезте в профила
+                        си</a>.
+                    </p>
+                {% endif %}
+
+                {% if reviews %}
+                    <div class="mt-4">
+                        {% for review in reviews %}
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ review.user.username }}</h5>
+                                    <h6 class="card-subtitle mb-2 text-muted">
+                                        Оценка: {{ review.rating }} ⭐
+                                        <small>({{ review.created_at|date:"d M Y" }})</small>
+                                    </h6>
+                                    {% if review.comment %}
+                                        <p class="card-text">{{ review.comment }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p>Все още няма ревюта за тази книга. Бъдете първият, който ще остави ревю!</p>
+                {% endif %}
+            </div>
         </div>
     </div>
-</div>
 {% endblock content %}
