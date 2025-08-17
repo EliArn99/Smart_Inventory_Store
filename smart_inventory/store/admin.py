@@ -1,7 +1,6 @@
-# store/admin.py
 from django.contrib import admin
 from django.utils.safestring import mark_safe
-from .models import Customer, Book, Order, OrderItem, ShippingAddress, Category
+from .models import Customer, Book, Order, OrderItem, ShippingAddress, Category, Review
 
 
 @admin.register(Book)
@@ -61,6 +60,13 @@ class CategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug')
     search_fields = ('name',)
 
+@admin.register(Review)
+class ReviewAdmin(admin.ModelAdmin):
+    list_display = ('book', 'user', 'rating', 'created_at', 'comment')
+    list_filter = ('rating', 'book')
+    search_fields = ('book__name', 'user__username', 'comment')
+    readonly_fields = ('created_at',)
+    list_per_page = 20
 
 admin.site.register(Customer)
 admin.site.register(ShippingAddress)
