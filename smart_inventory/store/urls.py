@@ -3,7 +3,7 @@
 from django.urls import path
 from . import views
 
-app_name = 'store'  # Namespace for the app
+app_name = 'store' 
 
 urlpatterns = [
     path('', views.store, name="store"),
@@ -13,6 +13,7 @@ urlpatterns = [
     path('cart/', views.cart, name="cart"),
     path('checkout/', views.checkout, name="checkout"),
     path('wishlist/', views.wishlist_view, name='wishlist'),
+    path('search/', views.search_results, name='search_results'),
 
     path('update_wishlist/', views.update_wishlist, name='update_wishlist'),
 
