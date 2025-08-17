@@ -1,3 +1,4 @@
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -32,7 +33,9 @@ class Book(models.Model):
     image = models.ImageField(null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     digital = models.BooleanField(default=False, null=True, blank=False)
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)  # New
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
+    stock = models.IntegerField(default=0)
+
 
     def __str__(self):
         return self.name
@@ -114,3 +117,22 @@ class WishlistItem(models.Model):
 
     def __str__(self):
         return f"{self.user.username}'s wishlist item: {self.book.name}"
+
+
+class Review(models.Model):
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name='reviews')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    rating = models.IntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)],
+        help_text="Оценка от 1 до 5 звезди"
+    )
+    comment = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'book')
+        verbose_name = 'Ревю'
+        verbose_name_plural = 'Ревюта'
+
+    def __str__(self):
+        return f"Ревю от {self.user.username} за {self.book.name}"
