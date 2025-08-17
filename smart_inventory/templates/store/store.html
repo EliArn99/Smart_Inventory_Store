@@ -273,6 +273,11 @@
                             {% elif book.is_new %}
                                 <span class="book-badge">Ново</span>
                             {% endif %}
+                            {% if book.stock <= 15 and book.stock > 0 %}
+                                <span class="book-badge" style="background-color: var(--secondary); color: black;">
+    Последни бройки!
+</span>
+                            {% endif %}
 
                             <div class="book-image">
                                 <img src="{{ book.imageURL }}"
