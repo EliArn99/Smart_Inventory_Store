@@ -1,14 +1,16 @@
+from datetime import time
+
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponseBadRequest
+from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.http import require_POST
-from pyexpat.errors import messages
-
-from .forms import CustomUserCreationForm
-from .models import Book, Order, OrderItem, Customer, Category, WishlistItem
+from django.contrib import messages
+from .forms import CustomUserCreationForm, ReviewForm
+from .models import Book, Order, OrderItem, Category, WishlistItem, Review, ShippingAddress
 import json
 from .utils import cartData, cookieCart
+from django.db.models import Q
 
 
 def store(request, category_slug=None):
@@ -98,6 +100,37 @@ def updateItem(request):
 
 
 def processOrder(request):
+    data = json.loads(request.body)
+    transaction_id = str(int(time.time() * 1000))
+    customer = request.user.customer
+
+    order, created = Order.objects.get_or_create(customer=customer, complete=False)
+    total = float(data['form']['total'])
+    order.transaction_id = transaction_id
+
+    if total == order.get_cart_total:
+        order.complete = True
+
+        for item in order.orderitem_set.all():
+            book = item.product
+            if book.stock >= item.quantity:
+                book.stock -= item.quantity
+                book.save()
+            else:
+                return JsonResponse({'error': f'Недостатъчна наличност за книга "{book.name}".'}, status=400)
+
+        order.save()
+
+    if order.shipping == True:
+        ShippingAddress.objects.create(
+            customer=customer,
+            order=order,
+            address=data['shipping']['address'],
+            city=data['shipping']['city'],
+            state=data['shipping']['state'],
+            zipcode=data['shipping']['zipcode'],
+        )
+
     return JsonResponse('Payment submitted..', safe=False)
 
 
@@ -142,9 +175,36 @@ def book_detail(request, pk):
     data = cartData(request)
     cartItems = data['cartItems']
 
+    # Вземане на всички ревюта за тази книга
+    reviews = book.reviews.all().order_by('-created_at')
+
+    if request.method == 'POST':
+        if not request.user.is_authenticated:
+            # Пренасочи към страницата за логин, ако потребителят не е логнат
+            messages.error(request, 'Трябва да сте влезли, за да оставите ревю.')
+            return redirect('login')
+
+        # Проверка дали потребителят вече е оставил ревю
+        if Review.objects.filter(book=book, user=request.user).exists():
+            messages.warning(request, 'Вече сте оставили ревю за тази книга.')
+            return redirect('store:book_detail', pk=pk)
+
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.book = book
+            review.user = request.user
+            review.save()
+            messages.success(request, 'Вашето ревю беше успешно добавено!')
+            return redirect('store:book_detail', pk=pk)
+    else:
+        form = ReviewForm()
+
     context = {
         'book': book,
-        'cartItems': cartItems
+        'cartItems': cartItems,
+        'reviews': reviews,  # Добави ревютата към контекста
+        'form': form,  # Добави формата за ревю към контекста
     }
     return render(request, 'store/book_detail.html', context)
 
@@ -194,3 +254,25 @@ def wishlist_view(request):
     user_wishlist = WishlistItem.objects.filter(user=request.user)
     context = {'wishlist_items': user_wishlist}
     return render(request, 'store/wishlist.html', context)
+
+
+def search_results(request):
+    data = cartData(request)
+    cartItems = data['cartItems']
+    query = request.GET.get('q')
+
+    books = Book.objects.all()
+
+    if query:
+        books = books.filter(
+            Q(name__icontains=query) |
+            Q(author__icontains=query) |
+            Q(description__icontains=query)
+        ).distinct()
+
+    context = {
+        'books': books,
+        'cartItems': cartItems,
+        'query': query,
+    }
+    return render(request, 'store/store.html', context)
