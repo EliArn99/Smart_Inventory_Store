@@ -1,5 +1,4 @@
 from datetime import time
-
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -10,17 +9,31 @@ from .forms import CustomUserCreationForm, ReviewForm
 from .models import Book, Order, OrderItem, Category, WishlistItem, Review, ShippingAddress
 import json
 from .utils import cartData, cookieCart
-from django.db.models import Q
+from django.db.models import Q, Count
 
 
 def store(request, category_slug=None):
-    category = None
-    categories = Category.objects.all()
     books = Book.objects.all()
+    query = request.GET.get('q')
+
+    if query:
+        books = books.filter(
+            Q(name__icontains=query) |
+            Q(author__icontains=query) |
+            Q(description__icontains=query)
+        ).distinct()
 
     if category_slug:
-        category = get_object_or_404(Category, slug=category_slug)
-        books = books.filter(category=category)
+        books = books.filter(category__slug=category_slug)
+
+    min_price = request.GET.get('min_price')
+    max_price = request.GET.get('max_price')
+    if min_price:
+        books = books.filter(price__gte=min_price)
+    if max_price:
+        books = books.filter(price__lte=max_price)
+
+    categories = Category.objects.annotate(book_count=Count('book'))
 
     data = cartData(request)
     cartItems = data['cartItems']
@@ -28,8 +41,11 @@ def store(request, category_slug=None):
     context = {
         'books': books,
         'cartItems': cartItems,
-        'category': category,
         'categories': categories,
+        'active_category_slug': category_slug,
+        'query': query,
+        'min_price': min_price,
+        'max_price': max_price,
     }
     return render(request, 'store/store.html', context)
 
@@ -175,16 +191,13 @@ def book_detail(request, pk):
     data = cartData(request)
     cartItems = data['cartItems']
 
-    # Вземане на всички ревюта за тази книга
     reviews = book.reviews.all().order_by('-created_at')
 
     if request.method == 'POST':
         if not request.user.is_authenticated:
-            # Пренасочи към страницата за логин, ако потребителят не е логнат
             messages.error(request, 'Трябва да сте влезли, за да оставите ревю.')
             return redirect('login')
 
-        # Проверка дали потребителят вече е оставил ревю
         if Review.objects.filter(book=book, user=request.user).exists():
             messages.warning(request, 'Вече сте оставили ревю за тази книга.')
             return redirect('store:book_detail', pk=pk)
@@ -203,8 +216,8 @@ def book_detail(request, pk):
     context = {
         'book': book,
         'cartItems': cartItems,
-        'reviews': reviews,  # Добави ревютата към контекста
-        'form': form,  # Добави формата за ревю към контекста
+        'reviews': reviews,
+        'form': form,
     }
     return render(request, 'store/book_detail.html', context)
 
@@ -276,3 +289,6 @@ def search_results(request):
         'query': query,
     }
     return render(request, 'store/store.html', context)
+
+
+
