@@ -25,8 +25,10 @@
             margin: 0;
         }
 
-        .category-list a {
-            display: block;
+        .category-list li a {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             padding: 10px 15px;
             color: #495057;
             font-weight: 500;
@@ -35,6 +37,14 @@
             transition: all 0.2s ease-in-out;
             margin-bottom: 5px;
         }
+        
+        /* Добавени стилове за активна категория */
+        .category-list li.active-category a {
+            background-color: var(--secondary);
+            color: var(--primary);
+            transform: translateX(5px);
+            font-weight: bold;
+        }
 
         .category-list a:hover {
             background-color: var(--secondary);
@@ -42,7 +52,29 @@
             transform: translateX(5px);
         }
 
+        .category-link-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
+        .category-count {
+            background-color: #e9ecef;
+            color: #6c757d;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .category-list li.active-category .category-count,
+        .category-list a:hover .category-count {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        /* Запазете останалите стилове непроменени... */
         .book-card {
             background-color: #fff;
             border: none;
@@ -249,14 +281,44 @@
     <div class="row g-4">
         <div class="col-lg-3">
             <div class="category-sidebar">
+                
+                <h3 class="mt-0">Филтриране</h3>
+                <form method="GET" action="{% url 'store:store' %}" class="mb-4">
+                    <input type="hidden" name="q" value="{{ query }}">
+                    <input type="hidden" name="category_slug" value="{{ active_category_slug }}">
+                    
+                    <div class="mb-3">
+                        <label for="min-price" class="form-label fw-bold">Цена (лв.)</label>
+                        <div class="d-flex align-items-center gap-2">
+                            <input type="number" name="min_price" id="min-price" class="form-control" placeholder="Мин." value="{{ min_price|default:'' }}" aria-label="Минимална цена">
+                            <span class="text-muted">-</span>
+                            <input type="number" name="max_price" id="max-price" class="form-control" placeholder="Макс." value="{{ max_price|default:'' }}" aria-label="Максимална цена">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Приложи филтри</button>
+                    <a href="{% url 'store:store' %}" class="btn btn-outline-secondary w-100 mt-2">Изчисти филтрите</a>
+                </form>
+
                 <h3>Категории</h3>
                 <ul class="category-list">
-                    <li>
-                        <a href="{% url 'store:store' %}">Всички</a>
+                    <li class="{% if not active_category_slug %}active-category{% endif %}">
+                        <a href="{% url 'store:store' %}">
+                            <span class="category-link-content">
+                                <i class="fas fa-list"></i> Всички
+                            </span>
+                            <span class="category-count"></span>
+                        </a>
                     </li>
                     {% for category in categories %}
-                        <li>
-                            <a href="{% url 'store:books_by_category' category.slug %}">{{ category.name }}</a>
+                        <li class="{% if active_category_slug == category.slug %}active-category{% endif %}">
+                            <a href="{% url 'store:books_by_category' category.slug %}">
+                                <span class="category-link-content">
+                                    <i class="{{ category.icon }}"></i> {{ category.name }}
+                                </span>
+                                {% if category.book_count > 0 %}
+                                    <span class="category-count">{{ category.book_count }}</span>
+                                {% endif %}
+                            </a>
                         </li>
                     {% endfor %}
                 </ul>
