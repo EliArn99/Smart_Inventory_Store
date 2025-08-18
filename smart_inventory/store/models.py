@@ -12,9 +12,16 @@ class Customer(models.Model):
         return self.name
 
 
+
+
 class Category(models.Model):
     name = models.CharField(max_length=200, unique=True)
     slug = models.SlugField(max_length=200, unique=True)
+    icon = models.CharField(
+        max_length=50,
+        default='fas fa-book',
+        help_text="Font Awesome class, e.g., 'fas fa-book'"
+    )
 
     class Meta:
         verbose_name_plural = 'Categories'
