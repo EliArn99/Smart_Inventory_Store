@@ -4,55 +4,256 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>
-    {% block title %}Онлайн Книжарница{% endblock %}
-</title>
-    <!-- Bootstrap 5 CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-          xintegrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <title>
+        {% block title %}Онлайн Книжарница{% endblock %}
+    </title>
 
-    <!-- Custom CSS за цветовете -->
+    <!-- Bootstrap 5 CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS -->
     <style>
+        :root {
+            --primary-dark: #3B153A;
+            --primary-light: #5a2d59;
+            --accent: #F0C987;
+            --accent-dark: #e6c17d;
+            --light-bg: #f8f9fa;
+            --dark-text: #212529;
+            --light-text: #f8f9fa;
+            --card-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+
         body {
-            background-color: #f8f9fa; /* Светъл сив фон за контраст */
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+            font-family: 'Montserrat', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1, h2, h3, h4, h5 {
+            font-family: 'Merriweather', serif;
+            font-weight: 700;
         }
 
         .navbar {
-            background-color: #3B153A; /* Дълбоко лилаво за навигационната лента */
+            background-color: var(--primary-dark);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 0.8rem 0;
         }
 
-        .navbar-brand, .nav-link {
-            color: #F0C987 !important; /* Златисто жълто за текст на навигацията */
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--accent) !important;
+            transition: var(--transition);
+        }
+
+        .navbar-brand:hover {
+            transform: scale(1.03);
+        }
+
+        .nav-link {
+            color: var(--accent) !important;
+            font-weight: 500;
+            position: relative;
+            padding: 0.5rem 1rem !important;
+            transition: var(--transition);
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background-color: var(--accent);
+            transition: var(--transition);
+            transform: translateX(-50%);
+        }
+
+        .nav-link:hover::after,
+        .nav-link.active::after {
+            width: 80%;
         }
 
         .nav-link:hover {
-            color: #fff !important; /* Бял цвят при hover */
+            color: #fff !important;
+            transform: translateY(-2px);
         }
 
         .btn-accent {
-            background-color: #F0C987; /* Златисто жълто за бутоните */
-            color: #3B153A; /* Дълбоко лилаво за текста на бутона */
+            background-color: var(--accent);
+            color: var(--primary-dark);
             border: none;
+            border-radius: 6px;
+            padding: 0.5rem 1.5rem;
+            font-weight: 600;
+            transition: var(--transition);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         .btn-accent:hover {
-            background-color: #e6c17d; /* По-тъмен жълт при hover */
-            color: #3B153A;
+            background-color: var(--accent-dark);
+            color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-outline-light {
+            color: var(--accent);
+            border-color: var(--accent);
+            transition: var(--transition);
+        }
+
+        .btn-outline-light:hover {
+            background-color: var(--accent);
+            color: var(--primary-dark);
+            border-color: var(--accent);
         }
 
         .container {
-            padding-top: 20px;
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+            flex: 1;
         }
 
         .card {
             border: none;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        #cart-icon {
+            transition: var(--transition);
+        }
+
+        #cart-icon:hover {
+            transform: scale(1.1);
         }
 
         #cart-total {
-            color: #F0C987;
+            color: var(--accent);
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .form-control {
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+            padding: 0.75rem 1rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            box-shadow: 0 0 0 0.25rem rgba(240, 201, 135, 0.25);
+            border-color: var(--accent);
+        }
+
+        .navbar-toggler {
+            border: none;
+            color: var(--accent) !important;
+            font-size: 1.5rem;
+        }
+
+        .navbar-toggler:focus {
+            box-shadow: none;
+        }
+
+        /* Toast notifications */
+        .toast-container {
+            position: fixed;
+            top: 90px;
+            right: 20px;
+            z-index: 1050;
+        }
+
+        .toast {
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: var(--primary-dark);
+            color: var(--light-text);
+            padding: 2.5rem 0;
+            margin-top: auto;
+        }
+
+        .footer a {
+            color: var(--accent);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer a:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 992px) {
+            .navbar-collapse {
+                background-color: var(--primary-dark);
+                padding: 1rem;
+                border-radius: 8px;
+                margin-top: 0.5rem;
+            }
+
+            .nav-link::after {
+                display: none;
+            }
+
+            .d-flex.me-4 {
+                margin-right: 0 !important;
+                margin-bottom: 1rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .container {
+                padding-left: 15px;
+                padding-right: 15px;
+            }
+
+            .navbar-brand {
+                font-size: 1.3rem;
+            }
+
+            .btn-accent {
+                padding: 0.4rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Animation for cart updates */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .cart-update {
+            animation: pulse 0.5s ease;
         }
     </style>
 
@@ -60,51 +261,79 @@
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg">
+<nav class="navbar navbar-expand-lg sticky-top">
     <div class="container">
-        <a class="navbar-brand" href="{% url 'store:store' %}">Книжарница</a>
+        <a class="navbar-brand" href="{% url 'store:store' %}">
+            <i class="fas fa-book-open me-2"></i>Книжарница
+        </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
+            <i class="fas fa-bars"></i>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="{% url 'store:store' %}">Начало</a>
+                    <a class="nav-link active" aria-current="page" href="{% url 'store:store' %}">
+                        <i class="fas fa-home me-1"></i>Начало
+                    </a>
                 </li>
                 {% if user.is_authenticated %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'store:wishlist' %}">
-                            Списък с желания
+                            <i class="fas fa-heart me-1"></i>Списък с желания
                         </a>
                     </li>
                 {% endif %}
             </ul>
 
             <form class="d-flex me-4" action="{% url 'store:search_results' %}" method="get">
-                <input class="form-control me-2" type="search" placeholder="Търси книги..." aria-label="Search" name="q">
-                <button class="btn btn-outline-light" type="submit" style="color: #F0C987; border-color: #F0C987;">Търси</button>
+                <div class="input-group">
+                    <input class="form-control" type="search" placeholder="Търси книги..." aria-label="Search" name="q">
+                    <button class="btn btn-outline-light" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
             </form>
 
             <div class="d-flex align-items-center">
                 {% if user.is_authenticated %}
-                    <a class="nav-link mb-0" href="{% url 'store:profile_details' %}"
-                       style="color: #F0C987;">Здравейте, {{ user.username }}</a>
-
-                    <form method="post" action="{% url 'logout' %}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-accent me-2">Изход</button>
-                    </form>
-
+                    <div class="dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button"
+                           id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle me-2"></i>
+                            <span>{{ user.username }}</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="{% url 'store:profile_details' %}">
+                                <i class="fas fa-user me-2"></i>Профил
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form method="post" action="{% url 'logout' %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dropdown-item">
+                                        <i class="fas fa-sign-out-alt me-2"></i>Изход
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
                 {% else %}
-                    <a class="btn btn-accent me-2" href="{% url 'login' %}">Вход</a>
+                    <a class="btn btn-accent me-2" href="{% url 'login' %}">
+                        <i class="fas fa-sign-in-alt me-1"></i>Вход
+                    </a>
                 {% endif %}
 
-                <a href="{% url 'store:cart' %}">
+                <a href="{% url 'store:cart' %}" class="position-relative ms-3">
                     <img id="cart-icon" src="{% static 'images/shopping-cart.png' %}" alt="Количка"
-                         style="width: 25px; height: 25px;">
+                         style="width: 28px; height: 28px;">
+                    {% if cartItems > 0 %}
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        {{ cartItems }}
+                        <span class="visually-hidden">продукти в количката</span>
+                    </span>
+                    {% endif %}
                 </a>
-                <p id="cart-total" class="ms-2 mb-0">{{ cartItems }}</p>
             </div>
         </div>
     </div>
@@ -115,13 +344,51 @@
     {% endblock %}
 </div>
 
+<footer class="footer">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 mb-4 mb-md-0">
+                <h5 class="mb-3">Книжарница</h5>
+                <p>Вашият доверен партньор в света на книгите. Предоставяме богата селекция от заглавия за всички възрасти и интереси.</p>
+            </div>
+            <div class="col-md-4 mb-4 mb-md-0">
+                <h5 class="mb-3">Бързи връзки</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><a href="{% url 'store:store' %}">Начало</a></li>
+                    {% if user.is_authenticated %}
+                    <li class="mb-2"><a href="{% url 'store:wishlist' %}">Списък с желания</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <h5 class="mb-3">Контакти</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><i class="fas fa-envelope me-2"></i>info@knizharnica.bg</li>
+                    <li class="mb-2"><i class="fas fa-phone me-2"></i>+359 888 123 456</li>
+                    <li class="mb-2"><i class="fas fa-map-marker-alt me-2"></i>София, бул. "България" 123</li>
+                </ul>
+            </div>
+        </div>
+        <hr class="my-4 bg-light">
+        <div class="row align-items-center">
+            <div class="col-md-6 text-center text-md-start">
+                <p class="mb-0">&copy; 2023 Книжарница. Всички права запазени.</p>
+            </div>
+            <div class="col-md-6 text-center text-md-end">
+                <a href="#" class="text-decoration-none me-3"><i class="fab fa-facebook-f fa-lg"></i></a>
+                <a href="#" class="text-decoration-none me-3"><i class="fab fa-instagram fa-lg"></i></a>
+                <a href="#" class="text-decoration-none"><i class="fab fa-twitter fa-lg"></i></a>
+            </div>
+        </div>
+    </div>
+</footer>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script type="text/javascript">
-    // Уверете се, че 'user' променливата е правилно дефинирана
     var user = '{{ request.user.is_authenticated|yesno:"AuthenticatedUser,AnonymousUser" }}';
     console.log("DEBUG (base.html): User status (raw): '{{ request.user }}'"); // Log the raw Django user object string
-    console.log("DEBUG (base.html): User status (is_authenticated): '{{ request.user.is_authenticated }}'"); // Log the boolean
-    console.log("DEBUG (base.html): User status (final JS var): '" + user + "'"); // Log the final JS variable
+    console.log("DEBUG (base.html): User status (is_authenticated): '{{ request.user.is_authenticated }}'");
+    console.log("DEBUG (base.html): User status (final JS var): '" + user + "'"); 
 
     function getToken(name) {
         var cookieValue = null;
@@ -129,7 +396,6 @@
             var cookies = document.cookie.split(';');
             for (var i = 0; i < cookies.length; i++) {
                 var cookie = cookies[i].trim();
-                // Does this cookie string begin with the name we want?
                 if (cookie.substring(0, name.length + 1) === (name + '=')) {
                     cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                     break;
@@ -142,22 +408,17 @@
     var csrftoken = getToken('csrftoken')
 
     function getCookie(name) {
-        // Split cookie string and get all individual name=value pairs in an array
         var cookieArr = document.cookie.split(";");
 
-        // Loop through the array elements
         for (var i = 0; i < cookieArr.length; i++) {
             var cookiePair = cookieArr[i].split("=");
 
-            /* Removing whitespace at the beginning of the cookie name
-            and compare it with the given string */
+
             if (name == cookiePair[0].trim()) {
-                // Decode the cookie value and return
                 return decodeURIComponent(cookiePair[1]);
             }
         }
 
-        // Return null if not found
         return null;
     }
 
@@ -169,8 +430,17 @@
         document.cookie = 'cart=' + JSON.stringify(cart) + ";domain=;path=/"
     }
     console.log('Cart:', cart)
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const cartIcon = document.getElementById('cart-icon');
+        if (cartIcon) {
+            cartIcon.classList.add('cart-update');
+            setTimeout(() => {
+                cartIcon.classList.remove('cart-update');
+            }, 500);
+        }
+    });
 </script>
-{# Добавяме параметър за версия, за да принудим презареждане на скрипта #}
 <script type="text/javascript" src="{% static 'js/cart.js' %}?v=1.3"></script>
 {% block extra_js %}{% endblock %}
 
