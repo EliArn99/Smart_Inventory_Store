@@ -42,6 +42,8 @@ class Book(models.Model):
     digital = models.BooleanField(default=False, null=True, blank=False)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
     stock = models.IntegerField(default=0)
+    publication_year = models.IntegerField(null=True, blank=True)
+
 
 
     def __str__(self):
