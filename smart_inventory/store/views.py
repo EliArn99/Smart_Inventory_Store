@@ -1,4 +1,5 @@
 from datetime import time
+
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -9,13 +10,19 @@ from .forms import CustomUserCreationForm, ReviewForm
 from .models import Book, Order, OrderItem, Category, WishlistItem, Review, ShippingAddress
 import json
 from .utils import cartData, cookieCart
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Avg, F
 
 
 def store(request, category_slug=None):
     books = Book.objects.all()
-    query = request.GET.get('q')
 
+    books = books.annotate(
+        avg_rating=Avg('reviews__rating')
+    ).annotate(
+        reviews_count=Count('reviews')
+    )
+
+    query = request.GET.get('q')
     if query:
         books = books.filter(
             Q(name__icontains=query) |
@@ -26,6 +33,18 @@ def store(request, category_slug=None):
     if category_slug:
         books = books.filter(category__slug=category_slug)
 
+    author = request.GET.get('author')
+    if author:
+        books = books.filter(author__icontains=author)
+
+    year = request.GET.get('year')
+    if year:
+        try:
+            books = books.filter(publication_year=int(year))
+        except (ValueError, TypeError):
+            pass # Игнориране на невалидна стойност
+
+    # Филтриране по цена (вече съществува)
     min_price = request.GET.get('min_price')
     max_price = request.GET.get('max_price')
     if min_price:
@@ -33,8 +52,19 @@ def store(request, category_slug=None):
     if max_price:
         books = books.filter(price__lte=max_price)
 
-    categories = Category.objects.annotate(book_count=Count('book'))
+    sort_by = request.GET.get('sort_by', 'name') 
+    order = request.GET.get('order', 'asc') 
 
+    valid_sort_fields = ['name', 'price', 'avg_rating', 'publication_year']
+    if sort_by in valid_sort_fields:
+        if order == 'desc':
+            books = books.order_by(F(sort_by).desc(nulls_last=True))
+        else:
+            books = books.order_by(F(sort_by).asc(nulls_last=True))
+    else:
+        books = books.order_by('name')
+
+    categories = Category.objects.annotate(book_count=Count('book'))
     data = cartData(request)
     cartItems = data['cartItems']
 
@@ -46,6 +76,10 @@ def store(request, category_slug=None):
         'query': query,
         'min_price': min_price,
         'max_price': max_price,
+        'author': author,
+        'year': year,
+        'sort_by': sort_by,
+        'order': order,
     }
     return render(request, 'store/store.html', context)
 
@@ -159,14 +193,33 @@ def get_cart_data(request):
     return JsonResponse(data, safe=False)
 
 
+# store/views.py
+
 @login_required
 def profile_details(request):
     customer = request.user.customer
-    orders = customer.order_set.all()
+    orders = customer.order_set.all().order_by('-date_ordered')
+
+
+    purchased_categories = Category.objects.filter(
+        book__orderitem__order__customer=customer
+    ).distinct()
+
+    recommended_books = Book.objects.filter(
+        category__in=purchased_categories
+    ).exclude(
+        orderitem__order__customer=customer
+    ).order_by('?')  
+
+    if not recommended_books:
+        recommended_books = Book.objects.all().order_by('?')[:4]
+    else:
+        recommended_books = recommended_books[:4]
 
     context = {
         'customer': customer,
         'orders': orders,
+        'recommended_books': recommended_books,  
     }
     return render(request, 'store/profile_details.html', context)
 
