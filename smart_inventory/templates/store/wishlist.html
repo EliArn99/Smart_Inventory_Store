@@ -118,4 +118,12 @@
         </div>
     </div>
 </div>
+    {% block extra_js %}
+    <script type="text/javascript">
+        // Получаваме CSRF токена и потребителя, за да ги използваме в JS
+        var csrftoken = '{{ csrf_token }}';
+        var user = '{{ request.user }}';
+    </script>
+    <script src="{% static 'js/wishlist.js' %}"></script>
+{% endblock %}
 {% endblock %}
