@@ -1,55 +1,83 @@
+{# TODO: Fix cart counter  #}
 {% extends 'store/base.html' %}
 {% load static %}
 
 {% block extra_head %}
 <style>
     .profile-container {
-        max-width: 1000px;
+        max-width: 1200px;
         margin: 2rem auto;
+        padding: 0 1rem;
     }
 
     .profile-card {
         border: none;
-        border-radius: 12px;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
         overflow: hidden;
+        background: #fff;
     }
 
     .profile-header {
-        background: linear-gradient(135deg, var(--primary) 0%, #5E2D5C 100%);
+        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-light) 100%);
         color: white;
-        padding: 2rem;
+        padding: 2.5rem 2rem;
         text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .profile-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        transform: rotate(30deg);
     }
 
     .profile-avatar {
-        width: 100px;
-        height: 100px;
+        width: 120px;
+        height: 120px;
         border-radius: 50%;
-        background-color: var(--secondary);
+        background-color: var(--accent);
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 1rem;
-        font-size: 2.5rem;
-        color: var(--primary);
+        margin: 0 auto 1.25rem;
+        font-size: 3rem;
+        color: var(--primary-dark);
         font-weight: 700;
+        position: relative;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        border: 4px solid rgba(255, 255, 255, 0.3);
     }
 
     .profile-body {
-        padding: 2rem;
+        padding: 2.5rem;
     }
 
     .profile-section {
-        margin-bottom: 2rem;
+        margin-bottom: 2.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .profile-section:last-of-type {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
     }
 
     .profile-section-title {
-        color: var(--primary);
-        font-weight: 600;
+        color: var(--primary-dark);
+        font-weight: 700;
         margin-bottom: 1.5rem;
         position: relative;
         padding-bottom: 0.75rem;
+        font-size: 1.35rem;
     }
 
     .profile-section-title::after {
@@ -57,82 +85,123 @@
         position: absolute;
         bottom: 0;
         left: 0;
-        width: 50px;
-        height: 3px;
-        background-color: var(--secondary);
+        width: 60px;
+        height: 4px;
+        background-color: var(--accent);
+        border-radius: 2px;
+    }
+
+    .profile-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.25rem;
     }
 
     .profile-info-item {
         display: flex;
-        margin-bottom: 1rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid #f0f0f0;
+        flex-direction: column;
+        padding: 1.25rem;
+        background-color: #f9f9f9;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .profile-info-item:hover {
+        background-color: #f0f0f0;
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
     }
 
     .profile-info-label {
-        flex: 0 0 200px;
-        font-weight: 500;
-        color: var(--primary);
+        font-weight: 600;
+        color: var(--primary-dark);
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
 
     .profile-info-value {
-        flex: 1;
         color: #555;
+        font-size: 1.1rem;
     }
 
     .order-card {
         border: 1px solid #eee;
-        border-radius: 8px;
-        padding: 1.5rem;
-        margin-bottom: 1rem;
+        border-radius: 12px;
+        padding: 1.75rem;
+        margin-bottom: 1.25rem;
         transition: all 0.3s ease;
+        background: #fff;
     }
 
     .order-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        border-color: transparent;
     }
 
     .order-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 1rem;
-        padding-bottom: 1rem;
+        margin-bottom: 1.25rem;
+        padding-bottom: 1.25rem;
         border-bottom: 1px solid #f0f0f0;
+        flex-wrap: wrap;
+        gap: 1rem;
     }
 
     .order-number {
-        font-weight: 600;
-        color: var(--primary);
+        font-weight: 700;
+        color: var(--primary-dark);
+        font-size: 1.1rem;
     }
 
     .order-date {
         color: #777;
+        font-size: 0.95rem;
     }
 
     .order-total {
+        font-weight: 700;
+        color: var(--primary-dark);
+        font-size: 1.25rem;
+    }
+
+    .order-status {
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
         font-weight: 600;
-        color: var(--primary);
+        background-color: #e8f5e9;
+        color: #2e7d32;
     }
 
     .order-items {
-        margin-top: 1rem;
+        margin-top: 1.25rem;
     }
 
     .order-item {
         display: flex;
         align-items: center;
-        padding: 0.5rem 0;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f9f9f9;
+    }
+
+    .order-item:last-child {
+        border-bottom: none;
     }
 
     .order-item-image {
-        width: 50px;
-        height: 70px;
+        width: 60px;
+        height: 80px;
         object-fit: cover;
-        border-radius: 4px;
-        margin-right: 1rem;
-        background-color: #f5f5f5;
+        border-radius: 6px;
+        margin-right: 1.25rem;
+        background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
+        padding: 0.25rem;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
     }
 
     .order-item-details {
@@ -140,60 +209,318 @@
     }
 
     .order-item-title {
-        font-weight: 500;
+        font-weight: 600;
         margin-bottom: 0.25rem;
+        color: #333;
     }
 
     .order-item-price {
         color: #777;
+        font-size: 0.9rem;
+    }
+
+    .order-item-total {
+        font-weight: 600;
+        color: var(--primary-dark);
+        min-width: 80px;
+        text-align: right;
     }
 
     .empty-orders {
         text-align: center;
-        padding: 2rem;
+        padding: 3rem 2rem;
         background-color: #f9f9f9;
-        border-radius: 8px;
+        border-radius: 12px;
+        border: 2px dashed #eee;
     }
 
     .empty-orders i {
-        font-size: 3rem;
-        color: rgba(59, 21, 58, 0.2);
-        margin-bottom: 1rem;
+        font-size: 3.5rem;
+        color: rgba(59, 21, 58, 0.15);
+        margin-bottom: 1.25rem;
     }
 
     .empty-orders h4 {
-        color: var(--primary);
-        margin-bottom: 0.5rem;
+        color: var(--primary-dark);
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+    }
+
+    .empty-orders p {
+        color: #777;
+        margin-bottom: 1.5rem;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
     }
 
     .btn-view-order {
-        background-color: var(--secondary);
-        color: var(--primary);
+        background-color: var(--accent);
+        color: var(--primary-dark);
         border: none;
-        padding: 0.5rem 1rem;
-        border-radius: 6px;
-        font-weight: 500;
+        padding: 0.6rem 1.25rem;
+        border-radius: 8px;
+        font-weight: 600;
         transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
     .btn-view-order:hover {
-        background-color: #e6b974;
-        color: var(--primary);
+        background-color: var(--accent-dark);
+        color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .recommended-section {
+        margin-top: 4rem;
+    }
+
+    .recommended-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .recommended-title {
+        color: var(--primary-dark);
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+        position: relative;
+        display: inline-block;
+    }
+
+    .recommended-title::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 4px;
+        background-color: var(--accent);
+        border-radius: 2px;
+    }
+
+    .recommended-subtitle {
+        color: #777;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .book-card {
+        background-color: #fff;
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        height: 100%;
+        position: relative;
+    }
+
+    .book-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .book-image {
+        position: relative;
+        padding-top: 150%;
+        overflow: hidden;
+        background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
+    }
+
+    .book-image img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        object-position: center;
+        transition: transform 0.5s ease, opacity 0.3s ease;
+        padding: 1.5rem;
+    }
+
+    .book-card:hover .book-image img {
+        transform: scale(1.05);
+    }
+
+    .book-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background-color: var(--accent);
+        color: var(--primary-dark);
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        z-index: 2;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .book-info {
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+
+    .book-title {
+        font-size: 1.1rem;
+        color: var(--primary-dark);
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        min-height: 3.2em;
+        text-decoration: none;
+    }
+
+    .book-title:hover {
+        color: var(--primary-light);
+    }
+
+    .book-author {
+        font-size: 0.9rem;
+        color: #6c757d;
+        font-style: italic;
+        margin-bottom: 0.75rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .book-footer {
+        padding: 1rem 1.5rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: rgba(248, 249, 250, 0.7);
+        gap: 0.75rem;
+    }
+
+    .book-price {
+        font-size: 1.2rem;
+        color: var(--primary-dark);
+        font-weight: 700;
+    }
+
+    .btn-add-cart {
+        background-color: var(--accent);
+        color: var(--primary-dark);
+        border: none;
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .btn-add-cart:hover {
+        background-color: var(--accent-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 992px) {
+        .profile-body {
+            padding: 2rem;
+        }
+        
+        .profile-info-grid {
+            grid-template-columns: 1fr;
+        }
     }
 
     @media (max-width: 768px) {
-        .profile-info-item {
-            flex-direction: column;
+        .profile-header {
+            padding: 2rem 1.5rem;
         }
-
-        .profile-info-label {
-            margin-bottom: 0.5rem;
+        
+        .profile-body {
+            padding: 1.5rem;
         }
-
+        
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            font-size: 2.5rem;
+        }
+        
         .order-header {
             flex-direction: column;
             align-items: flex-start;
+            gap: 0.75rem;
+        }
+        
+        .order-header > div {
+            display: flex;
+            flex-direction: column;
             gap: 0.5rem;
+        }
+        
+        .order-item {
+            flex-wrap: wrap;
+        }
+        
+        .order-item-total {
+            text-align: left;
+            margin-top: 0.5rem;
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .profile-container {
+            margin: 1rem auto;
+        }
+        
+        .profile-header {
+            padding: 1.5rem 1rem;
+        }
+        
+        .profile-body {
+            padding: 1.25rem;
+        }
+        
+        .profile-section-title {
+            font-size: 1.2rem;
+        }
+        
+        .order-card {
+            padding: 1.25rem;
+        }
+        
+        .order-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+        
+        .order-item-image {
+            margin-right: 0;
+            width: 80px;
+            height: 100px;
+        }
+        
+        .order-item-total {
+            text-align: left;
+            margin-top: 0;
         }
     }
 </style>
@@ -213,20 +540,27 @@
         <div class="profile-body">
             <div class="profile-section">
                 <h3 class="profile-section-title">Основна информация</h3>
-
-                <div class="profile-info-item">
-                    <div class="profile-info-label">Потребителско име</div>
-                    <div class="profile-info-value">{{ user.username }}</div>
-                </div>
-
-                <div class="profile-info-item">
-                    <div class="profile-info-label">Имейл адрес</div>
-                    <div class="profile-info-value">{{ user.email }}</div>
-                </div>
-
-                <div class="profile-info-item">
-                    <div class="profile-info-label">Дата на регистрация</div>
-                    <div class="profile-info-value">{{ user.date_joined|date:"d.m.Y" }}</div>
+                
+                <div class="profile-info-grid">
+                    <div class="profile-info-item">
+                        <span class="profile-info-label">Потребителско име</span>
+                        <span class="profile-info-value">{{ user.username }}</span>
+                    </div>
+                    
+                    <div class="profile-info-item">
+                        <span class="profile-info-label">Имейл адрес</span>
+                        <span class="profile-info-value">{{ user.email }}</span>
+                    </div>
+                    
+                    <div class="profile-info-item">
+                        <span class="profile-info-label">Дата на регистрация</span>
+                        <span class="profile-info-value">{{ user.date_joined|date:"d.m.Y" }}</span>
+                    </div>
+                    
+                    <div class="profile-info-item">
+                        <span class="profile-info-label">Общо поръчки</span>
+                        <span class="profile-info-value">{{ orders|length }}</span>
+                    </div>
                 </div>
             </div>
 
@@ -242,7 +576,10 @@
                                 <span class="order-date mx-2">•</span>
                                 <span class="order-date">{{ order.date_ordered|date:"d.m.Y" }}</span>
                             </div>
-                            <div class="order-total">{{ order.get_cart_total }} лв.</div>
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="order-total">{{ order.get_cart_total }} лв.</span>
+                                <span class="order-status">Завършена</span>
+                            </div>
                         </div>
 
                         <div class="order-items">
@@ -255,14 +592,14 @@
                                     <div class="order-item-title">{{ item.product.name }}</div>
                                     <div class="order-item-price">{{ item.quantity }} x {{ item.product.price|floatformat:2 }} лв.</div>
                                 </div>
-                                <div>{{ item.get_total|floatformat:2 }} лв.</div>
+                                <div class="order-item-total">{{ item.get_total|floatformat:2 }} лв.</div>
                             </div>
                             {% endfor %}
                         </div>
 
                         <div class="text-end mt-3">
-                            <button class="btn-view-order">{# TODO: Add order details page  #}
-                                <i class="fas fa-eye me-1"></i> Детайли за поръчката
+                            <button class="btn-view-order">
+                                <i class="fas fa-eye"></i> Детайли за поръчката
                             </button>
                         </div>
                     </div>
@@ -282,36 +619,48 @@
     </div>
 </div>
 
-<div class="container my-5">
-    {% if recommended_books %}
-        <hr class="my-5">
-        <h3 class="mb-4">Може да харесате също...</h3>
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
-            {% for rec_book in recommended_books %}
-                <div class="col">
-                    <div class="card h-100 book-card shadow-sm border-0">
-                        <a href="{% url 'store:book_detail' rec_book.id %}">
-                            <div class="book-image">
-                                <img src="{{ rec_book.imageURL }}"
-                                     class="card-img-top img-fluid"
-                                     alt="{{ rec_book.name }}">
-                            </div>
-                        </a>
-                        <div class="card-body d-flex flex-column">
-                            <h5 class="card-title text-truncate">{{ rec_book.name }}</h5>
-                            <p class="card-text text-muted">{{ rec_book.author|default:"Неизвестен автор" }}</p>
-                            <div class="mt-auto d-flex justify-content-between align-items-center">
-                                <span class="fw-bold fs-5 text-primary">{{ rec_book.price|floatformat:2 }} лв.</span>
-                                <button data-product="{{ rec_book.id }}" data-action="add" class="btn btn-primary btn-sm update-cart">
-                                    Добави <i class="fas fa-cart-plus"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+{% if recommended_books %}
+<div class="profile-container recommended-section">
+    <div class="recommended-header">
+        <h3 class="recommended-title">Може да харесате също...</h3>
+        <p class="recommended-subtitle">Книги подбрани специално за Вас въз основа на вашите интереси и предишни поръчки</p>
+    </div>
+    
+    <div class="row g-4">
+        {% for rec_book in recommended_books %}
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="book-card">
+                {% if rec_book.is_bestseller %}
+                    <span class="book-badge">Бестселър</span>
+                {% elif rec_book.is_new %}
+                    <span class="book-badge">Ново</span>
+                {% endif %}
+
+                <div class="book-image">
+                    <img src="{{ rec_book.imageURL }}"
+                         onerror="this.onerror=null;this.src='{% static 'images/placeholder.png' %}'"
+                         alt="{{ rec_book.name }}"
+                         loading="lazy">
                 </div>
-            {% endfor %}
+
+                <div class="book-info">
+                    <a href="{% url 'store:book_detail' rec_book.id %}">
+                        <h4 class="book-title">{{ rec_book.name }}</h4>
+                    </a>
+                    <h5 class="book-author">{{ rec_book.author|default:"Неизвестен автор" }}</h5>
+                </div>
+
+                <div class="book-footer">
+                    <span class="book-price">{{ rec_book.price|floatformat:2 }} лв.</span>
+                    <button data-product="{{ rec_book.id }}" data-action="add" class="btn-add-cart update-cart">
+                        <i class="fas fa-cart-plus"></i> Добави
+                    </button>
+                </div>
+            </div>
         </div>
-    {% endif %}
+        {% endfor %}
+    </div>
 </div>
+{% endif %}
 
 {% endblock %}
