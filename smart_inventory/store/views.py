@@ -52,8 +52,8 @@ def store(request, category_slug=None):
     if max_price:
         books = books.filter(price__lte=max_price)
 
-    sort_by = request.GET.get('sort_by', 'name') 
-    order = request.GET.get('order', 'asc') 
+    sort_by = request.GET.get('sort_by', 'name')
+    order = request.GET.get('order', 'asc')
 
     valid_sort_fields = ['name', 'price', 'avg_rating', 'publication_year']
     if sort_by in valid_sort_fields:
@@ -209,7 +209,7 @@ def profile_details(request):
         category__in=purchased_categories
     ).exclude(
         orderitem__order__customer=customer
-    ).order_by('?')  
+    ).order_by('?')
 
     if not recommended_books:
         recommended_books = Book.objects.all().order_by('?')[:4]
@@ -219,7 +219,7 @@ def profile_details(request):
     context = {
         'customer': customer,
         'orders': orders,
-        'recommended_books': recommended_books,  
+        'recommended_books': recommended_books,
     }
     return render(request, 'store/profile_details.html', context)
 
