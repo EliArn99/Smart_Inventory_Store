@@ -1,113 +1,566 @@
 {% extends 'store/base.html' %}
 {% load static %}
 
+{% block extra_head %}
+<style>
+    .book-detail-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .book-image-container {
+        position: relative;
+        overflow: hidden;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
+    }
+
+    .book-image {
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+        padding: 2rem;
+        transition: transform 0.5s ease;
+    }
+
+    .book-image:hover {
+        transform: scale(1.02);
+    }
+
+    .book-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background-color: var(--accent);
+        color: var(--primary-dark);
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        z-index: 2;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .book-title {
+        color: var(--primary-dark);
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        line-height: 1.2;
+    }
+
+    .book-author {
+        color: #6c757d;
+        font-size: 1.25rem;
+        font-style: italic;
+        margin-bottom: 1.5rem;
+    }
+
+    .book-description {
+        color: #495057;
+        line-height: 1.7;
+        font-size: 1.05rem;
+        margin-bottom: 2rem;
+    }
+
+    .price-section {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .book-price {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: var(--primary-dark);
+        margin: 0;
+    }
+
+    .btn-add-cart {
+        background-color: var(--accent);
+        color: var(--primary-dark);
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-add-cart:hover {
+        background-color: var(--accent-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-out-of-stock {
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .stock-alert {
+        background-color: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 10px;
+        padding: 1rem 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .stock-alert i {
+        color: #f0b400;
+        font-size: 1.25rem;
+    }
+
+    .stock-alert strong {
+        color: #856404;
+    }
+
+    .category-link {
+        color: var(--primary-dark);
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .category-link:hover {
+        color: var(--primary-light);
+        transform: translateX(5px);
+    }
+
+    .reviews-section {
+        margin-top: 3rem;
+        padding-top: 3rem;
+        border-top: 1px solid #eee;
+    }
+
+    .reviews-title {
+        color: var(--primary-dark);
+        font-weight: 700;
+        margin-bottom: 2rem;
+        position: relative;
+        padding-bottom: 0.75rem;
+    }
+
+    .reviews-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 60px;
+        height: 4px;
+        background-color: var(--accent);
+        border-radius: 2px;
+    }
+
+    .review-form-card {
+        background-color: #fff;
+        border-radius: 16px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        padding: 2rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .review-form-title {
+        color: var(--primary-dark);
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: var(--primary-dark);
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control {
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 0.25rem rgba(240, 201, 135, 0.25);
+    }
+
+    .rating-stars {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .rating-stars input[type="radio"] {
+        display: none;
+    }
+
+    .rating-stars label {
+        font-size: 1.5rem;
+        color: #ddd;
+        cursor: pointer;
+        transition: color 0.3s ease;
+    }
+
+    .rating-stars input[type="radio"]:checked ~ label,
+    .rating-stars label:hover,
+    .rating-stars label:hover ~ label {
+        color: #ffc107;
+    }
+
+    .messages {
+        list-style: none;
+        padding: 0;
+        margin-bottom: 1.5rem;
+    }
+
+    .messages li {
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+
+    .messages .success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .messages .error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .review-card {
+        background-color: #fff;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.06);
+        padding: 1.5rem;
+        margin-bottom: 1.25rem;
+        transition: all 0.3s ease;
+        border-left: 4px solid var(--accent);
+    }
+
+    .review-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .review-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .review-user {
+        font-weight: 700;
+        color: var(--primary-dark);
+    }
+
+    .review-rating {
+        color: #ffc107;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .review-date {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    .review-comment {
+        color: #495057;
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    .no-reviews {
+        text-align: center;
+        padding: 2.5rem;
+        background-color: #f9f9f9;
+        border-radius: 12px;
+        border: 2px dashed #eee;
+    }
+
+    .no-reviews i {
+        font-size: 3rem;
+        color: rgba(59, 21, 58, 0.15);
+        margin-bottom: 1rem;
+    }
+
+    .no-reviews h4 {
+        color: var(--primary-dark);
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    .login-prompt {
+        background-color: #e8f5e9;
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .login-prompt a {
+        color: var(--primary-dark);
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .login-prompt a:hover {
+        color: var(--primary-light);
+        transform: translateX(3px);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 992px) {
+        .book-title {
+            font-size: 2rem;
+        }
+        
+        .book-price {
+            font-size: 1.8rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .book-detail-container {
+            margin: 1rem auto;
+        }
+        
+        .book-title {
+            font-size: 1.8rem;
+        }
+        
+        .book-author {
+            font-size: 1.1rem;
+        }
+        
+        .price-section {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .review-form-card {
+            padding: 1.5rem;
+        }
+        
+        .review-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .book-title {
+            font-size: 1.6rem;
+        }
+        
+        .book-price {
+            font-size: 1.6rem;
+        }
+        
+        .btn-add-cart,
+        .btn-out-of-stock {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .review-form-card {
+            padding: 1.25rem;
+        }
+    }
+
+    /* Animation for messages */
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .messages li {
+        animation: slideIn 0.3s ease;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-    <div class="container my-5">
-        <div class="row">
-            <div class="col-md-5">
+<div class="book-detail-container">
+    <div class="row">
+        <div class="col-lg-5 mb-4 mb-lg-0">
+            <div class="book-image-container">
                 <img src="{{ book.imageURL }}"
                      onerror="this.onerror=null;this.src='{% static 'images/placeholder.png' %}'"
-                     class="img-fluid rounded shadow-lg"
-                     alt="{{ book.name }}">
-            </div>
-
-            <div class="col-md-7">
-                <h1 class="display-4 fw-bold">{{ book.name }}</h1>
-                <p class="lead text-muted fst-italic">{{ book.author|default:"Неизвестен автор" }}</p>
-
-                <hr>
-
-                <h3 class="my-4">Описание</h3>
-                <p>{{ book.description|linebreaksbr }}</p>
-
-                <div class="d-flex align-items-center my-4">
-                    {% if book.stock > 0 %}
-                        <span class="fs-2 fw-bolder me-3">{{ book.price|floatformat:2 }} лв.</span>
-                        <button data-product="{{ book.id }}"
-                                data-action="add"
-                                class="btn btn-primary btn-lg update-cart">
-                            <i class="fas fa-cart-plus me-2"></i> Добави в количката
-                        </button>
-                    {% else %}
-                        <span class="fs-2 fw-bolder me-3 text-danger">Изчерпана наличност</span>
-                        <button class="btn btn-secondary btn-lg" disabled>
-                            <i class="fas fa-times me-2"></i> Не е налично
-                        </button>
-                    {% endif %}
-                </div>
-
-                {% if book.stock <= 15 and book.stock > 0 %}
-                    <div class="alert alert-warning mt-2 d-flex align-items-center" role="alert">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        <strong>Внимание:</strong> Последни бройки! Побързайте!
-                    </div>
-                {% endif %}
-
-                {% if book.category %}
-                    <p class="text-muted mt-3">
-                        Категория: <a
-                            href="{% url 'store:books_by_category' book.category.slug %}">{{ book.category.name }}</a>
-                    </p>
+                     class="book-image"
+                     alt="{{ book.name }}"
+                     loading="lazy">
+                
+                {% if book.is_bestseller %}
+                    <span class="book-badge">Бестселър</span>
+                {% elif book.is_new %}
+                    <span class="book-badge">Ново</span>
                 {% endif %}
             </div>
         </div>
 
-        <hr>
-        <div class="row">
-            <div class="col-lg-8">
-                <h3>Ревюта и оценки</h3>
+        <div class="col-lg-7">
+            <h1 class="book-title">{{ book.name }}</h1>
+            <p class="book-author">{{ book.author|default:"Неизвестен автор" }}</p>
 
-                {% if user.is_authenticated %}
-                    <div class="card p-3 mb-4">
-                        <h4>Оставете вашето ревю</h4>
-                        {% if messages %}
-                            <ul class="messages">
-                                {% for message in messages %}
-                                    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
-                        <form action="{% url 'store:book_detail' book.pk %}" method="post">
-                            {% csrf_token %}
-                            <div class="form-group">
-                                <label for="id_rating">Оценка (1-5):</label>
-                                {{ form.rating }}
-                            </div>
-                            <div class="form-group mt-2">
-                                <label for="id_comment">Коментар:</label>
-                                {{ form.comment }}
-                            </div>
-                            <button type="submit" class="btn btn-primary mt-3">Изпрати ревю</button>
-                        </form>
-                    </div>
-                {% else %}
-                    <p>
-                        За да оставите ревю, моля, <a href="{% url 'login' %}?next={{ request.path }}">влезте в профила
-                        си</a>.
-                    </p>
-                {% endif %}
+            <div class="book-description">
+                {{ book.description|linebreaksbr }}
+            </div>
 
-                {% if reviews %}
-                    <div class="mt-4">
-                        {% for review in reviews %}
-                            <div class="card mb-3">
-                                <div class="card-body">
-                                    <h5 class="card-title">{{ review.user.username }}</h5>
-                                    <h6 class="card-subtitle mb-2 text-muted">
-                                        Оценка: {{ review.rating }} ⭐
-                                        <small>({{ review.created_at|date:"d M Y" }})</small>
-                                    </h6>
-                                    {% if review.comment %}
-                                        <p class="card-text">{{ review.comment }}</p>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
+            <div class="price-section">
+                {% if book.stock > 0 %}
+                    <span class="book-price">{{ book.price|floatformat:2 }} лв.</span>
+                    <button data-product="{{ book.id }}"
+                            data-action="add"
+                            class="btn-add-cart update-cart">
+                        <i class="fas fa-cart-plus"></i> Добави в количката
+                    </button>
                 {% else %}
-                    <p>Все още няма ревюта за тази книга. Бъдете първият, който ще остави ревю!</p>
+                    <span class="book-price text-danger">Изчерпана наличност</span>
+                    <button class="btn-out-of-stock" disabled>
+                        <i class="fas fa-times"></i> Не е налично
+                    </button>
                 {% endif %}
             </div>
+
+            {% if book.stock <= 15 and book.stock > 0 %}
+                <div class="stock-alert">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div>
+                        <strong>Внимание:</strong> Остават само {{ book.stock }} бройки! Побързайте!
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if book.category %}
+                <p class="text-muted">
+                    <i class="fas fa-tag me-2"></i>
+                    Категория: <a href="{% url 'store:books_by_category' book.category.slug %}" class="category-link">
+                        {{ book.category.name }} <i class="fas fa-arrow-right"></i>
+                    </a>
+                </p>
+            {% endif %}
         </div>
     </div>
+
+    <div class="reviews-section">
+        <h2 class="reviews-title">Ревюта и оценки</h2>
+
+        {% if user.is_authenticated %}
+            <div class="review-form-card">
+                <h3 class="review-form-title">Оставете вашето ревю</h3>
+                
+                {% if messages %}
+                    <ul class="messages">
+                        {% for message in messages %}
+                            <li class="{{ message.tags }}">{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                
+                <form action="{% url 'store:book_detail' book.pk %}" method="post">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label for="id_rating">Оценка:</label>
+                        <div class="rating-stars">
+                            {% for i in "54321" %}
+                                <input type="radio" id="rating-{{ i }}" name="rating" value="{{ i }}" {% if form.rating.value == i %}checked{% endif %}>
+                                <label for="rating-{{ i }}">⭐</label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_comment">Коментар:</label>
+                        <textarea name="comment" id="id_comment" class="form-control" rows="4" placeholder="Споделете вашите впечатления за книгата...">{{ form.comment.value|default:'' }}</textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-accent">
+                        <i class="fas fa-paper-plane me-2"></i> Изпрати ревю
+                    </button>
+                </form>
+            </div>
+        {% else %}
+            <div class="login-prompt">
+                <p class="mb-0">
+                    За да оставите ревю, моля, <a href="{% url 'login' %}?next={{ request.path }}">
+                    <i class="fas fa-sign-in-alt me-1"></i> влезте в профила си</a>.
+                </p>
+            </div>
+        {% endif %}
+
+        {% if reviews %}
+            <div class="reviews-list">
+            {# TODO: Само админа може да поставя ревю а друг потребител не / Оправи звездите за да може да се дава оценка  #}
+                {% for review in reviews %}
+                    <div class="review-card">
+                        <div class="review-header">
+                            <span class="review-user">{{ review.user.username }}</span>
+                            <span class="review-rating">
+                                {{ review.rating }} <i class="fas fa-star text-warning"></i>
+                            </span>
+                            <span class="review-date">{{ review.created_at|date:"d.m.Y" }}</span>
+                        </div>
+                        
+                        {% if review.comment %}
+                            <p class="review-comment">{{ review.comment }}</p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-reviews">
+                <i class="fas fa-comments"></i>
+                <h4>Все още няма ревюта</h4>
+                <p>Бъдете първият, който ще сподели впечатленията си за тази книга!</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
 {% endblock content %}
