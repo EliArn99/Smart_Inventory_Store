@@ -1,3 +1,5 @@
+
+{# TODO: Да се поправи динамичното отчитане на количката при добавяне на продукт без да трябва да се актуялизира страницата #}
 <!DOCTYPE html>
 {% load static %}
 <html lang="bg">
@@ -10,12 +12,14 @@
 
     <!-- Bootstrap 5 CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Montserrat:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet">
 
     <!-- Custom CSS -->
     <style>
@@ -247,9 +251,15 @@
 
         /* Animation for cart updates */
         @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
         }
 
         .cart-update {
@@ -307,7 +317,9 @@
                             <li><a class="dropdown-item" href="{% url 'store:profile_details' %}">
                                 <i class="fas fa-user me-2"></i>Профил
                             </a></li>
-                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
                             <li>
                                 <form method="post" action="{% url 'logout' %}">
                                     {% csrf_token %}
@@ -328,10 +340,11 @@
                     <img id="cart-icon" src="{% static 'images/shopping-cart.png' %}" alt="Количка"
                          style="width: 28px; height: 28px;">
                     {% if cartItems > 0 %}
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                        {{ cartItems }}
-                        <span class="visually-hidden">продукти в количката</span>
-                    </span>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                              id="cart-total">
+        {{ cartItems }}
+        <span class="visually-hidden">продукти в количката</span>
+    </span>
                     {% endif %}
                 </a>
             </div>
@@ -349,14 +362,15 @@
         <div class="row">
             <div class="col-md-4 mb-4 mb-md-0">
                 <h5 class="mb-3">Книжарница</h5>
-                <p>Вашият доверен партньор в света на книгите. Предоставяме богата селекция от заглавия за всички възрасти и интереси.</p>
+                <p>Вашият доверен партньор в света на книгите. Предоставяме богата селекция от заглавия за всички
+                    възрасти и интереси.</p>
             </div>
             <div class="col-md-4 mb-4 mb-md-0">
                 <h5 class="mb-3">Бързи връзки</h5>
                 <ul class="list-unstyled">
                     <li class="mb-2"><a href="{% url 'store:store' %}">Начало</a></li>
                     {% if user.is_authenticated %}
-                    <li class="mb-2"><a href="{% url 'store:wishlist' %}">Списък с желания</a></li>
+                        <li class="mb-2"><a href="{% url 'store:wishlist' %}">Списък с желания</a></li>
                     {% endif %}
                 </ul>
             </div>
@@ -386,11 +400,9 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script type="text/javascript">
     var user = '{{ request.user.is_authenticated|yesno:"AuthenticatedUser,AnonymousUser" }}';
-    console.log("DEBUG (base.html): User status (raw): '{{ request.user }}'"); // Log the raw Django user object string
-    console.log("DEBUG (base.html): User status (is_authenticated): '{{ request.user.is_authenticated }}'");
-    console.log("DEBUG (base.html): User status (final JS var): '" + user + "'"); 
 
     function getToken(name) {
+        // Вашият код за получаване на CSRF токен
         var cookieValue = null;
         if (document.cookie && document.cookie !== '') {
             var cookies = document.cookie.split(';');
@@ -405,41 +417,96 @@
         return cookieValue;
     }
 
-    var csrftoken = getToken('csrftoken')
+    var csrftoken = getToken('csrftoken');
 
-    function getCookie(name) {
-        var cookieArr = document.cookie.split(";");
+    // Намираме бутоните за добавяне в количка и добавяме слушател
+    var updateBtns = document.getElementsByClassName('update-cart');
 
-        for (var i = 0; i < cookieArr.length; i++) {
-            var cookiePair = cookieArr[i].split("=");
+    for (var i = 0; i < updateBtns.length; i++) {
+        updateBtns[i].addEventListener('click', function () {
+            var bookId = this.dataset.product;
+            var action = this.dataset.action;
+            console.log('bookId:', bookId, 'action:', action);
 
+            if (user === 'AuthenticatedUser') {
+                updateUserOrder(bookId, action);
+            } else {
+                addCookieItem(bookId, action);
+            }
+        });
+    }
 
-            if (name == cookiePair[0].trim()) {
-                return decodeURIComponent(cookiePair[1]);
+    function updateUserOrder(bookId, action) {
+        console.log('Потребителят е логнат, изпращам данни...');
+
+        var url = '/update_item/';
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify({'bookId': bookId, 'action': action})
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                console.log('data:', data);
+                // Актуализиране на брояча на продуктите
+                var cartTotalSpan = document.querySelector('#cart-total');
+                if (cartTotalSpan) {
+                    cartTotalSpan.innerHTML = data.cartItems;
+                }
+
+                // Забележка: В HTML-а, който сте предоставили,
+                // елементът е <span> с клас badge, а не с ID cart-total.
+                // Трябва да го променим, за да работи.
+
+                // Намираме елемента с броя на продуктите и го актуализираме
+                var cartBadge = document.querySelector('.badge');
+                if (cartBadge) {
+                    if (data.cartItems > 0) {
+                        cartBadge.innerHTML = data.cartItems;
+                        cartBadge.style.display = 'block'; // Показваме го, ако има продукти
+                    } else {
+                        cartBadge.innerHTML = 0;
+                        cartBadge.style.display = 'none'; // Скриваме го, ако е 0
+                    }
+                }
+
+                // Добавяме анимация към иконата на количката
+                var cartIcon = document.getElementById('cart-icon');
+                cartIcon.classList.add('cart-update');
+                setTimeout(function () {
+                    cartIcon.classList.remove('cart-update');
+                }, 500); // Премахваме класа след 0.5 секунди
+            });
+    }
+
+    function addCookieItem(bookId, action) {
+        console.log('Потребителят е анонимен');
+
+        if (action == 'add') {
+            if (cart[bookId] == undefined) {
+                cart[bookId] = {'quantity': 1};
+            } else {
+                cart[bookId]['quantity'] += 1;
             }
         }
 
-        return null;
-    }
+        if (action == 'remove') {
+            cart[bookId]['quantity'] -= 1;
 
-    var cart = JSON.parse(getCookie('cart'))
-
-    if (cart == undefined) {
-        cart = {}
-        console.log('Cart Created!', cart)
-        document.cookie = 'cart=' + JSON.stringify(cart) + ";domain=;path=/"
-    }
-    console.log('Cart:', cart)
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const cartIcon = document.getElementById('cart-icon');
-        if (cartIcon) {
-            cartIcon.classList.add('cart-update');
-            setTimeout(() => {
-                cartIcon.classList.remove('cart-update');
-            }, 500);
+            if (cart[bookId]['quantity'] <= 0) {
+                console.log('Премахване на продукт');
+                delete cart[bookId];
+            }
         }
-    });
+
+        console.log('Количка:', cart);
+        document.cookie = 'cart=' + JSON.stringify(cart) + ";domain=;path=/";
+        location.reload(); // Презареждане на страницата
+    }
 </script>
 <script type="text/javascript" src="{% static 'js/cart.js' %}?v=1.3"></script>
 {% block extra_js %}{% endblock %}
