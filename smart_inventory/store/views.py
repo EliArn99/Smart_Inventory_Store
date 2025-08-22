@@ -7,7 +7,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from .forms import CustomUserCreationForm, ReviewForm
-from .models import Book, Order, OrderItem, Category, WishlistItem, Review, ShippingAddress
+from .models import Book, Order, OrderItem, Category, WishlistItem, Review, ShippingAddress, Post
 import json
 from .utils import cartData, cookieCart
 from django.db.models import Q, Count, Avg, F
@@ -345,3 +345,13 @@ def search_results(request):
 
 
 
+# @login_required(login_url='login')
+# def post_list(request):
+#     posts = Post.objects.filter(status=1).order_by('-created_on')
+#     return render(request, 'blog/post_list.html', {'posts': posts})
+#
+#
+# @login_required(login_url='login')
+# def post_detail(request, slug):
+#     post = get_object_or_404(Post, slug=slug, status=1)
+#     return render(request, 'blog/post_detail.html')
