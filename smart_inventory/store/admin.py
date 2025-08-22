@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.safestring import mark_safe
-from .models import Customer, Book, Order, OrderItem, ShippingAddress, Category, Review
+from .models import Customer, Book, Order, OrderItem, ShippingAddress, Category, Review, Post
 
 
 @admin.register(Book)
@@ -70,3 +70,11 @@ class ReviewAdmin(admin.ModelAdmin):
 
 admin.site.register(Customer)
 admin.site.register(ShippingAddress)
+
+
+@admin.register(Post)
+class PostAdmin(admin.ModelAdmin):
+    list_display = ('title', 'slug', 'status', 'created_on')
+    list_filter = ("status",)
+    search_fields = ['title', 'content']
+    prepopulated_fields = {'slug': ('title',)}
