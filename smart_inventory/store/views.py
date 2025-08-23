@@ -11,6 +11,7 @@ from .models import Book, Order, OrderItem, Category, WishlistItem, Review, Ship
 import json
 from .utils import cartData, cookieCart
 from django.db.models import Q, Count, Avg, F
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
 def store(request, category_slug=None):
@@ -42,9 +43,8 @@ def store(request, category_slug=None):
         try:
             books = books.filter(publication_year=int(year))
         except (ValueError, TypeError):
-            pass # Игнориране на невалидна стойност
+            pass
 
-    # Филтриране по цена (вече съществува)
     min_price = request.GET.get('min_price')
     max_price = request.GET.get('max_price')
     if min_price:
@@ -64,12 +64,22 @@ def store(request, category_slug=None):
     else:
         books = books.order_by('name')
 
+    # Добавяне на пагинация
+    paginator = Paginator(books, 10)  # Показва 10 книги на страница
+    page = request.GET.get('page')
+    try:
+        books_on_page = paginator.page(page)
+    except PageNotAnInteger:
+        books_on_page = paginator.page(1)
+    except EmptyPage:
+        books_on_page = paginator.page(paginator.num_pages)
+
     categories = Category.objects.annotate(book_count=Count('book'))
     data = cartData(request)
     cartItems = data['cartItems']
 
     context = {
-        'books': books,
+        'books': books_on_page,  # Променяме 'books' на 'books_on_page'
         'cartItems': cartItems,
         'categories': categories,
         'active_category_slug': category_slug,
@@ -199,7 +209,6 @@ def get_cart_data(request):
 def profile_details(request):
     customer = request.user.customer
     orders = customer.order_set.all().order_by('-date_ordered')
-
 
     purchased_categories = Category.objects.filter(
         book__orderitem__order__customer=customer
@@ -344,14 +353,23 @@ def search_results(request):
     return render(request, 'store/store.html', context)
 
 
+def blog_list(request):
+    """
+    Показва списък с всички публикувани публикации в блога.
+    """
+    posts = Post.objects.filter(status=1).order_by('-created_on')
+    context = {
+        'posts': posts,
+    }
+    return render(request, 'store/blog_list.html', context)
 
-# @login_required(login_url='login')
-# def post_list(request):
-#     posts = Post.objects.filter(status=1).order_by('-created_on')
-#     return render(request, 'blog/post_list.html', {'posts': posts})
-#
-#
-# @login_required(login_url='login')
-# def post_detail(request, slug):
-#     post = get_object_or_404(Post, slug=slug, status=1)
-#     return render(request, 'blog/post_detail.html')
+
+def blog_detail(request, slug):
+    """
+    Показва детайлите на една публикация по нейния slug.
+    """
+    post = get_object_or_404(Post, slug=slug, status=1)
+    context = {
+        'post': post,
+    }
+    return render(request, 'store/blog_detail.html', context)
