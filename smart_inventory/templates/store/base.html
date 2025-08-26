@@ -1,5 +1,5 @@
-
 {# TODO: Да се поправи динамичното отчитане на количката при добавяне на продукт без да трябва да се актуялизира страницата #}
+{# TODO: Да се поправи пьгинацията #}
 <!DOCTYPE html>
 {% load static %}
 <html lang="bg">
@@ -287,10 +287,16 @@
                         <i class="fas fa-home me-1"></i>Начало
                     </a>
                 </li>
+
                 {% if user.is_authenticated %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'store:wishlist' %}">
                             <i class="fas fa-heart me-1"></i>Списък с желания
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'store:blog_list' %}">
+                            <i class="fas fa-newspaper me-1"></i>Блог
                         </a>
                     </li>
                 {% endif %}
@@ -313,9 +319,13 @@
                             <i class="fas fa-user-circle me-2"></i>
                             <span>{{ user.username }}</span>
                         </a>
+                        {# TODO: Fix the Blog a little / Overall it looks ok  #}
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                            <li><a class="dropdown-item" href="{% url 'store:profile_details' %}">
-                                <i class="fas fa-user me-2"></i>Профил
+{#                            <li><a class="dropdown-item" href="{% url 'store:profile_details' %}">#}
+{#                                <i class="fas fa-user me-2"></i>Профил#}
+{#                            </a></li>#}
+                            <li><a class="dropdown-item" href="{% url 'store:blog_list' %}">
+                                <i class="fas fa-newspaper me-2"></i>Блог
                             </a></li>
                             <li>
                                 <hr class="dropdown-divider">
