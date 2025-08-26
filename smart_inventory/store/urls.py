@@ -7,6 +7,8 @@ app_name = 'store'
 
 urlpatterns = [
     path('', views.store, name="store"),
+    path('about-us/', views.about_us, name='about_us'),
+
     path('category/<slug:category_slug>/', views.store, name='books_by_category'),
     path('book/<int:pk>/', views.book_detail, name='book_detail'),
 
@@ -19,6 +21,7 @@ urlpatterns = [
 
     path('blog/', views.blog_list, name='blog_list'),
     path('blog/<slug:slug>/', views.blog_detail, name='blog_detail'),
+    path('admin/inventory-report/', views.inventory_report_view, name='inventory_report'),
 
     # AJAX endpoint for updating cart items (add/remove)
     path('update_item/', views.updateItem, name="update_item"),
