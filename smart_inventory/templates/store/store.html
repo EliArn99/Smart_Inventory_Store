@@ -1,3 +1,4 @@
+{# TODO: ADD PAGINATION  #}
 <!DOCTYPE html>
 {% load static %}
 <html lang="bg">
@@ -558,6 +559,11 @@
                         <i class="fas fa-home me-1"></i>Начало
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'store:about_us' %}">
+                        <i class="fas fa-info-circle me-1"></i>За нас
+                    </a>
+                </li>
                 {% if user.is_authenticated %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'store:wishlist' %}">
@@ -579,7 +585,7 @@
             <div class="d-flex align-items-center">
                 {% if user.is_authenticated %}
                     <div class="dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" 
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button"
                            id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="fas fa-user-circle me-2"></i>
                             <span>{{ user.username }}</span>
@@ -587,6 +593,12 @@
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                             <li><a class="dropdown-item" href="{% url 'store:profile_details' %}">
                                 <i class="fas fa-user me-2"></i>Профил
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'store:wishlist' %}">
+                                <i class="fas fa-user me-2"></i>Списък с желания 
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'store:blog_list' %}">
+                                <i class="fas fa-user me-2"></i>Блог
                             </a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
@@ -631,7 +643,7 @@
                     <input type="hidden" name="category_slug" value="{{ active_category_slug|default:'' }}">
                     <input type="hidden" name="sort_by" value="{{ sort_by|default:'' }}">
                     <input type="hidden" name="order" value="{{ order|default:'' }}">
-                    
+
                     <div class="mb-3">
                         <label for="author" class="form-label">Автор</label>
                         <input type="text" name="author" id="author" class="form-control" placeholder="Име на автор" value="{{ author|default:'' }}">
@@ -650,7 +662,7 @@
                             <input type="number" name="max_price" id="max-price" class="form-control" placeholder="Макс." value="{{ max_price|default:'' }}">
                         </div>
                     </div>
-                    
+
                     <button type="submit" class="btn btn-accent w-100">Приложи филтри</button>
                     <a href="{% url 'store:store' %}" class="btn btn-outline-secondary w-100 mt-2">Изчисти филтрите</a>
                 </form>
@@ -871,7 +883,7 @@
         document.cookie = 'cart=' + JSON.stringify(cart) + ";domain=;path=/"
     }
     console.log('Cart:', cart)
-    
+
     // Add animation to cart icon when cart updates
     document.addEventListener('DOMContentLoaded', function() {
         const cartIcon = document.getElementById('cart-icon');
@@ -882,7 +894,7 @@
             }, 500);
         }
     });
-    
+
     // JavaScript за автоматично презареждане на страницата при промяна на сортирането
     document.addEventListener('DOMContentLoaded', function() {
         const sortSelect = document.getElementById('sort_by');
