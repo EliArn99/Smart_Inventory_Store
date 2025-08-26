@@ -1,5 +1,5 @@
 from datetime import time
-
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -79,7 +79,7 @@ def store(request, category_slug=None):
     cartItems = data['cartItems']
 
     context = {
-        'books': books_on_page,  # Променяме 'books' на 'books_on_page'
+        'books': books_on_page,  
         'cartItems': cartItems,
         'categories': categories,
         'active_category_slug': category_slug,
@@ -92,6 +92,10 @@ def store(request, category_slug=None):
         'order': order,
     }
     return render(request, 'store/store.html', context)
+
+
+def about_us(request):
+    return render(request, 'store/about_us.html')
 
 
 def cart(request):
@@ -365,11 +369,19 @@ def blog_list(request):
 
 
 def blog_detail(request, slug):
-    """
-    Показва детайлите на една публикация по нейния slug.
-    """
+
     post = get_object_or_404(Post, slug=slug, status=1)
     context = {
         'post': post,
     }
     return render(request, 'store/blog_detail.html', context)
+
+
+@staff_member_required
+def inventory_report_view(request):
+    low_stock_books = Book.objects.filter(stock__lte=5).order_by('stock')
+
+    context = {
+        'low_stock_books': low_stock_books,
+    }
+    return render(request, 'admin/inventory_report.html', context)
