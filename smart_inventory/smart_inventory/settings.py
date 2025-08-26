@@ -131,6 +131,16 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Authentication settings
-LOGIN_REDIRECT_URL = '/'
-LOGIN_URL = 'login'
+# your_project/settings.py
 
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+
+# TODO: FIX HERE
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'eli_arnaytska@abv.bg'  
+EMAIL_HOST_PASSWORD = 'Taralej1' 
+DEFAULT_FROM_EMAIL = 'your_email@gmail.com'
