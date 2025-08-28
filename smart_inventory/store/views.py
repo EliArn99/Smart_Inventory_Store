@@ -7,7 +7,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from .forms import CustomUserCreationForm, ReviewForm
-from .models import Book, Order, OrderItem, Category, WishlistItem, Review, ShippingAddress, Post
+from .models import Book, Order, OrderItem, Category, WishlistItem, Review, ShippingAddress, Post, Banner
 import json
 from .utils import cartData, cookieCart
 from django.db.models import Q, Count, Avg, F
@@ -77,9 +77,11 @@ def store(request, category_slug=None):
     categories = Category.objects.annotate(book_count=Count('book'))
     data = cartData(request)
     cartItems = data['cartItems']
+    banners = Banner.objects.filter(is_active=True)
+
 
     context = {
-        'books': books_on_page,  
+        'books': books_on_page,
         'cartItems': cartItems,
         'categories': categories,
         'active_category_slug': category_slug,
@@ -90,6 +92,7 @@ def store(request, category_slug=None):
         'year': year,
         'sort_by': sort_by,
         'order': order,
+        'banners': banners
     }
     return render(request, 'store/store.html', context)
 
