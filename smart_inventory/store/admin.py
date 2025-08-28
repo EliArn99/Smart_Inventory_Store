@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.safestring import mark_safe
-from .models import Customer, Book, Order, OrderItem, ShippingAddress, Category, Review, Post
+from .models import Customer, Book, Order, OrderItem, ShippingAddress, Category, Review, Post, Banner
 
 
 @admin.register(Book)
@@ -9,7 +9,7 @@ class BookAdmin(admin.ModelAdmin):
 
     list_editable = ('price', 'stock')
 
-    list_filter = ('category', 'digital', 'stock')  
+    list_filter = ('category', 'digital', 'stock')
     search_fields = ('name', 'author', 'description')
 
     def image_tag(self, obj):
@@ -82,3 +82,10 @@ class PostAdmin(admin.ModelAdmin):
     list_filter = ("status",)
     search_fields = ['title', 'content']
     prepopulated_fields = {'slug': ('title',)}
+
+
+@admin.register(Banner)
+class BannerAdmin(admin.ModelAdmin):
+    list_display = ('title', 'is_active', 'order')
+    list_filter = ('is_active',)
+    search_fields = ('title',)
