@@ -12,8 +12,6 @@ class Customer(models.Model):
         return self.name
 
 
-
-
 class Category(models.Model):
     name = models.CharField(max_length=200, unique=True)
     slug = models.SlugField(max_length=200, unique=True)
@@ -43,8 +41,6 @@ class Book(models.Model):
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
     stock = models.IntegerField(default=0)
     publication_year = models.IntegerField(null=True, blank=True)
-
-
 
     def __str__(self):
         return self.name
@@ -147,7 +143,6 @@ class Review(models.Model):
         return f"Ревю от {self.user.username} за {self.book.name}"
 
 
-
 class Post(models.Model):
     title = models.CharField(max_length=200, unique=True)
     slug = models.SlugField(max_length=200, unique=True)
@@ -155,10 +150,25 @@ class Post(models.Model):
     content = models.TextField()
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
-    status = models.IntegerField(choices=[(0, "Draft"), (1, "Published")] ,default=0)
+    status = models.IntegerField(choices=[(0, "Draft"), (1, "Published")], default=0)
 
     class Meta:
         ordering = ['-created_on']
+
+    def __str__(self):
+        return self.title
+
+
+class Banner(models.Model):
+    title = models.CharField(max_length=200)
+    subtitle = models.CharField(max_length=300, blank=True, null=True)
+    image = models.ImageField(upload_to='banners/')
+    is_active = models.BooleanField(default=True)
+    url = models.URLField(blank=True, null=True)
+    order = models.IntegerField(default=0, help_text="По-ниското число се показва по-рано")
+
+    class Meta:
+        ordering = ['order']
 
     def __str__(self):
         return self.title
