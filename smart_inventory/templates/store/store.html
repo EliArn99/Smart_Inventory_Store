@@ -9,15 +9,17 @@
     <title>
         {% block title %}Онлайн Книжарница{% endblock %}
     </title>
-    
+
     <!-- Bootstrap 5 CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Montserrat:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet">
 
     <!-- Custom CSS -->
     <style>
@@ -32,7 +34,7 @@
             --card-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
             --transition: all 0.3s ease;
         }
-        
+
         body {
             background-color: var(--light-bg);
             color: var(--dark-text);
@@ -41,29 +43,29 @@
             display: flex;
             flex-direction: column;
         }
-        
+
         h1, h2, h3, h4, h5 {
             font-family: 'Merriweather', serif;
             font-weight: 700;
         }
-        
+
         .navbar {
             background-color: var(--primary-dark);
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             padding: 0.8rem 0;
         }
-        
+
         .navbar-brand {
             font-weight: 700;
             font-size: 1.5rem;
             color: var(--accent) !important;
             transition: var(--transition);
         }
-        
+
         .navbar-brand:hover {
             transform: scale(1.03);
         }
-        
+
         .nav-link {
             color: var(--accent) !important;
             font-weight: 500;
@@ -71,7 +73,7 @@
             padding: 0.5rem 1rem !important;
             transition: var(--transition);
         }
-        
+
         .nav-link::after {
             content: '';
             position: absolute;
@@ -83,17 +85,17 @@
             transition: var(--transition);
             transform: translateX(-50%);
         }
-        
+
         .nav-link:hover::after,
         .nav-link.active::after {
             width: 80%;
         }
-        
+
         .nav-link:hover {
             color: #fff !important;
             transform: translateY(-2px);
         }
-        
+
         .btn-accent {
             background-color: var(--accent);
             color: var(--primary-dark);
@@ -104,32 +106,32 @@
             transition: var(--transition);
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        
+
         .btn-accent:hover {
             background-color: var(--accent-dark);
             color: var(--primary-dark);
             transform: translateY(-2px);
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
-        
+
         .btn-outline-light {
             color: var(--accent);
             border-color: var(--accent);
             transition: var(--transition);
         }
-        
+
         .btn-outline-light:hover {
             background-color: var(--accent);
             color: var(--primary-dark);
             border-color: var(--accent);
         }
-        
+
         .container {
             padding-top: 2rem;
             padding-bottom: 2rem;
             flex: 1;
         }
-        
+
         .card {
             border: none;
             border-radius: 12px;
@@ -137,48 +139,48 @@
             transition: var(--transition);
             overflow: hidden;
         }
-        
+
         .card:hover {
             transform: translateY(-5px);
             box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
         }
-        
+
         #cart-icon {
             transition: var(--transition);
         }
-        
+
         #cart-icon:hover {
             transform: scale(1.1);
         }
-        
+
         #cart-total {
             color: var(--accent);
             font-weight: 600;
             font-size: 1.1rem;
         }
-        
+
         .form-control {
             border-radius: 6px;
             border: 1px solid #dee2e6;
             padding: 0.75rem 1rem;
             transition: var(--transition);
         }
-        
+
         .form-control:focus {
             box-shadow: 0 0 0 0.25rem rgba(240, 201, 135, 0.25);
             border-color: var(--accent);
         }
-        
+
         .navbar-toggler {
             border: none;
             color: var(--accent) !important;
             font-size: 1.5rem;
         }
-        
+
         .navbar-toggler:focus {
             box-shadow: none;
         }
-        
+
         /* Toast notifications */
         .toast-container {
             position: fixed;
@@ -186,13 +188,13 @@
             right: 20px;
             z-index: 1050;
         }
-        
+
         .toast {
             border-radius: 8px;
             box-shadow: var(--card-shadow);
             overflow: hidden;
         }
-        
+
         /* Footer */
         .footer {
             background-color: var(--primary-dark);
@@ -200,18 +202,18 @@
             padding: 2.5rem 0;
             margin-top: auto;
         }
-        
+
         .footer a {
             color: var(--accent);
             text-decoration: none;
             transition: var(--transition);
         }
-        
+
         .footer a:hover {
             color: #fff;
             text-decoration: underline;
         }
-        
+
         /* Responsive adjustments */
         @media (max-width: 992px) {
             .navbar-collapse {
@@ -220,44 +222,50 @@
                 border-radius: 8px;
                 margin-top: 0.5rem;
             }
-            
+
             .nav-link::after {
                 display: none;
             }
-            
+
             .d-flex.me-4 {
                 margin-right: 0 !important;
                 margin-bottom: 1rem;
             }
         }
-        
+
         @media (max-width: 576px) {
             .container {
                 padding-left: 15px;
                 padding-right: 15px;
             }
-            
+
             .navbar-brand {
                 font-size: 1.3rem;
             }
-            
+
             .btn-accent {
                 padding: 0.4rem 1rem;
                 font-size: 0.9rem;
             }
         }
-        
+
         /* Animation for cart updates */
         @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
         }
-        
+
         .cart-update {
             animation: pulse 0.5s ease;
         }
-        
+
         /* Store page specific styles */
         .category-sidebar {
             background-color: #fff;
@@ -266,7 +274,7 @@
             box-shadow: var(--card-shadow);
             margin-bottom: 1.5rem;
         }
-        
+
         .category-sidebar h3 {
             font-size: 1.2rem;
             font-weight: 700;
@@ -275,13 +283,13 @@
             border-bottom: 2px solid var(--accent);
             padding-bottom: 0.75rem;
         }
-        
+
         .category-list {
             list-style: none;
             padding: 0;
             margin: 0;
         }
-        
+
         .category-list li a {
             display: flex;
             align-items: center;
@@ -294,26 +302,26 @@
             transition: var(--transition);
             margin-bottom: 0.25rem;
         }
-        
+
         .category-list li.active-category a {
             background-color: var(--accent);
             color: var(--primary-dark);
             transform: translateX(5px);
             font-weight: 600;
         }
-        
+
         .category-list a:hover {
             background-color: var(--accent);
             color: var(--primary-dark);
             transform: translateX(5px);
         }
-        
+
         .category-link-content {
             display: flex;
             align-items: center;
             gap: 0.75rem;
         }
-        
+
         .category-count {
             background-color: #e9ecef;
             color: #6c757d;
@@ -323,13 +331,13 @@
             font-weight: 600;
             transition: var(--transition);
         }
-        
+
         .category-list li.active-category .category-count,
         .category-list a:hover .category-count {
             background-color: var(--primary-dark);
             color: white;
         }
-        
+
         .book-card {
             background-color: #fff;
             border: none;
@@ -342,19 +350,19 @@
             height: 100%;
             position: relative;
         }
-        
+
         .book-card:hover {
             transform: translateY(-8px);
             box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
         }
-        
+
         .book-image {
             position: relative;
             padding-top: 150%;
             overflow: hidden;
             background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
         }
-        
+
         .book-image img {
             position: absolute;
             top: 0;
@@ -366,11 +374,11 @@
             transition: transform 0.5s ease, opacity 0.3s ease;
             padding: 1.25rem;
         }
-        
+
         .book-card:hover .book-image img {
             transform: scale(1.05);
         }
-        
+
         .book-badge {
             position: absolute;
             top: 15px;
@@ -384,14 +392,14 @@
             z-index: 2;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
-        
+
         .book-info {
             padding: 1.25rem;
             display: flex;
             flex-direction: column;
             flex-grow: 1;
         }
-        
+
         .book-title {
             font-size: 1.1rem;
             color: var(--primary-dark);
@@ -404,11 +412,11 @@
             min-height: 3em;
             text-decoration: none;
         }
-        
+
         .book-title:hover {
             color: var(--primary-light);
         }
-        
+
         .book-author {
             font-size: 0.85rem;
             color: #6c757d;
@@ -419,7 +427,7 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
-        
+
         .book-description {
             font-size: 0.85rem;
             color: #495057;
@@ -431,7 +439,7 @@
             overflow: hidden;
             line-height: 1.4;
         }
-        
+
         .book-footer {
             padding: 1rem 1.25rem;
             border-top: 1px solid rgba(0, 0, 0, 0.05);
@@ -441,13 +449,13 @@
             background-color: rgba(248, 249, 250, 0.7);
             gap: 0.75rem;
         }
-        
+
         .book-price {
             font-size: 1.2rem;
             color: var(--primary-dark);
             font-weight: 700;
         }
-        
+
         .btn-add-cart {
             background-color: var(--accent);
             color: var(--primary-dark);
@@ -459,40 +467,40 @@
             white-space: nowrap;
             flex-shrink: 0;
         }
-        
+
         .btn-add-cart:hover {
             background-color: var(--accent-dark);
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-        
+
         .btn-add-cart:active {
             transform: translateY(0);
         }
-        
+
         .empty-state {
             text-align: center;
             padding: 3.75rem 1.25rem;
         }
-        
+
         .empty-state i {
             font-size: 4rem;
             color: rgba(59, 21, 58, 0.2);
             margin-bottom: 1.25rem;
         }
-        
+
         .empty-state h3 {
             color: var(--primary-dark);
             font-weight: 600;
             margin-bottom: 1rem;
         }
-        
+
         .empty-state p {
             color: #6c757d;
             max-width: 500px;
             margin: 0 auto 1.5rem;
         }
-        
+
         .btn-wishlist {
             background-color: transparent;
             border: 1px solid #dee2e6;
@@ -500,43 +508,90 @@
             transition: var(--transition);
             padding: 0.5rem 0.75rem;
         }
-        
+
         .btn-wishlist:hover {
             background-color: #f8f9fa;
             border-color: #ced4da;
         }
-        
+
         .btn-wishlist i {
             color: #ced4da;
             transition: color 0.2s ease;
         }
-        
+
         .btn-wishlist i.fas {
             color: #dc3545;
         }
-        
+
         .filter-form label {
             font-weight: 600;
             margin-bottom: 0.5rem;
             color: var(--primary-dark);
         }
-        
+
         @media (max-width: 1199px) {
             .book-title {
                 font-size: 1rem;
             }
-            
+
             .book-price {
                 font-size: 1.1rem;
             }
         }
-        
+
         @media (max-width: 767px) {
             .book-card {
                 max-width: 280px;
                 margin-left: auto;
                 margin-right: auto;
             }
+        }
+
+        /* Pagination Styles */
+        .pagination {
+            --bs-pagination-color: var(--primary-dark);
+            --bs-pagination-hover-color: var(--primary-dark);
+            --bs-pagination-hover-bg: var(--accent);
+            --bs-pagination-focus-bg: var(--accent);
+            --bs-pagination-active-bg: var(--primary-dark);
+            --bs-pagination-active-border-color: var(--primary-dark);
+            --bs-pagination-disabled-color: #ced4da;
+            --bs-pagination-disabled-bg: #e9ecef;
+            --bs-pagination-border-radius: 8px;
+            --bs-pagination-border-color: #dee2e6;
+            --bs-pagination-border-width: 1px;
+            --bs-pagination-hover-border-color: var(--accent-dark);
+        }
+
+        .page-item .page-link {
+            transition: var(--transition);
+        }
+
+        .page-item.active .page-link {
+            color: var(--light-text);
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+            font-weight: 600;
+        }
+
+        .page-item .page-link:hover {
+            background-color: var(--accent);
+            color: var(--primary-dark);
+            border-color: var(--accent);
+        }
+
+        .page-item.disabled .page-link {
+            pointer-events: none;
+            cursor: default;
+        }
+
+        .page-link {
+            color: var(--primary-dark);
+            background-color: #fff;
+            border: 1px solid #dee2e6;
+            margin: 0 4px;
+            border-radius: 8px;
+            transition: var(--transition);
         }
     </style>
 
@@ -596,12 +651,14 @@
                                 <i class="fas fa-user me-2"></i>Профил
                             </a></li>
                             <li><a class="dropdown-item" href="{% url 'store:wishlist' %}">
-                                <i class="fas fa-user me-2"></i>Списък с желания 
+                                <i class="fas fa-user me-2"></i>Списък с желания
                             </a></li>
                             <li><a class="dropdown-item" href="{% url 'store:blog_list' %}">
                                 <i class="fas fa-user me-2"></i>Блог
                             </a></li>
-                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
                             <li>
                                 <form method="post" action="{% url 'logout' %}">
                                     {% csrf_token %}
@@ -622,7 +679,7 @@
                     <img id="cart-icon" src="{% static 'images/shopping-cart.png' %}" alt="Количка"
                          style="width: 28px; height: 28px;">
                     {% if cartItems > 0 %}
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                         {{ cartItems }}
                         <span class="visually-hidden">продукти в количката</span>
                     </span>
@@ -635,175 +692,221 @@
 
 <div class="container">
     {% block content %}
-    <div class="row g-4">
-        <div class="col-lg-3">
-            <div class="category-sidebar">
-                <h3>Филтриране</h3>
-                <form method="GET" action="{% url 'store:store' %}" id="filter-form" class="mb-4">
-                    <input type="hidden" name="q" value="{{ query|default:'' }}">
-                    <input type="hidden" name="category_slug" value="{{ active_category_slug|default:'' }}">
-                    <input type="hidden" name="sort_by" value="{{ sort_by|default:'' }}">
-                    <input type="hidden" name="order" value="{{ order|default:'' }}">
+        <div class="row g-4">
 
-                    <div class="mb-3">
-                        <label for="author" class="form-label">Автор</label>
-                        <input type="text" name="author" id="author" class="form-control" placeholder="Име на автор" value="{{ author|default:'' }}">
-                    </div>
 
-                    <div class="mb-3">
-                        <label for="year" class="form-label">Година на издаване</label>
-                        <input type="number" name="year" id="year" class="form-control" placeholder="Напр. 2023" value="{{ year|default:'' }}">
-                    </div>
+            <div class="col-lg-3">
+                <div class="category-sidebar">
+                    <h3>Филтриране</h3>
+                    <form method="GET" action="{% url 'store:store' %}" id="filter-form" class="mb-4">
+                        <input type="hidden" name="q" value="{{ query|default:'' }}">
+                        <input type="hidden" name="category_slug" value="{{ active_category_slug|default:'' }}">
+                        <input type="hidden" name="sort_by" value="{{ sort_by|default:'' }}">
+                        <input type="hidden" name="order" value="{{ order|default:'' }}">
 
-                    <div class="mb-3">
-                        <label for="min-price" class="form-label">Цена (лв.)</label>
-                        <div class="d-flex align-items-center gap-2">
-                            <input type="number" name="min_price" id="min-price" class="form-control" placeholder="Мин." value="{{ min_price|default:'' }}">
-                            <span class="text-muted">-</span>
-                            <input type="number" name="max_price" id="max-price" class="form-control" placeholder="Макс." value="{{ max_price|default:'' }}">
+                        <div class="mb-3">
+                            <label for="author" class="form-label">Автор</label>
+                            <input type="text" name="author" id="author" class="form-control" placeholder="Име на автор"
+                                   value="{{ author|default:'' }}">
                         </div>
-                    </div>
 
-                    <button type="submit" class="btn btn-accent w-100">Приложи филтри</button>
-                    <a href="{% url 'store:store' %}" class="btn btn-outline-secondary w-100 mt-2">Изчисти филтрите</a>
-                </form>
+                        <div class="mb-3">
+                            <label for="year" class="form-label">Година на издаване</label>
+                            <input type="number" name="year" id="year" class="form-control" placeholder="Напр. 2023"
+                                   value="{{ year|default:'' }}">
+                        </div>
 
-                <h3>Категории</h3>
-                <ul class="category-list">
-                    <li class="{% if not active_category_slug %}active-category{% endif %}">
-                        <a href="{% url 'store:store' %}">
+                        <div class="mb-3">
+                            <label for="min-price" class="form-label">Цена (лв.)</label>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="number" name="min_price" id="min-price" class="form-control"
+                                       placeholder="Мин." value="{{ min_price|default:'' }}">
+                                <span class="text-muted">-</span>
+                                <input type="number" name="max_price" id="max-price" class="form-control"
+                                       placeholder="Макс." value="{{ max_price|default:'' }}">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-accent w-100">Приложи филтри</button>
+                        <a href="{% url 'store:store' %}" class="btn btn-outline-secondary w-100 mt-2">Изчисти
+                            филтрите</a>
+                    </form>
+
+                    <h3>Категории</h3>
+                    <ul class="category-list">
+                        <li class="{% if not active_category_slug %}active-category{% endif %}">
+                            <a href="{% url 'store:store' %}">
                             <span class="category-link-content">
                                 <i class="fas fa-list"></i> Всички
                             </span>
-                            <span class="category-count"></span>
-                        </a>
-                    </li>
-                    {% for category in categories %}
-                        <li class="{% if active_category_slug == category.slug %}active-category{% endif %}">
-                            <a href="{% url 'store:books_by_category' category.slug %}">
+                                <span class="category-count"></span>
+                            </a>
+                        </li>
+                        {% for category in categories %}
+                            <li class="{% if active_category_slug == category.slug %}active-category{% endif %}">
+                                <a href="{% url 'store:books_by_category' category.slug %}">
                                 <span class="category-link-content">
                                     <i class="{{ category.icon }}"></i> {{ category.name }}
                                 </span>
-                                {% if category.book_count > 0 %}
-                                    <span class="category-count">{{ category.book_count }}</span>
+                                    {% if category.book_count > 0 %}
+                                        <span class="category-count">{{ category.book_count }}</span>
+                                    {% endif %}
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-lg-9">
+                <div class="d-flex justify-content-end align-items-center mb-4">
+                    {# TODO: Make it work #}
+                    <label for="sort_by" class="me-2 text-muted fw-bold">Сортирай по:</label>
+                    <select id="sort_by" class="form-select w-auto me-2">
+                        <option value="name" {% if sort_by == 'name' %}selected{% endif %}>Име</option>
+                        <option value="price" {% if sort_by == 'price' %}selected{% endif %}>Цена</option>
+                        <option value="avg_rating" {% if sort_by == 'avg_rating' %}selected{% endif %}>Рейтинг</option>
+                        <option value="publication_year" {% if sort_by == 'publication_year' %}selected{% endif %}>
+                            Година на издаване
+                        </option>
+                    </select>
+                    <select id="order" class="form-select w-auto">
+                        <option value="asc" {% if order == 'asc' %}selected{% endif %}>Възходящ</option>
+                        <option value="desc" {% if order == 'desc' %}selected{% endif %}>Низходящ</option>
+                    </select>
+                </div>
+
+                <div class="row g-4">
+                    {% for book in books %}
+                        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 col-6">
+                            <div class="book-card">
+                                {% if book.is_bestseller %}
+                                    <span class="book-badge">Бестселър</span>
+                                {% elif book.is_new %}
+                                    <span class="book-badge">Ново</span>
                                 {% endif %}
-                            </a>
-                        </li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
-
-        <div class="col-lg-9">
-            <div class="d-flex justify-content-end align-items-center mb-4">
-            {# TODO: Make it work #}
-                <label for="sort_by" class="me-2 text-muted fw-bold">Сортирай по:</label>
-                <select id="sort_by" class="form-select w-auto me-2">
-                    <option value="name" {% if sort_by == 'name' %}selected{% endif %}>Име</option>
-                    <option value="price" {% if sort_by == 'price' %}selected{% endif %}>Цена</option>
-                    <option value="avg_rating" {% if sort_by == 'avg_rating' %}selected{% endif %}>Рейтинг</option>
-                    <option value="publication_year" {% if sort_by == 'publication_year' %}selected{% endif %}>Година на издаване</option>
-                </select>
-                <select id="order" class="form-select w-auto">
-                    <option value="asc" {% if order == 'asc' %}selected{% endif %}>Възходящ</option>
-                    <option value="desc" {% if order == 'desc' %}selected{% endif %}>Низходящ</option>
-                </select>
-            </div>
-
-            <div class="row g-4">
-                {% for book in books %}
-                    <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 col-6">
-                        <div class="book-card">
-                            {% if book.is_bestseller %}
-                                <span class="book-badge">Бестселър</span>
-                            {% elif book.is_new %}
-                                <span class="book-badge">Ново</span>
-                            {% endif %}
-                            {% if book.stock <= 15 and book.stock > 0 %}
-                                <span class="book-badge" style="background-color: var(--accent); color: black;">
+                                {% if book.stock <= 15 and book.stock > 0 %}
+                                    <span class="book-badge" style="background-color: var(--accent); color: black;">
                                     Последни бройки!
                                 </span>
-                            {% endif %}
-
-                            <div class="book-image">
-                                <img src="{{ book.imageURL }}"
-                                     onerror="this.onerror=null;this.src='{% static 'images/placeholder.png' %}'"
-                                     alt="{{ book.name }}"
-                                     loading="lazy">
-                            </div>
-
-                            <div class="book-info">
-                                <a href="{% url 'store:book_detail' book.id %}">
-                                    <h4 class="book-title">{{ book.name }}</h4>
-                                </a>
-                                <h5 class="book-author">{{ book.author|default:"Неизвестен автор" }}</h5>
-                                {% if book.description %}
-                                    <p class="book-description">{{ book.description }}</p>
-                                {% else %}
-                                    <p class="book-description text-muted">Няма описание</p>
                                 {% endif %}
-                                <div class="rating-info mt-auto">
-                                    {% if book.reviews_count > 0 %}
-                                        <p class="text-muted mb-0">
-                                            <i class="fas fa-star text-warning"></i>
-                                            {{ book.avg_rating|floatformat:1 }} ({{ book.reviews_count }} ревюта)
-                                        </p>
-                                    {% else %}
-                                        <p class="text-muted mb-0">Без оценки</p>
-                                    {% endif %}
-                                </div>
-                            </div>
 
-                            <div class="book-footer">
-                                <span class="book-price">{{ book.price|floatformat:2 }} лв.</span>
-                                <div class="d-flex align-items-center">
-                                    {% if user.is_authenticated %}
-                                        <button data-book="{{ book.id }}" data-action="{% if book in request.user.wishlist.all %}remove{% else %}add{% endif %}" class="btn btn-wishlist me-2">
-                                            <i class="{% if book in request.user.wishlist.all %}fas text-danger{% else %}far{% endif %} fa-heart"></i>
-                                        </button>
+
+                                <div class="book-image">
+                                    <img src="{{ book.imageURL }}"
+                                         onerror="this.onerror=null;this.src='{% static 'images/placeholder.png' %}'"
+                                         alt="{{ book.name }}"
+                                         loading="lazy">
+                                </div>
+
+                                <div class="book-info">
+                                    <a href="{% url 'store:book_detail' book.id %}">
+                                        <h4 class="book-title">{{ book.name }}</h4>
+                                    </a>
+                                    <h5 class="book-author">{{ book.author|default:"Неизвестен автор" }}</h5>
+                                    {% if book.description %}
+                                        <p class="book-description">{{ book.description }}</p>
                                     {% else %}
-                                        <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-wishlist me-2">
-                                            <i class="far fa-heart"></i>
-                                        </a>
+                                        <p class="book-description text-muted">Няма описание</p>
                                     {% endif %}
-                                    <button data-product="{{ book.id }}" data-action="add" class="btn btn-add-cart update-cart">
-                                        <i class="fas fa-cart-plus me-1"></i>Добави
-                                    </button>
+                                    <div class="rating-info mt-auto">
+                                        {% if book.reviews_count > 0 %}
+                                            <p class="text-muted mb-0">
+                                                <i class="fas fa-star text-warning"></i>
+                                                {{ book.avg_rating|floatformat:1 }} ({{ book.reviews_count }} ревюта)
+                                            </p>
+                                        {% else %}
+                                            <p class="text-muted mb-0">Без оценки</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="book-footer">
+                                    <span class="book-price">{{ book.price|floatformat:2 }} лв.</span>
+                                    <div class="d-flex align-items-center">
+                                        {% if user.is_authenticated %}
+                                            <button data-book="{{ book.id }}"
+                                                    data-action="{% if book in request.user.wishlist.all %}remove{% else %}add{% endif %}"
+                                                    class="btn btn-wishlist me-2">
+                                                <i class="{% if book in request.user.wishlist.all %}fas text-danger{% else %}far{% endif %} fa-heart"></i>
+                                            </button>
+                                        {% else %}
+                                            <a href="{% url 'login' %}?next={{ request.path }}"
+                                               class="btn btn-wishlist me-2">
+                                                <i class="far fa-heart"></i>
+                                            </a>
+                                        {% endif %}
+                                        <button data-product="{{ book.id }}" data-action="add"
+                                                class="btn btn-add-cart update-cart">
+                                            <i class="fas fa-cart-plus me-1"></i>Добави
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                {% empty %}
-                    <div class="col-12">
-                        <div class="empty-state">
-                            <i class="fas fa-book-open"></i>
-                            <h3>Няма налични книги в тази категория</h3>
-                            <p>Моля, разгледайте други категории или проверете по-късно.</p>
-                            <a href="{% url 'store:store' %}" class="btn btn-accent">
-                                <i class="fas fa-arrow-left me-2"></i>Назад към всички книги
-                            </a>
+                    {% empty %}
+                        <div class="col-12">
+                            <div class="empty-state">
+                                <i class="fas fa-book-open"></i>
+                                <h3>Няма налични книги в тази категория</h3>
+                                <p>Моля, разгледайте други категории или проверете по-късно.</p>
+                                <a href="{% url 'store:store' %}" class="btn btn-accent">
+                                    <i class="fas fa-arrow-left me-2"></i>Назад към всички книги
+                                </a>
+                            </div>
                         </div>
-                    </div>
-                {% endfor %}
+                    {% endfor %}
+                </div>
             </div>
         </div>
-    </div>
     {% endblock %}
 </div>
+{% if books.has_other_pages %}
+    <nav aria-label="Book pages" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if books.has_previous %}
+                <li class="page-item"><a class="page-link"
+                                         href="?page={{ books.previous_page_number }}&q={{ query|default:'' }}&category_slug={{ active_category_slug|default:'' }}&author={{ author|default:'' }}&year={{ year|default:'' }}&min_price={{ min_price|default:'' }}&max_price={{ max_price|default:'' }}&sort_by={{ sort_by|default:'' }}&order={{ order|default:'' }}">Предишна</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">Предишна</span></li>
+            {% endif %}
+
+            {% for i in books.paginator.page_range %}
+                {% if books.number == i %}
+                    <li class="page-item active" aria-current="page"><span class="page-link">{{ i }}</span></li>
+                {% else %}
+                    <li class="page-item"><a class="page-link"
+                                             href="?page={{ i }}&q={{ query|default:'' }}&category_slug={{ active_category_slug|default:'' }}&author={{ author|default:'' }}&year={{ year|default:'' }}&min_price={{ min_price|default:'' }}&max_price={{ max_price|default:'' }}&sort_by={{ sort_by|default:'' }}&order={{ order|default:'' }}">{{ i }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if books.has_next %}
+                <li class="page-item"><a class="page-link"
+                                         href="?page={{ books.next_page_number }}&q={{ query|default:'' }}&category_slug={{ active_category_slug|default:'' }}&author={{ author|default:'' }}&year={{ year|default:'' }}&min_price={{ min_price|default:'' }}&max_price={{ max_price|default:'' }}&sort_by={{ sort_by|default:'' }}&order={{ order|default:'' }}">Следваща</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">Следваща</span></li>
+            {% endif %}
+        </ul>
+    </nav>
+{% endif %}
 
 <footer class="footer">
     <div class="container">
         <div class="row">
             <div class="col-md-4 mb-4 mb-md-0">
                 <h5 class="mb-3">Книжарница</h5>
-                <p>Вашият доверен партньор в света на книгите. Предоставяме богата селекция от заглавия за всички възрасти и интереси.</p>
+                <p>Вашият доверен партньор в света на книгите. Предоставяме богата селекция от заглавия за всички
+                    възрасти и интереси.</p>
             </div>
             <div class="col-md-4 mb-4 mb-md-0">
                 <h5 class="mb-3">Бързи връзки</h5>
                 <ul class="list-unstyled">
                     <li class="mb-2"><a href="{% url 'store:store' %}">Начало</a></li>
                     {% if user.is_authenticated %}
-                    <li class="mb-2"><a href="{% url 'store:wishlist' %}">Списък с желания</a></li>
+                        <li class="mb-2"><a href="{% url 'store:wishlist' %}">Списък с желания</a></li>
                     {% endif %}
                 </ul>
             </div>
@@ -832,7 +935,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script type="text/javascript">
-    // Уверете се, че 'user' променливата е правилно дефинирана
     var user = '{{ request.user.is_authenticated|yesno:"AuthenticatedUser,AnonymousUser" }}';
     console.log("DEBUG (base.html): User status (raw): '{{ request.user }}'"); // Log the raw Django user object string
     console.log("DEBUG (base.html): User status (is_authenticated): '{{ request.user.is_authenticated }}'"); // Log the boolean
@@ -844,7 +946,6 @@
             var cookies = document.cookie.split(';');
             for (var i = 0; i < cookies.length; i++) {
                 var cookie = cookies[i].trim();
-                // Does this cookie string begin with the name we want?
                 if (cookie.substring(0, name.length + 1) === (name + '=')) {
                     cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                     break;
@@ -857,22 +958,17 @@
     var csrftoken = getToken('csrftoken')
 
     function getCookie(name) {
-        // Split cookie string and get all individual name=value pairs in an array
         var cookieArr = document.cookie.split(";");
 
-        // Loop through the array elements
         for (var i = 0; i < cookieArr.length; i++) {
             var cookiePair = cookieArr[i].split("=");
 
-            /* Removing whitespace at the beginning of the cookie name
-            and compare it with the given string */
+
             if (name == cookiePair[0].trim()) {
-                // Decode the cookie value and return
                 return decodeURIComponent(cookiePair[1]);
             }
         }
 
-        // Return null if not found
         return null;
     }
 
@@ -885,19 +981,23 @@
     }
     console.log('Cart:', cart)
 
-    // Add animation to cart icon when cart updates
     document.addEventListener('DOMContentLoaded', function() {
-        const cartIcon = document.getElementById('cart-icon');
-        if (cartIcon) {
-            cartIcon.classList.add('cart-update');
-            setTimeout(() => {
-                cartIcon.classList.remove('cart-update');
-            }, 500);
+        const sortForm = document.getElementById('sort-form');
+        const sortBySelect = document.getElementById('sort_by');
+        const orderSelect = document.getElementById('order');
+
+        if (sortForm && sortBySelect && orderSelect) {
+            sortBySelect.addEventListener('change', function() {
+                sortForm.submit();
+            });
+
+            orderSelect.addEventListener('change', function() {
+                sortForm.submit();
+            });
         }
     });
 
-    // JavaScript за автоматично презареждане на страницата при промяна на сортирането
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         const sortSelect = document.getElementById('sort_by');
         const orderSelect = document.getElementById('order');
 
@@ -911,7 +1011,6 @@
             url.searchParams.set('sort_by', sortSelect.value);
             url.searchParams.set('order', orderSelect.value);
 
-            // Запазваме съществуващите параметри за филтриране
             const filterForm = document.getElementById('filter-form');
             const filterParams = new URLSearchParams(new FormData(filterForm));
             filterParams.forEach((value, key) => {
@@ -926,7 +1025,6 @@
         }
     });
 </script>
-{# Добавяме параметър за версия, за да принудим презареждане на скрипта #}
 <script type="text/javascript" src="{% static 'js/cart.js' %}?v=1.3"></script>
 {% block extra_js %}{% endblock %}
 
