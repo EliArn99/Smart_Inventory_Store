@@ -329,9 +329,9 @@
         <p class="blog-subtitle">Открийте интересни статии, новини и вдъхновяващи истории от света на книгите</p>
     </div>
 
-    {% if posts %}
+    {% if page_obj.object_list %}
         <div class="blog-grid">
-            {% for post in posts %}
+            {% for post in page_obj %}
             <div class="blog-card">
                 <div class="blog-card-image">
                     <i class="fas fa-book-open"></i>
