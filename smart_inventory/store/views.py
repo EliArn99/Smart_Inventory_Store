@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.http import require_POST
 from django.contrib import messages
-from .forms import CustomUserCreationForm, ReviewForm
+from .forms import CustomUserCreationForm, ReviewForm, PostForm, CommentForm
 from .models import Book, Order, OrderItem, Category, WishlistItem, Review, ShippingAddress, Post, Banner
 import json
 from .utils import cartData, cookieCart
@@ -64,8 +64,7 @@ def store(request, category_slug=None):
     else:
         books = books.order_by('name')
 
-    # Добавяне на пагинация
-    paginator = Paginator(books, 10)  # Показва 10 книги на страница
+    paginator = Paginator(books, 12)
     page = request.GET.get('page')
     try:
         books_on_page = paginator.page(page)
@@ -78,7 +77,6 @@ def store(request, category_slug=None):
     data = cartData(request)
     cartItems = data['cartItems']
     banners = Banner.objects.filter(is_active=True)
-
 
     context = {
         'books': books_on_page,
@@ -121,8 +119,6 @@ def checkout(request):
     return render(request, 'store/checkout.html', context)
 
 
-# store/views.py
-
 @require_POST
 def updateItem(request):
     data = json.loads(request.body)
@@ -150,19 +146,25 @@ def updateItem(request):
 
     else:
         print('User is not authenticated')
-        cookieData = cookieCart(request)
-        cart = cookieData['cart']
+        cookie_data = cookieCart(request)
+        cart = cookie_data['cart']
 
         if action == 'add':
-            cart[bookId] = (cart.get(bookId, {'quantity': 0}))['quantity'] + 1
+            quantity = cart.get(bookId, {'quantity': 0})['quantity'] + 1
+            cart[bookId] = {'quantity': quantity}
+
         elif action == 'remove':
-            cart[bookId] = (cart.get(bookId, {'quantity': 0}))['quantity'] - 1
+            if bookId in cart:
+                cart[bookId]['quantity'] -= 1
+                if cart[bookId]['quantity'] <= 0:
+                    del cart[bookId]
 
-        if cart[bookId]['quantity'] <= 0:
-            del cart[bookId]
+        cart_items_count = sum(item['quantity'] for item in cart.values())
 
-        response = JsonResponse('Item was added', safe=False)
+        response = JsonResponse({'cartItems': cart_items_count}, safe=False)
+
         response.set_cookie('cart', json.dumps(cart))
+
         return response
 
 
@@ -361,23 +363,62 @@ def search_results(request):
 
 
 def blog_list(request):
-    """
-    Показва списък с всички публикувани публикации в блога.
-    """
-    posts = Post.objects.filter(status=1).order_by('-created_on')
+    posts_list = Post.objects.filter(status=1).order_by('-created_on')
+
+    paginator = Paginator(posts_list, 6)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     context = {
-        'posts': posts,
+        'page_obj': page_obj,
+        'is_paginated': True,
     }
     return render(request, 'store/blog_list.html', context)
 
 
 def blog_detail(request, slug):
-
     post = get_object_or_404(Post, slug=slug, status=1)
+
+    comments = post.comments.filter(is_approved=True).order_by('-created_on')
+
+    if request.method == 'POST':
+        if not request.user.is_authenticated:
+            messages.error(request, 'Трябва да сте влезли, за да коментирате.')
+            return redirect('login')
+
+        comment_form = CommentForm(data=request.POST)
+        if comment_form.is_valid():
+            new_comment = comment_form.save(commit=False)
+            new_comment.post = post
+            new_comment.user = request.user
+            new_comment.save()
+            messages.success(request, 'Вашият коментар е изпратен и очаква одобрение.')
+            return redirect('store:blog_detail', slug=slug)
+    else:
+        comment_form = CommentForm()
+
     context = {
         'post': post,
+        'comments': comments,
+        'comment_form': comment_form,
     }
     return render(request, 'store/blog_detail.html', context)
+
+
+@staff_member_required
+def add_post(request):
+    if request.method == 'POST':
+        form = PostForm(request.POST)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.author = request.user
+            post.save()
+            messages.success(request, 'Публикацията беше успешно създадена!')
+            return redirect('store:blog_list')
+    else:
+        form = PostForm()
+
+    return render(request, 'store/add_post.html', {'form': form})
 
 
 @staff_member_required
