@@ -21,6 +21,8 @@ urlpatterns = [
 
     path('blog/', views.blog_list, name='blog_list'),
     path('blog/<slug:slug>/', views.blog_detail, name='blog_detail'),
+    path('blog/add/', views.add_post, name='add_post'),
+
     path('admin/inventory-report/', views.inventory_report_view, name='inventory_report'),
 
     # AJAX endpoint for updating cart items (add/remove)
