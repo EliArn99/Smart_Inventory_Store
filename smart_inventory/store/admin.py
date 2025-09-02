@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.safestring import mark_safe
-from .models import Customer, Book, Order, OrderItem, ShippingAddress, Category, Review, Post, Banner
+from .models import Customer, Book, Order, OrderItem, ShippingAddress, Category, Review, Post, Banner, Comment
 
 
 @admin.register(Book)
@@ -89,3 +89,15 @@ class BannerAdmin(admin.ModelAdmin):
     list_display = ('title', 'is_active', 'order')
     list_filter = ('is_active',)
     search_fields = ('title',)
+
+
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ('user', 'content', 'post', 'created_on', 'is_approved')
+    list_filter = ('is_approved',)
+    search_fields = ['content', 'user__username']
+    actions = ['approve_comments']
+
+    def approve_comments(self, request, queryset):
+        queryset.update(is_approved=True)
+    approve_comments.short_description = "Одобри избраните коментари"
