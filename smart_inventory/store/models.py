@@ -1,7 +1,7 @@
 from django.core.validators import MinValueValidator, MaxValueValidator
-from django.db import models
 from django.contrib.auth.models import User
-
+from django.db import models
+from django.conf import settings
 
 class Customer(models.Model):
     user = models.OneToOneField(User, null=True, blank=True, on_delete=models.CASCADE)
@@ -159,6 +159,19 @@ class Post(models.Model):
         return self.title
 
 
+class Comment(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.TextField()
+    is_approved = models.BooleanField(default=False)
+    created_on = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_on']
+
+    def __str__(self):
+        return f"Коментар от {self.user.username} на {self.post.title}"
+
 class Banner(models.Model):
     title = models.CharField(max_length=200)
     subtitle = models.CharField(max_length=300, blank=True, null=True)
@@ -172,3 +185,83 @@ class Banner(models.Model):
 
     def __str__(self):
         return self.title
+
+
+
+
+# TODO: Finish
+# class UserListManager(models.Manager):
+#
+#     def get_main_list(self, user):
+#         try:
+#             return self.get(user=user, is_main=True)
+#         except self.model.DoesNotExist:
+#             return None
+#
+# class UserList(models.Model):
+#
+#     user = models.ForeignKey(
+#         settings.AUTH_USER_MODEL,
+#         on_delete=models.CASCADE,
+#         related_name='custom_lists',
+#         verbose_name='Потребител'
+#     )
+#     name = models.CharField(
+#         max_length=255,
+#         verbose_name='Име на списъка'
+#     )
+#     is_main = models.BooleanField(
+#         default=False,
+#         verbose_name='Основен списък'
+#     )
+#     created_at = models.DateTimeField(
+#         auto_now_add=True,
+#         verbose_name='Дата на създаване'
+#     )
+#
+#     objects = UserListManager()
+#
+#     class Meta:
+#         verbose_name = 'Потребителски списък'
+#         verbose_name_plural = 'Потребителски списъци'
+#         # Гарантира, че потребителят може да има само един основен списък.
+#         constraints = [
+#             models.UniqueConstraint(
+#                 fields=['user'],
+#                 condition=models.Q(is_main=True),
+#                 name='unique_main_list'
+#             )
+#         ]
+#         ordering = ['-created_at']
+#
+#     def __str__(self):
+#         return f"Списък '{self.name}' на {self.user.username}"
+#
+# class UserListItem(models.Model):
+#
+#     user_list = models.ForeignKey(
+#         UserList,
+#         on_delete=models.CASCADE,
+#         related_name='items',
+#         verbose_name='Списък'
+#     )
+#     book = models.ForeignKey(
+#         Book,
+#         on_delete=models.CASCADE,
+#         verbose_name='Книга'
+#     )
+#     added_at = models.DateTimeField(
+#         auto_now_add=True,
+#         verbose_name='Дата на добавяне'
+#     )
+#
+#     class Meta:
+#         verbose_name = 'Елемент от списък'
+#         verbose_name_plural = 'Елементи от списъци'
+#         unique_together = ('user_list', 'book')
+#         ordering = ['-added_at']
+#
+#     def __str__(self):
+#         return f"Книга '{self.book.title}' в '{self.user_list.name}'"
+
+
