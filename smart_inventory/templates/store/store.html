@@ -678,12 +678,11 @@
                 <a href="{% url 'store:cart' %}" class="position-relative ms-3">
                     <img id="cart-icon" src="{% static 'images/shopping-cart.png' %}" alt="Количка"
                          style="width: 28px; height: 28px;">
-                    {% if cartItems > 0 %}
-                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                        {{ cartItems }}
-                        <span class="visually-hidden">продукти в количката</span>
-                    </span>
-                    {% endif %}
+                    <span id="cart-total"
+                          class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger {% if cartItems == 0 %}d-none{% endif %}">
+        {{ cartItems }}
+        <span class="visually-hidden">продукти в количката</span>
+    </span>
                 </a>
             </div>
         </div>
@@ -981,17 +980,17 @@
     }
     console.log('Cart:', cart)
 
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         const sortForm = document.getElementById('sort-form');
         const sortBySelect = document.getElementById('sort_by');
         const orderSelect = document.getElementById('order');
 
         if (sortForm && sortBySelect && orderSelect) {
-            sortBySelect.addEventListener('change', function() {
+            sortBySelect.addEventListener('change', function () {
                 sortForm.submit();
             });
 
-            orderSelect.addEventListener('change', function() {
+            orderSelect.addEventListener('change', function () {
                 sortForm.submit();
             });
         }
