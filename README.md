@@ -81,3 +81,7 @@
    ```bash
    git clone https://github.com/EliArn99/Smart_Inventory_Store.git
    cd Smart_Inventory_Store
+
+2. **Създай .env файл**
+Копирай .env.example и го преименувай на .env.
+Попълни необходимата информация за базата данни.
