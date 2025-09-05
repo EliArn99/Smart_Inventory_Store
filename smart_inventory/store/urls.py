@@ -1,5 +1,3 @@
-# store/urls.py
-
 from django.urls import path
 from . import views
 
@@ -19,9 +17,11 @@ urlpatterns = [
 
     path('update_wishlist/', views.update_wishlist, name='update_wishlist'),
 
+    # Blog URLs
     path('blog/', views.blog_list, name='blog_list'),
     path('blog/<slug:slug>/', views.blog_detail, name='blog_detail'),
     path('blog/add/', views.add_post, name='add_post'),
+    path('order/<int:order_id>/', views.order_detail, name='order_detail'),
 
     path('admin/inventory-report/', views.inventory_report_view, name='inventory_report'),
 
