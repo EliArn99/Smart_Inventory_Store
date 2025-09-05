@@ -1,0 +1,219 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block extra_head %}
+<style>
+    :root {
+        --primary: #3B153A;
+        --secondary: #F0C987;
+        --light: #f8f9fa;
+        --dark: #212529;
+        --accent: #6C4F70;
+        --text: #333333;
+        --white: #ffffff;
+        --gray-light: #e9ecef;
+    }
+
+    body {
+        background-color: var(--light);
+        color: var(--text);
+    }
+
+    .profile-container {
+        padding-top: 3rem;
+        padding-bottom: 3rem;
+    }
+
+    .order-detail-card {
+        background-color: var(--white);
+        border-radius: 1rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        padding: 2.5rem;
+    }
+
+    .order-detail-title {
+        font-weight: 700;
+        color: var(--primary);
+        border-bottom: 3px solid var(--secondary);
+        padding-bottom: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .info-block {
+        background-color: var(--gray-light);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .info-block h4 {
+        color: var(--primary);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .info-block p {
+        margin: 0;
+        color: var(--text);
+        font-size: 1rem;
+    }
+
+    .order-items-table {
+        margin-top: 2rem;
+    }
+
+    .order-items-table h4 {
+        color: var(--primary);
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .table {
+        border-collapse: separate;
+        border-spacing: 0 0.5rem;
+    }
+
+    .table thead th {
+        border-bottom: 2px solid var(--secondary);
+        color: var(--accent);
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        padding-bottom: 1rem;
+    }
+
+    .table tbody tr {
+        background-color: var(--white);
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    }
+
+    .table tbody td {
+        border: none;
+        padding: 1rem;
+        vertical-align: middle;
+    }
+
+    .table img {
+        width: 60px;
+        height: auto;
+        border-radius: 0.5rem;
+        object-fit: cover;
+    }
+    
+    .order-summary {
+        margin-top: 2rem;
+        border-top: 2px solid var(--gray-light);
+        padding-top: 1.5rem;
+    }
+
+    .order-summary h3 {
+        font-weight: 700;
+        color: var(--primary);
+        margin-top: 1rem;
+        font-size: 1.5rem;
+    }
+    
+    .order-summary p {
+        margin-bottom: 0.5rem;
+        font-size: 1.1rem;
+        color: var(--accent);
+    }
+    
+    .btn-secondary {
+        background-color: var(--accent);
+        border-color: var(--accent);
+        color: var(--white);
+        font-weight: 600;
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-secondary:hover {
+        background-color: #5a425e;
+        border-color: #5a425e;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(108, 79, 112, 0.2);
+    }
+    
+    .text-end {
+        text-align: right !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-container container">
+    <div class="order-detail-card">
+        <h1 class="order-detail-title">Детайли за поръчка № {{ order.id }}</h1>
+        <p class="text-muted">Направена на: {{ order.date_ordered|date:"d.m.Y" }}</p>
+
+        <div class="row mt-4">
+            <div class="col-md-6 mb-4">
+                <div class="info-block">
+                    <h4><i class="fas fa-truck-fast me-2"></i> Адрес за доставка</h4>
+                    {% if order.shipping_address %}
+                        <p>{{ order.shipping_address }}</p>
+                    {% else %}
+                        <p>Поръчката е без физическа доставка.</p>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="info-block">
+                    <h4><i class="fas fa-info-circle me-2"></i> Статус на поръчката</h4>
+                    <p>{{ order.status }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="order-items-table">
+            <h4>Продукти в поръчката</h4>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Продукт</th>
+                        <th scope="col" class="text-end">Количество</th>
+                        <th scope="col" class="text-end">Цена за брой</th>
+                        <th scope="col" class="text-end">Общо</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order_items %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <img src="{{ item.product.imageURL }}" class="me-3" onerror="this.onerror=null;this.src='{% static 'images/placeholder.png' %}'" alt="{{ item.product.name }}">
+                                <span>{{ item.product.name }}</span>
+                            </div>
+                        </td>
+                        <td class="text-end">{{ item.quantity }}</td>
+                        <td class="text-end">{{ item.product.price|floatformat:2 }} лв.</td>
+                        <td class="text-end">{{ item.get_total|floatformat:2 }} лв.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="order-summary text-end mt-4">
+            <p>Междинна сума: {{ order.get_cart_total|floatformat:2 }} лв.</p>
+            {# TODO: Направи автоматично начисление на доставката #}
+            <p>Доставка: 2.00 лв.</p>
+            <hr>
+            <h3>Общо: {{ order.get_grand_total|floatformat:2 }} лв.</h3>
+        </div>
+
+        <div class="text-center mt-5">
+            <a href="{% url 'store:profile_details' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Обратно към поръчките
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
