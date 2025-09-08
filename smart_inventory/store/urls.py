@@ -1,36 +1,76 @@
+# # store/urls.py
+#
+# from django.urls import path
+# from . import views
+#
+# app_name = 'store'
+#
+# urlpatterns = [
+#     path('', views.store, name="store"),
+#     path('about-us/', views.about_us, name='about_us'),
+#
+#     path('category/<slug:category_slug>/', views.store, name='books_by_category'),
+#     path('book/<int:pk>/', views.book_detail, name='book_detail'),
+#
+#     path('cart/', views.cart, name="cart"),
+#     path('checkout/', views.checkout, name="checkout"),
+#     path('wishlist/', views.wishlist_view, name='wishlist'),
+#     path('search/', views.search_results, name='search_results'),
+#
+#     path('update_wishlist/', views.update_wishlist, name='update_wishlist'),
+#
+#     # Blog URLs
+#     path('blog/', views.blog_list, name='blog_list'),
+#     path('blog/<slug:slug>/', views.blog_detail, name='blog_detail'),
+#     path('blog/add/', views.add_post, name='add_post'),
+#     path('order/<int:order_id>/', views.order_detail, name='order_detail'),
+#
+#     path('admin/inventory-report/', views.inventory_report_view, name='inventory_report'),
+#
+#     # AJAX endpoint for updating cart items (add/remove)
+#     path('update_item/', views.updateItem, name="update_item"),
+#
+#     # AJAX endpoint for processing an order
+#     path('process_order/', views.processOrder, name="process_order"),
+#     path('profile/', views.profile_details, name="profile_details"),
+#     path('register/', views.register, name='register'),
+#
+# ]
+
+
+# store/urls.py
 from django.urls import path
 from . import views
 
 app_name = 'store'
 
 urlpatterns = [
-    path('', views.store, name="store"),
-    path('about-us/', views.about_us, name='about_us'),
-
-    path('category/<slug:category_slug>/', views.store, name='books_by_category'),
-    path('book/<int:pk>/', views.book_detail, name='book_detail'),
-
+    # Most specific paths first
     path('cart/', views.cart, name="cart"),
     path('checkout/', views.checkout, name="checkout"),
     path('wishlist/', views.wishlist_view, name='wishlist'),
     path('search/', views.search_results, name='search_results'),
-
     path('update_wishlist/', views.update_wishlist, name='update_wishlist'),
-
-    # Blog URLs
-    path('blog/', views.blog_list, name='blog_list'),
-    path('blog/<slug:slug>/', views.blog_detail, name='blog_detail'),
-    path('blog/add/', views.add_post, name='add_post'),
-    path('order/<int:order_id>/', views.order_detail, name='order_detail'),
-
-    path('admin/inventory-report/', views.inventory_report_view, name='inventory_report'),
-
-    # AJAX endpoint for updating cart items (add/remove)
     path('update_item/', views.updateItem, name="update_item"),
-
-    # AJAX endpoint for processing an order
     path('process_order/', views.processOrder, name="process_order"),
     path('profile/', views.profile_details, name="profile_details"),
     path('register/', views.register, name='register'),
+    path('order/<int:order_id>/', views.order_detail, name='order_detail'),
 
+    # Blog URLs
+    path('blog/add/', views.add_post, name='add_post'),
+    path('blog/<slug:slug>/', views.blog_detail, name='blog_detail'),
+    path('blog/', views.blog_list, name='blog_list'),
+    path('category/<slug:category_slug>/', views.posts_by_category, name='posts_by_category'),
+
+    # Category and Book detail URLs
+    path('category/<slug:category_slug>/', views.store, name='books_by_category'),
+    path('book/<int:pk>/', views.book_detail, name='book_detail'),
+
+    # Administrative/report URLs
+    path('admin/inventory-report/', views.inventory_report_view, name='inventory_report'),
+    path('about-us/', views.about_us, name='about_us'),
+
+    # The most general path should be last
+    path('', views.store, name="store"),
 ]
