@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.conf import settings
 
+
 class Customer(models.Model):
     user = models.OneToOneField(User, null=True, blank=True, on_delete=models.CASCADE)
     name = models.CharField(max_length=200, null=True)
@@ -143,11 +144,30 @@ class Review(models.Model):
         return f"Ревю от {self.user.username} за {self.book.name}"
 
 
+class BlogCategory(models.Model):
+    name = models.CharField(max_length=100)
+    slug = models.SlugField(unique=True)
+
+    class Meta:
+        verbose_name_plural = "Blog Categories"
+
+    def __str__(self):
+        return self.name
+
+
 class Post(models.Model):
     title = models.CharField(max_length=200, unique=True)
     slug = models.SlugField(max_length=200, unique=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='blog_posts')
     content = models.TextField()
+    image = models.ImageField(upload_to='blog_images/', blank=True, null=True)
+    category = models.ForeignKey(
+        BlogCategory,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='posts'
+    )
+    views = models.IntegerField(default=0)
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
     status = models.IntegerField(choices=[(0, "Draft"), (1, "Published")], default=0)
@@ -172,6 +192,7 @@ class Comment(models.Model):
     def __str__(self):
         return f"Коментар от {self.user.username} на {self.post.title}"
 
+
 class Banner(models.Model):
     title = models.CharField(max_length=200)
     subtitle = models.CharField(max_length=300, blank=True, null=True)
@@ -185,9 +206,6 @@ class Banner(models.Model):
 
     def __str__(self):
         return self.title
-
-
-
 
 # TODO: Finish
 # class UserListManager(models.Manager):
@@ -263,5 +281,3 @@ class Banner(models.Model):
 #
 #     def __str__(self):
 #         return f"Книга '{self.book.title}' в '{self.user_list.name}'"
-
-
