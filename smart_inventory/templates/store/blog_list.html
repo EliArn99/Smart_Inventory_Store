@@ -1,402 +1,560 @@
-{# TODO: Allow users to write blogs and longer reviews  #}
+{# TODO: Да направя снимките на блоговете по добри  #}
 {% extends 'store/base.html' %}
 {% load static %}
 
 {% block extra_head %}
 <style>
-    .blog-container {
-        max-width: 1200px;
-        margin: 2rem auto;
-        padding: 0 1rem;
-    }
-
-    .blog-header {
-        text-align: center;
-        margin-bottom: 3rem;
-        position: relative;
-    }
-
-    .blog-title {
-        color: var(--primary-dark);
-        font-weight: 800;
-        margin-bottom: 1rem;
-        position: relative;
-        display: inline-block;
-    }
-
-    .blog-title::after {
-        content: '';
-        position: absolute;
-        bottom: -10px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 80px;
-        height: 4px;
-        background-color: var(--accent);
-        border-radius: 2px;
-    }
-
-    .blog-subtitle {
-        color: #6c757d;
-        font-size: 1.1rem;
-        max-width: 600px;
-        margin: 0 auto;
-    }
-
-    .blog-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-        gap: 2rem;
-    }
-
-    .blog-card {
+    /* ... Вашият съществуващ CSS код ... */
+    
+    /* Добавен CSS за страничната лента */
+    .sidebar {
         background: #fff;
         border-radius: 16px;
-        overflow: hidden;
+        padding: 1.5rem;
         box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-        transition: all 0.3s ease;
-        display: flex;
-        flex-direction: column;
-        height: 100%;
     }
 
-    .blog-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
-    }
-
-    .blog-card-image {
-        height: 200px;
-        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-light) 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .blog-card-image::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-        transform: rotate(30deg);
-    }
-
-    .blog-card-image i {
-        font-size: 3.5rem;
-        color: rgba(255, 255, 255, 0.9);
-        z-index: 2;
-    }
-
-    .blog-card-content {
-        padding: 1.75rem;
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .blog-card-title {
+    .sidebar-title {
         color: var(--primary-dark);
         font-weight: 700;
-        margin-bottom: 0.75rem;
-        font-size: 1.25rem;
-        line-height: 1.4;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
+        margin-bottom: 1rem;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 0.5rem;
     }
 
-    .blog-card-meta {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        margin-bottom: 1rem;
+    .category-list-item {
+        margin-bottom: 0.5rem;
+    }
+
+    .category-link {
+        color: #495057;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        display: block;
+        padding: 0.5rem 0.75rem;
+        border-radius: 8px;
+    }
+
+    .category-link:hover,
+    .category-link.active {
+        background-color: var(--accent);
+        color: var(--primary-dark);
+    }
+    
+    /* Custom styles for the blog list page */
+.blog-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.blog-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    position: relative;
+}
+
+.blog-title {
+    color: var(--primary-dark);
+    font-weight: 800;
+    margin-bottom: 1rem;
+    position: relative;
+    display: inline-block;
+}
+
+.blog-title::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background-color: var(--accent);
+    border-radius: 2px;
+}
+
+.blog-subtitle {
+    color: #6c757d;
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.blog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 2rem;
+}
+
+.blog-card {
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.blog-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+}
+
+.blog-card-image {
+    height: 200px;
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-light) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.blog-card-image::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    transform: rotate(30deg);
+}
+
+.blog-card-image i {
+    font-size: 3.5rem;
+    color: rgba(255, 255, 255, 0.9);
+    z-index: 2;
+}
+
+.blog-card-content {
+    padding: 1.75rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.blog-card-title {
+    color: var(--primary-dark);
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    font-size: 1.25rem;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.blog-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.blog-card-author,
+.blog-card-date,
+.blog-card-category { /* New style for category */
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: #6c757d;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.blog-card-author i,
+.blog-card-date i,
+.blog-card-category i { /* New style for category icon */
+    color: var(--accent);
+}
+
+.blog-card-excerpt {
+    color: #495057;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    flex: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.blog-card-read-more {
+    background-color: var(--accent);
+    color: var(--primary-dark);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: auto;
+    width: fit-content;
+}
+
+.blog-card-read-more:hover {
+    background-color: var(--accent-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    color: var(--primary-dark);
+}
+
+.empty-blog {
+    text-align: center;
+    padding: 4rem 2rem;
+    background-color: #f9f9f9;
+    border-radius: 16px;
+    border: 2px dashed #eee;
+    grid-column: 1 / -1;
+}
+
+.empty-blog i {
+    font-size: 4rem;
+    color: rgba(59, 21, 58, 0.15);
+    margin-bottom: 1.5rem;
+}
+
+.empty-blog h3 {
+    color: var(--primary-dark);
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.empty-blog p {
+    color: #6c757d;
+    max-width: 500px;
+    margin: 0 auto 2rem;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 3rem;
+    gap: 0.5rem;
+}
+
+.page-link {
+    padding: 0.75rem 1rem;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    color: var(--primary-dark);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    min-width: 45px;
+    text-align: center;
+}
+
+.page-link:hover {
+    border-color: var(--accent);
+    background-color: rgba(240, 201, 135, 0.1);
+}
+
+.page-link.active {
+    background-color: var(--accent);
+    border-color: var(--accent);
+    color: var(--primary-dark);
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .blog-grid {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .blog-card-content {
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .blog-container {
+        margin: 1.5rem auto;
+    }
+    
+    .blog-header {
+        margin-bottom: 2rem;
+    }
+    
+    .blog-title {
+        font-size: 2rem;
+    }
+    
+    .blog-grid {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+    
+    .blog-card-image {
+        height: 180px;
+    }
+    
+    .blog-card-image i {
+        font-size: 3rem;
+    }
+    
+    .pagination {
         flex-wrap: wrap;
     }
+}
 
-    .blog-card-author,
-    .blog-card-date {
-        display: flex;
-        align-items: center;
-        gap: 0.4rem;
-        color: #6c757d;
-        font-size: 0.85rem;
-        font-weight: 500;
+@media (max-width: 576px) {
+    .blog-container {
+        padding: 0 0.75rem;
     }
-
-    .blog-card-author i,
-    .blog-card-date i {
-        color: var(--accent);
+    
+    .blog-title {
+        font-size: 1.75rem;
     }
-
-    .blog-card-excerpt {
-        color: #495057;
-        line-height: 1.6;
-        margin-bottom: 1.5rem;
-        flex: 1;
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
+    
+    .blog-card-content {
+        padding: 1.25rem;
     }
-
+    
     .blog-card-read-more {
-        background-color: var(--accent);
-        color: var(--primary-dark);
-        border: none;
-        padding: 0.75rem 1.5rem;
-        border-radius: 8px;
-        font-weight: 600;
-        text-decoration: none;
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        margin-top: auto;
-        width: fit-content;
-    }
-
-    .blog-card-read-more:hover {
-        background-color: var(--accent-dark);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        color: var(--primary-dark);
-    }
-
-    .empty-blog {
-        text-align: center;
-        padding: 4rem 2rem;
-        background-color: #f9f9f9;
-        border-radius: 16px;
-        border: 2px dashed #eee;
-        grid-column: 1 / -1;
-    }
-
-    .empty-blog i {
-        font-size: 4rem;
-        color: rgba(59, 21, 58, 0.15);
-        margin-bottom: 1.5rem;
-    }
-
-    .empty-blog h3 {
-        color: var(--primary-dark);
-        margin-bottom: 1rem;
-        font-weight: 600;
-    }
-
-    .empty-blog p {
-        color: #6c757d;
-        max-width: 500px;
-        margin: 0 auto 2rem;
-    }
-
-    .pagination {
-        display: flex;
+        width: 100%;
         justify-content: center;
-        margin-top: 3rem;
-        gap: 0.5rem;
     }
-
-    .page-link {
-        padding: 0.75rem 1rem;
-        border: 2px solid #e9ecef;
-        border-radius: 8px;
-        color: var(--primary-dark);
-        text-decoration: none;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        min-width: 45px;
-        text-align: center;
+    
+    .empty-blog {
+        padding: 2.5rem 1.5rem;
     }
-
-    .page-link:hover {
-        border-color: var(--accent);
-        background-color: rgba(240, 201, 135, 0.1);
+    
+    .empty-blog i {
+        font-size: 3rem;
     }
+}
 
-    .page-link.active {
-        background-color: var(--accent);
-        border-color: var(--accent);
-        color: var(--primary-dark);
+/* Animation for cards */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
     }
-
-    /* Responsive Design */
-    @media (max-width: 992px) {
-        .blog-grid {
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
-        }
-        
-        .blog-card-content {
-            padding: 1.5rem;
-        }
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
+}
 
-    @media (max-width: 768px) {
-        .blog-container {
-            margin: 1.5rem auto;
-        }
-        
-        .blog-header {
-            margin-bottom: 2rem;
-        }
-        
-        .blog-title {
-            font-size: 2rem;
-        }
-        
-        .blog-grid {
-            grid-template-columns: 1fr;
-            gap: 1.25rem;
-            max-width: 500px;
-            margin: 0 auto;
-        }
-        
-        .blog-card-image {
-            height: 180px;
-        }
-        
-        .blog-card-image i {
-            font-size: 3rem;
-        }
-        
-        .pagination {
-            flex-wrap: wrap;
-        }
-    }
+.blog-card {
+    animation: fadeInUp 0.6s ease;
+}
 
-    @media (max-width: 576px) {
-        .blog-container {
-            padding: 0 0.75rem;
-        }
-        
-        .blog-title {
-            font-size: 1.75rem;
-        }
-        
-        .blog-card-content {
-            padding: 1.25rem;
-        }
-        
-        .blog-card-read-more {
-            width: 100%;
-            justify-content: center;
-        }
-        
-        .empty-blog {
-            padding: 2.5rem 1.5rem;
-        }
-        
-        .empty-blog i {
-            font-size: 3rem;
-        }
-    }
+.blog-card:nth-child(1) { animation-delay: 0.1s; }
+.blog-card:nth-child(2) { animation-delay: 0.2s; }
+.blog-card:nth-child(3) { animation-delay: 0.3s; }
+.blog-card:nth-child(4) { animation-delay: 0.4s; }
+.blog-card:nth-child(5) { animation-delay: 0.5s; }
+.blog-card:nth-child(6) { animation-delay: 0.6s; }
 
-    /* Animation for cards */
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
+/* Styles for blog details page */
+.blog-detail-container {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
 
-    .blog-card {
-        animation: fadeInUp 0.6s ease;
-    }
+.blog-detail-image {
+    max-height: 400px;
+    width: 100%;
+    object-fit: cover;
+    border-radius: 16px;
+    margin-bottom: 2rem;
+}
 
-    .blog-card:nth-child(1) { animation-delay: 0.1s; }
-    .blog-card:nth-child(2) { animation-delay: 0.2s; }
-    .blog-card:nth-child(3) { animation-delay: 0.3s; }
-    .blog-card:nth-child(4) { animation-delay: 0.4s; }
-    .blog-card:nth-child(5) { animation-delay: 0.5s; }
-    .blog-card:nth-child(6) { animation-delay: 0.6s; }
+.blog-detail-title {
+    color: var(--primary-dark);
+    font-weight: 800;
+    margin-bottom: 1rem;
+}
+
+.blog-detail-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    color: #6c757d;
+}
+
+.blog-detail-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.blog-detail-content {
+    line-height: 1.8;
+    color: #495057;
+    font-size: 1.1rem;
+}
+
+.comments-section {
+    margin-top: 3rem;
+}
+
+.comment-card {
+    background: #f8f9fa;
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.comment-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.comment-author {
+    font-weight: 600;
+    color: var(--primary-dark);
+}
+
+.comment-date {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.comment-content {
+    color: #495057;
+}
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="blog-container">
-    <div class="blog-header">
-        <h1 class="blog-title">Блог</h1>
-        <p class="blog-subtitle">Открийте интересни статии, новини и вдъхновяващи истории от света на книгите</p>
-    </div>
-
-    {% if page_obj.object_list %}
-        <div class="blog-grid">
-            {% for post in page_obj %}
-            <div class="blog-card">
-                <div class="blog-card-image">
-                    <i class="fas fa-book-open"></i>
-                </div>
-                
-                <div class="blog-card-content">
-                    <h3 class="blog-card-title">{{ post.title }}</h3>
-                    
-                    <div class="blog-card-meta">
-                        <span class="blog-card-author">
-                            <i class="fas fa-user"></i> {{ post.author.username }}
-                        </span>
-                        <span class="blog-card-date">
-                            <i class="fas fa-calendar"></i> {{ post.created_on|date:"d.m.Y" }}
-                        </span>
-                    </div>
-                    
-                    <p class="blog-card-excerpt">{{ post.content|truncatechars:150 }}</p>
-                    
-                    <a href="{% url 'store:blog_detail' post.slug %}" class="blog-card-read-more">
-                        <i class="fas fa-arrow-right"></i> Прочети още
-                    </a>
-                </div>
+    <div class="row g-5">
+        <div class="col-lg-3">
+            <div class="sidebar">
+                <h5 class="sidebar-title">Категории на блога</h5>
+                <ul class="list-unstyled">
+                    <li class="category-list-item">
+                        <a href="{% url 'store:blog_list' %}" class="category-link {% if not current_category %}active{% endif %}">
+                            Всички публикации
+                        </a>
+                    </li>
+                    {% for category in categories %}
+                    <li class="category-list-item">
+                        <a href="{% url 'store:posts_by_category' category.slug %}" class="category-link {% if current_category.slug == category.slug %}active{% endif %}">
+                            {{ category.name }}
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
             </div>
-            {% endfor %}
         </div>
-        
-        {% if is_paginated %}
-        <div class="pagination">
-            {% if page_obj.has_previous %}
-                <a href="?page=1" class="page-link">
-                    <i class="fas fa-angle-double-left"></i>
-                </a>
-                <a href="?page={{ page_obj.previous_page_number }}" class="page-link">
-                    <i class="fas fa-angle-left"></i>
-                </a>
-            {% endif %}
+
+        <div class="col-lg-9">
+            <div class="blog-header mb-4 text-start">
+                <h1 class="blog-title">
+                    {% if current_category %}
+                        Категория: {{ current_category.name }}
+                    {% else %}
+                        Всички публикации
+                    {% endif %}
+                </h1>
+                <p class="blog-subtitle text-start mt-2">
+                    Открийте интересни статии, новини и вдъхновяващи истории от света на книгите.
+                </p>
+            </div>
+
+            {% if page_obj.object_list %}
+            <div class="blog-grid">
+                {% for post in page_obj %}
+                <div class="blog-card">
+                    {% if post.image %}
+                        <div class="blog-card-image">
+                             <img src="{{ post.image.url }}" alt="{{ post.title }}" class="img-fluid" style="height: 100%; width: 100%; object-fit: cover;">
+                        </div>
+                    {% else %}
+                        <div class="blog-card-image">
+                            <i class="fas fa-book-open"></i>
+                        </div>
+                    {% endif %}
+
+                    <div class="blog-card-content">
+                        <h3 class="blog-card-title">{{ post.title }}</h3>
+                        
+                        <div class="blog-card-meta">
+                            <span class="blog-card-author">
+                                <i class="fas fa-user"></i> {{ post.author.username }}
+                            </span>
+                            <span class="blog-card-date">
+                                <i class="fas fa-calendar"></i> {{ post.created_on|date:"d.m.Y" }}
+                            </span>
+                            <span class="blog-card-category">
+                                <i class="fas fa-folder"></i> {{ post.category.name|default:"Без категория" }}
+                            </span>
+                        </div>
+                        
+                        <p class="blog-card-excerpt">{{ post.content|truncatechars:150 }}</p>
+                        
+                        <a href="{% url 'store:blog_detail' post.slug %}" class="blog-card-read-more">
+                            Прочети още <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
             
-            {% for num in page_obj.paginator.page_range %}
-                {% if page_obj.number == num %}
-                    <a href="?page={{ num }}" class="page-link active">{{ num }}</a>
-                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                    <a href="?page={{ num }}" class="page-link">{{ num }}</a>
+            {% if is_paginated %}
+            <div class="pagination">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1{% if current_category %}&category={{ current_category.slug }}{% endif %}" class="page-link">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+                    <a href="?page={{ page_obj.previous_page_number }}{% if current_category %}&category={{ current_category.slug }}{% endif %}" class="page-link">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
                 {% endif %}
-            {% endfor %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <a href="?page={{ num }}{% if current_category %}&category={{ current_category.slug }}{% endif %}" class="page-link active">{{ num }}</a>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <a href="?page={{ num }}{% if current_category %}&category={{ current_category.slug }}{% endif %}" class="page-link">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}{% if current_category %}&category={{ current_category.slug }}{% endif %}" class="page-link">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}{% if current_category %}&category={{ current_category.slug }}{% endif %}" class="page-link">
+                        <i class="fas fa-angle-double-right"></i>
+                    </a>
+                {% endif %}
+            </div>
+            {% endif %}
             
-            {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}" class="page-link">
-                    <i class="fas fa-angle-right"></i>
+            {% else %}
+            <div class="empty-blog">
+                <i class="fas fa-newspaper"></i>
+                <h3>Все още няма публикации</h3>
+                <p>Следвайте ни, за да сте информирани когато публикуваме нови статии и новини.</p>
+                <a href="{% url 'store:store' %}" class="blog-card-read-more">
+                    <i class="fas fa-arrow-left me-2"></i> Обратно към магазина
                 </a>
-                <a href="?page={{ page_obj.paginator.num_pages }}" class="page-link">
-                    <i class="fas fa-angle-double-right"></i>
-                </a>
+            </div>
             {% endif %}
         </div>
-        {% endif %}
-    {% else %}
-        <div class="empty-blog">
-            <i class="fas fa-newspaper"></i>
-            <h3>Все още няма публикации</h3>
-            <p>Следвайте ни, за да сте информирани когато публикуваме нови статии и новини.</p>
-            <a href="{% url 'store:store' %}" class="blog-card-read-more">
-                <i class="fas fa-arrow-left me-2"></i> Обратно към магазина
-            </a>
-        </div>
-    {% endif %}
+    </div>
 </div>
-{% endblock content %}
+{% endblock %}
