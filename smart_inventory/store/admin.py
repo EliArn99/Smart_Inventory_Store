@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.utils.safestring import mark_safe
-from .models import Customer, Book, Order, OrderItem, ShippingAddress, Category, Review, Post, Banner, Comment
+from .models import Customer, Book, Order, OrderItem, ShippingAddress, Category, Review, Post, Banner, Comment, \
+    BlogCategory
 
 
 @admin.register(Book)
@@ -78,11 +79,16 @@ admin.site.register(ShippingAddress)
 
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
-    list_display = ('title', 'slug', 'status', 'created_on')
-    list_filter = ("status",)
+    list_display = ('title', 'slug', 'category', 'status', 'created_on')
+    list_filter = ('status', 'category')
     search_fields = ['title', 'content']
     prepopulated_fields = {'slug': ('title',)}
 
+@admin.register(BlogCategory)
+class BlogCategoryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'slug')
+    prepopulated_fields = {'slug': ('name',)}
+    search_fields = ['name']
 
 @admin.register(Banner)
 class BannerAdmin(admin.ModelAdmin):
