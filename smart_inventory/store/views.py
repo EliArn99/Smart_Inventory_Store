@@ -402,6 +402,7 @@ def blog_list(request):
     return render(request, 'store/blog_list.html', context)
 
 
+
 def posts_by_category(request, category_slug):
     category = get_object_or_404(BlogCategory, slug=category_slug)
     posts = Post.objects.filter(category=category, status=1).order_by('-created_on')
