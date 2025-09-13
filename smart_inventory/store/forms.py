@@ -9,6 +9,10 @@ class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = User
         fields = ('username', 'email')
+        labels = {
+            'username': 'Потребителско име',
+            'email': 'Имейл',
+        }
 
 
 class ReviewForm(forms.ModelForm):
@@ -16,8 +20,12 @@ class ReviewForm(forms.ModelForm):
         model = Review
         fields = ['rating', 'comment']
         widgets = {
-            'rating': forms.Select(choices=[(i, str(i)) for i in range(1, 6)]),
+            'rating': forms.RadioSelect(choices=[(i, str(i)) for i in range(1, 6)]),
             'comment': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Оставете коментар тук...'}),
+        }
+        labels = {
+            'rating': 'Вашата оценка',
+            'comment': 'Вашето ревю',
         }
 
 
@@ -30,6 +38,12 @@ class PostForm(forms.ModelForm):
             'content': forms.Textarea(attrs={'class': 'form-control'}),
             'status': forms.Select(attrs={'class': 'form-select'}),
         }
+        labels = {
+            'title': 'Заглавие на публикацията',
+            'content': 'Съдържание',
+            'status': 'Статус',
+        }
+
 
 class CommentForm(forms.ModelForm):
     class Meta:
