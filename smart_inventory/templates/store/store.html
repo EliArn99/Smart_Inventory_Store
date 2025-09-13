@@ -1,4 +1,3 @@
-{# TODO: Fix Banners  #}
 <!DOCTYPE html>
 {% load static %}
 <html lang="bg">
@@ -480,6 +479,9 @@
         .empty-state {
             text-align: center;
             padding: 3.75rem 1.25rem;
+            background-color: #f9f9f9;
+            border-radius: 12px;
+            border: 2px dashed #eee;
         }
 
         .empty-state i {
@@ -528,22 +530,104 @@
             color: var(--primary-dark);
         }
 
-        @media (max-width: 1199px) {
-            .book-title {
-                font-size: 1rem;
-            }
-
-            .book-price {
-                font-size: 1.1rem;
-            }
+        /* BANNER SECTION STYLES */
+        .banner-carousel {
+            margin-bottom: 2.5rem;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
         }
 
-        @media (max-width: 767px) {
-            .book-card {
-                max-width: 280px;
-                margin-left: auto;
-                margin-right: auto;
-            }
+        .carousel-inner {
+            border-radius: 16px;
+        }
+
+        .carousel-item {
+            height: 400px;
+            position: relative;
+        }
+
+        .carousel-item img {
+            object-fit: cover;
+            width: 100%;
+            height: 100%;
+            filter: brightness(0.85);
+            transition: transform 0.5s ease;
+        }
+
+        .carousel-item:hover img {
+            transform: scale(1.05);
+        }
+
+        .carousel-caption {
+            bottom: 10%;
+            left: 5%;
+            right: auto;
+            text-align: left;
+            max-width: 500px;
+            padding: 2rem;
+            background: rgba(59, 21, 58, 0.6);
+
+            border-radius: 12px;
+            backdrop-filter: blur(5px);
+        }
+
+        .carousel-caption h3 {
+            font-size: 1.2rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            color: var(--accent);
+        }
+
+        .carousel-caption p {
+            font-size: 0.8rem;
+            margin-bottom: 1.5rem;
+            color: white;
+        }
+
+        .carousel-indicators button {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin: 0 6px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border: none;
+        }
+
+        .carousel-indicators .active {
+            background-color: var(--accent);
+        }
+
+        .carousel-control-prev,
+        .carousel-control-next {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .banner-carousel:hover .carousel-control-prev,
+        .banner-carousel:hover .carousel-control-next {
+            opacity: 1;
+        }
+
+        .carousel-control-prev {
+            left: 20px;
+        }
+
+        .carousel-control-next {
+            right: 20px;
+        }
+
+        .carousel-control-prev-icon,
+        .carousel-control-next-icon {
+            width: 20px;
+            height: 20px;
         }
 
         /* Pagination Styles */
@@ -592,6 +676,117 @@
             border-radius: 8px;
             transition: var(--transition);
         }
+
+        /* Responsive banner styles */
+        @media (max-width: 1199px) {
+            .book-title {
+                font-size: 1rem;
+            }
+
+            .book-price {
+                font-size: 1.1rem;
+            }
+
+            .carousel-item {
+                height: 350px;
+            }
+
+            .carousel-caption h3 {
+                font-size: 1.8rem;
+            }
+
+            .carousel-caption p {
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .carousel-item {
+                height: 300px;
+            }
+
+            .carousel-caption {
+                bottom: 20%;
+                padding: 1.5rem;
+            }
+
+            .carousel-caption h3 {
+                font-size: 1.6rem;
+            }
+
+            .carousel-caption p {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .carousel-item {
+                height: 250px;
+            }
+
+            .carousel-caption {
+                bottom: 15%;
+                padding: 1rem;
+                text-align: center;
+                max-width: 80%;
+                left: 10%;
+            }
+
+            .carousel-caption h3 {
+                font-size: 1.4rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .carousel-caption p {
+                font-size: 0.9rem;
+                margin-bottom: 1rem;
+            }
+
+            .carousel-control-prev,
+            .carousel-control-next {
+                width: 40px;
+                height: 40px;
+                opacity: 0.7;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .carousel-item {
+                height: 200px;
+            }
+
+            .carousel-caption {
+                bottom: 10%;
+                padding: 0.75rem;
+            }
+
+            .carousel-caption h3 {
+                font-size: 1.2rem;
+            }
+
+            .carousel-caption p {
+                font-size: 0.8rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .carousel-indicators {
+                bottom: 10px;
+            }
+
+            .carousel-indicators button {
+                width: 8px;
+                height: 8px;
+                margin: 0 4px;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .book-card {
+                max-width: 280px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+        }
     </style>
 
     {% block extra_head %}{% endblock %}
@@ -619,16 +814,21 @@
                         <i class="fas fa-info-circle me-1"></i>За нас
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'store:blog_list' %}">
+{#                        <i class="fas fa-blog me-1"></i>Блог#}
+                    </a>
+                </li>
                 {% if user.is_authenticated %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'store:wishlist' %}">
-                            <i class="fas fa-heart me-1"></i>Списък с желания
+{#                            <i class="fas fa-heart me-1"></i>Списък с желания#}
                         </a>
                     </li>
                 {% endif %}
             </ul>
 
-            <form class="d-flex me-4" action="{% url 'store:search_results' %}" method="get">
+            <form class="d-flex me-4" action="{% url 'store:store' %}" method="get">
                 <div class="input-group">
                     <input class="form-control" type="search" placeholder="Търси книги..." aria-label="Search" name="q">
                     <button class="btn btn-outline-light" type="submit">
@@ -679,9 +879,9 @@
                          style="width: 28px; height: 28px;">
                     <span id="cart-total"
                           class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger {% if cartItems == 0 %}d-none{% endif %}">
-        {{ cartItems }}
-        <span class="visually-hidden">продукти в количката</span>
-    </span>
+                        {{ cartItems }}
+                        <span class="visually-hidden">продукти в количката</span>
+                    </span>
                 </a>
             </div>
         </div>
@@ -691,8 +891,6 @@
 <div class="container">
     {% block content %}
         <div class="row g-4">
-
-
             <div class="col-lg-3">
                 <div class="category-sidebar">
                     <h3>Филтриране</h3>
@@ -757,25 +955,46 @@
             </div>
 
             <div class="col-lg-9">
-{#                <div class="d-flex justify-content-end align-items-center mb-4">#}
-                    {# TODO: Make it work #}
-{#                    <label for="sort_by" class="me-2 text-muted fw-bold">Сортирай по:</label>#}
-{#                    <select id="sort_by" class="form-select w-auto me-2">#}
-{#                        <option value="name" {% if sort_by == 'name' %}selected{% endif %}>Име</option>#}
-{#                        <option value="price" {% if sort_by == 'price' %}selected{% endif %}>Цена</option>#}
-{#                        <option value="avg_rating" {% if sort_by == 'avg_rating' %}selected{% endif %}>Рейтинг</option>#}
-{#                        <option value="publication_year" {% if sort_by == 'publication_year' %}selected{% endif %}>#}
-{#                            Година на издаване#}
-{#                        </option>#}
-{#                    </select>#}
-{#                    <select id="order" class="form-select w-auto">#}
-{#                        <option value="asc" {% if order == 'asc' %}selected{% endif %}>Възходящ</option>#}
-{#                        <option value="desc" {% if order == 'desc' %}selected{% endif %}>Низходящ</option>#}
-{#                    </select>#}
-{#                </div>#}
+                {% if banners %}
+                    <div id="bannerCarousel" class="carousel slide banner-carousel" data-bs-ride="carousel">
+                        <div class="carousel-indicators">
+                            {% for banner in banners %}
+                                <button type="button" data-bs-target="#bannerCarousel"
+                                        data-bs-slide-to="{{ forloop.counter0 }}"
+                                        class="{% if forloop.first %}active{% endif %}"
+                                        aria-current="{% if forloop.first %}true{% else %}false{% endif %}"
+                                        aria-label="Slide {{ forloop.counter }}"></button>
+                            {% endfor %}
+                        </div>
+                        <div class="carousel-inner">
+                            {% for banner in banners %}
+                                <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                    <a href="{{ banner.url }}">
+                                        <img src="{{ banner.image.url }}" class="d-block w-100" alt="{{ banner.title }}"
+                                             loading="lazy">
+                                        <div class="carousel-caption d-none d-md-block">
+                                            <h3>{{ banner.title }}</h3>
+                                            <p>{{ banner.subtitle }}</p>
+                                        </div>
+                                    </a>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#bannerCarousel"
+                                data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#bannerCarousel"
+                                data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                    </div>
+                {% endif %}
 
                 <div class="row g-4">
-                    {% for book in books %}
+                    {% for book in books_on_page %}
                         <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 col-6">
                             <div class="book-card">
                                 {% if book.is_bestseller %}
@@ -785,10 +1004,9 @@
                                 {% endif %}
                                 {% if book.stock <= 15 and book.stock > 0 %}
                                     <span class="book-badge" style="background-color: var(--accent); color: black;">
-                                    Последни бройки!
-                                </span>
+                                        Последни бройки!
+                                    </span>
                                 {% endif %}
-
 
                                 <div class="book-image">
                                     <img src="{{ book.imageURL }}"
@@ -859,19 +1077,20 @@
         </div>
     {% endblock %}
 </div>
-{% if books.has_other_pages %}
+
+{% if books_on_page.has_other_pages %}
     <nav aria-label="Book pages" class="mt-4">
         <ul class="pagination justify-content-center">
-            {% if books.has_previous %}
+            {% if books_on_page.has_previous %}
                 <li class="page-item"><a class="page-link"
-                                         href="?page={{ books.previous_page_number }}&q={{ query|default:'' }}&category_slug={{ active_category_slug|default:'' }}&author={{ author|default:'' }}&year={{ year|default:'' }}&min_price={{ min_price|default:'' }}&max_price={{ max_price|default:'' }}&sort_by={{ sort_by|default:'' }}&order={{ order|default:'' }}">Предишна</a>
+                                         href="?page={{ books_on_page.previous_page_number }}&q={{ query|default:'' }}&category_slug={{ active_category_slug|default:'' }}&author={{ author|default:'' }}&year={{ year|default:'' }}&min_price={{ min_price|default:'' }}&max_price={{ max_price|default:'' }}&sort_by={{ sort_by|default:'' }}&order={{ order|default:'' }}">Предишна</a>
                 </li>
             {% else %}
                 <li class="page-item disabled"><span class="page-link">Предишна</span></li>
             {% endif %}
 
-            {% for i in books.paginator.page_range %}
-                {% if books.number == i %}
+            {% for i in books_on_page.paginator.page_range %}
+                {% if books_on_page.number == i %}
                     <li class="page-item active" aria-current="page"><span class="page-link">{{ i }}</span></li>
                 {% else %}
                     <li class="page-item"><a class="page-link"
@@ -880,9 +1099,9 @@
                 {% endif %}
             {% endfor %}
 
-            {% if books.has_next %}
+            {% if books_on_page.has_next %}
                 <li class="page-item"><a class="page-link"
-                                         href="?page={{ books.next_page_number }}&q={{ query|default:'' }}&category_slug={{ active_category_slug|default:'' }}&author={{ author|default:'' }}&year={{ year|default:'' }}&min_price={{ min_price|default:'' }}&max_price={{ max_price|default:'' }}&sort_by={{ sort_by|default:'' }}&order={{ order|default:'' }}">Следваща</a>
+                                         href="?page={{ books_on_page.next_page_number }}&q={{ query|default:'' }}&category_slug={{ active_category_slug|default:'' }}&author={{ author|default:'' }}&year={{ year|default:'' }}&min_price={{ min_price|default:'' }}&max_price={{ max_price|default:'' }}&sort_by={{ sort_by|default:'' }}&order={{ order|default:'' }}">Следваща</a>
                 </li>
             {% else %}
                 <li class="page-item disabled"><span class="page-link">Следваща</span></li>
