@@ -352,7 +352,7 @@
         .book-title {
             font-size: 2rem;
         }
-        
+
         .book-price {
             font-size: 1.8rem;
         }
@@ -362,24 +362,24 @@
         .book-detail-container {
             margin: 1rem auto;
         }
-        
+
         .book-title {
             font-size: 1.8rem;
         }
-        
+
         .book-author {
             font-size: 1.1rem;
         }
-        
+
         .price-section {
             flex-direction: column;
             align-items: flex-start;
         }
-        
+
         .review-form-card {
             padding: 1.5rem;
         }
-        
+
         .review-header {
             flex-direction: column;
             align-items: flex-start;
@@ -391,17 +391,17 @@
         .book-title {
             font-size: 1.6rem;
         }
-        
+
         .book-price {
             font-size: 1.6rem;
         }
-        
+
         .btn-add-cart,
         .btn-out-of-stock {
             width: 100%;
             justify-content: center;
         }
-        
+
         .review-form-card {
             padding: 1.25rem;
         }
@@ -422,6 +422,7 @@
     .messages li {
         animation: slideIn 0.3s ease;
     }
+    
 </style>
 {% endblock %}
 
@@ -435,7 +436,7 @@
                      class="book-image"
                      alt="{{ book.name }}"
                      loading="lazy">
-                
+
                 {% if book.is_bestseller %}
                     <span class="book-badge">Бестселър</span>
                 {% elif book.is_new %}
@@ -494,7 +495,7 @@
         {% if user.is_authenticated %}
             <div class="review-form-card">
                 <h3 class="review-form-title">Оставете вашето ревю</h3>
-                
+
                 {% if messages %}
                     <ul class="messages">
                         {% for message in messages %}
@@ -502,10 +503,10 @@
                         {% endfor %}
                     </ul>
                 {% endif %}
-                
+
                 <form action="{% url 'store:book_detail' book.pk %}" method="post">
                     {% csrf_token %}
-                    
+
                     <div class="form-group">
     <label for="id_rating">Оценка:</label>
     <div class="rating-stars">
@@ -515,12 +516,12 @@
         {% endfor %}
     </div>
 </div>
-                    
+
                     <div class="form-group">
                         <label for="id_comment">Коментар:</label>
                         <textarea name="comment" id="id_comment" class="form-control" rows="4" placeholder="Споделете вашите впечатления за книгата...">{{ form.comment.value|default:'' }}</textarea>
                     </div>
-                    
+
                     <button type="submit" class="btn btn-accent">
                         <i class="fas fa-paper-plane me-2"></i> Изпрати ревю
                     </button>
@@ -537,7 +538,6 @@
 
         {% if reviews %}
             <div class="reviews-list">
-            {# TODO: Съцо така искам да добавя че коментарите може да са повече от 10 и да могат да се виждат на страницата   #}
                 {% for review in reviews %}
                     <div class="review-card">
                         <div class="review-header">
@@ -547,7 +547,7 @@
                             </span>
                             <span class="review-date">{{ review.created_at|date:"d.m.Y" }}</span>
                         </div>
-                        
+
                         {% if review.comment %}
                             <p class="review-comment">{{ review.comment }}</p>
                         {% endif %}
