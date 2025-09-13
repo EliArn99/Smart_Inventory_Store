@@ -1,3 +1,4 @@
+# TODO: Fix Pagination
 from datetime import time
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import login
@@ -6,6 +7,8 @@ from django.http import JsonResponse, Http404, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.http import require_POST
 from django.contrib import messages
+from django.views.generic import ListView, TemplateView, DetailView, View
+from django.views.generic.edit import FormView
 from .forms import CustomUserCreationForm, ReviewForm, PostForm, CommentForm
 from .models import Book, Order, OrderItem, Category, WishlistItem, Review, ShippingAddress, Post, Banner, Customer, \
     BlogCategory
@@ -15,109 +18,107 @@ from django.db.models import Q, Count, Avg, F
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
-def store(request, category_slug=None):
-    books = Book.objects.all()
+class CartMixin:
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        data = cartData(self.request)
+        context['cartItems'] = data['cartItems']
+        context['order'] = data['order']
+        context['items'] = data['items']
+        return context
 
-    books = books.annotate(
-        avg_rating=Avg('reviews__rating')
-    ).annotate(
-        reviews_count=Count('reviews')
-    )
 
-    query = request.GET.get('q')
-    if query:
-        books = books.filter(
-            Q(name__icontains=query) |
-            Q(author__icontains=query) |
-            Q(description__icontains=query)
-        ).distinct()
+class BaseContextMixin:
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        data = cartData(self.request)
+        context['cartItems'] = data['cartItems']
+        return context
 
-    if category_slug:
-        books = books.filter(category__slug=category_slug)
 
-    author = request.GET.get('author')
-    if author:
-        books = books.filter(author__icontains=author)
+class BookListView(BaseContextMixin, ListView):
+    model = Book
+    template_name = 'store/store.html'
+    context_object_name = 'books_on_page'
+    paginate_by = 12
 
-    year = request.GET.get('year')
-    if year:
-        try:
-            books = books.filter(publication_year=int(year))
-        except (ValueError, TypeError):
-            pass
+    def get_queryset(self):
+        books = Book.objects.annotate(
+            avg_rating=Avg('reviews__rating')
+        ).annotate(
+            reviews_count=Count('reviews')
+        )
 
-    min_price = request.GET.get('min_price')
-    max_price = request.GET.get('max_price')
-    if min_price:
-        books = books.filter(price__gte=min_price)
-    if max_price:
-        books = books.filter(price__lte=max_price)
+        query = self.request.GET.get('q')
+        if query:
+            books = books.filter(
+                Q(name__icontains=query) |
+                Q(author__icontains=query) |
+                Q(description__icontains=query)
+            ).distinct()
 
-    sort_by = request.GET.get('sort_by', 'name')
-    order = request.GET.get('order', 'asc')
+        category_slug = self.kwargs.get('category_slug')
+        if category_slug:
+            books = books.filter(category__slug=category_slug)
 
-    valid_sort_fields = ['name', 'price', 'avg_rating', 'publication_year']
-    if sort_by in valid_sort_fields:
-        if order == 'desc':
-            books = books.order_by(F(sort_by).desc(nulls_last=True))
+        author = self.request.GET.get('author')
+        if author:
+            books = books.filter(author__icontains=author)
+
+        year = self.request.GET.get('year')
+        if year:
+            try:
+                books = books.filter(publication_year=int(year))
+            except (ValueError, TypeError):
+                pass
+
+        min_price = self.request.GET.get('min_price')
+        max_price = self.request.GET.get('max_price')
+        if min_price:
+            books = books.filter(price__gte=min_price)
+        if max_price:
+            books = books.filter(price__lte=max_price)
+
+        sort_by = self.request.GET.get('sort_by', 'name')
+        order = self.request.GET.get('order', 'asc')
+
+        valid_sort_fields = ['name', 'price', 'avg_rating', 'publication_year']
+        if sort_by in valid_sort_fields:
+            if order == 'desc':
+                books = books.order_by(F(sort_by).desc(nulls_last=True))
+            else:
+                books = books.order_by(F(sort_by).asc(nulls_last=True))
         else:
-            books = books.order_by(F(sort_by).asc(nulls_last=True))
-    else:
-        books = books.order_by('name')
+            books = books.order_by('name')
 
-    paginator = Paginator(books, 12)
-    page = request.GET.get('page')
-    try:
-        books_on_page = paginator.page(page)
-    except PageNotAnInteger:
-        books_on_page = paginator.page(1)
-    except EmptyPage:
-        books_on_page = paginator.page(paginator.num_pages)
+        return books
 
-    categories = Category.objects.annotate(book_count=Count('book'))
-    data = cartData(request)
-    cartItems = data['cartItems']
-    banners = Banner.objects.filter(is_active=True)
-
-    context = {
-        'books': books_on_page,
-        'cartItems': cartItems,
-        'categories': categories,
-        'active_category_slug': category_slug,
-        'query': query,
-        'min_price': min_price,
-        'max_price': max_price,
-        'author': author,
-        'year': year,
-        'sort_by': sort_by,
-        'order': order,
-        'banners': banners
-    }
-    return render(request, 'store/store.html', context)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categories'] = Category.objects.annotate(book_count=Count('book'))
+        context['banners'] = Banner.objects.filter(is_active=True)
+        context['active_category_slug'] = self.kwargs.get('category_slug')
+        context['query'] = self.request.GET.get('q')
+        context['min_price'] = self.request.GET.get('min_price')
+        context['max_price'] = self.request.GET.get('max_price')
+        context['author'] = self.request.GET.get('author')
+        context['year'] = self.request.GET.get('year')
+        context['sort_by'] = self.request.GET.get('sort_by', 'name')
+        context['order'] = self.request.GET.get('order', 'asc')
+        return context
 
 
-def about_us(request):
-    return render(request, 'store/about_us.html')
+
+class AboutUsView(BaseContextMixin, TemplateView):
+    template_name = 'store/about_us.html'
 
 
-def cart(request):
-    data = cartData(request)
-    cartItems = data['cartItems']
-    order = data['order']
-    items = data['items']
-
-    context = {'items': items, 'order': order, 'cartItems': cartItems}
-    return render(request, 'store/cart.html', context)
+class CartView(CartMixin, TemplateView):
+    template_name = 'store/cart.html'
 
 
-def checkout(request):
-    data = cartData(request)
-    cartItems = data['cartItems']
-    order = data['order']
-    items = data['items']
-
-    context = {'items': items, 'order': order, 'cartItems': cartItems}
-    return render(request, 'store/checkout.html', context)
+class CheckoutView(CartMixin, TemplateView):
+    template_name = 'store/checkout.html'
 
 
 @require_POST
@@ -153,7 +154,6 @@ def updateItem(request):
         if action == 'add':
             quantity = cart.get(bookId, {'quantity': 0})['quantity'] + 1
             cart[bookId] = {'quantity': quantity}
-
         elif action == 'remove':
             if bookId in cart:
                 cart[bookId]['quantity'] -= 1
@@ -161,11 +161,8 @@ def updateItem(request):
                     del cart[bookId]
 
         cart_items_count = sum(item['quantity'] for item in cart.values())
-
         response = JsonResponse({'cartItems': cart_items_count}, safe=False)
-
         response.set_cookie('cart', json.dumps(cart))
-
         return response
 
 
@@ -185,7 +182,6 @@ def processOrder(request):
 
         order.transaction_id = transaction_id
 
-        # Проверка за наличност преди завършване на поръчката
         order_items = order.orderitem_set.all()
         for item in order_items:
             book = item.product
@@ -197,7 +193,6 @@ def processOrder(request):
 
         order.complete = True
 
-        # Намаляване на наличността след успешно завършване
         for item in order_items:
             book = item.product
             book.stock -= item.quantity
@@ -205,7 +200,6 @@ def processOrder(request):
 
         order.save()
 
-        # Създаване на адрес за доставка
         if order.shipping:
             ShippingAddress.objects.create(
                 customer=customer,
@@ -216,8 +210,6 @@ def processOrder(request):
             )
 
         response = JsonResponse('Payment submitted successfully', safe=False)
-
-        # Изчистване на бисквитката "cart" за анонимни потребители
         if not request.user.is_authenticated:
             response.delete_cookie('cart')
 
@@ -235,8 +227,6 @@ def get_cart_data(request):
         item['get_total'] = float(item['get_total'])
     return JsonResponse(data, safe=False)
 
-
-# store/views.py
 
 @login_required
 def profile_details(request):
@@ -281,40 +271,39 @@ def register(request):
     return render(request, 'registration/register.html', context)
 
 
-def book_detail(request, pk):
-    book = get_object_or_404(Book, pk=pk)
-    data = cartData(request)
-    cartItems = data['cartItems']
+class BookDetailView(BaseContextMixin, DetailView, FormView):
+    model = Book
+    template_name = 'store/book_detail.html'
+    context_object_name = 'book'
+    pk_url_kwarg = 'pk'
+    form_class = ReviewForm
 
-    reviews = book.reviews.all().order_by('-created_at')
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['reviews'] = self.object.reviews.all().order_by('-created_at')
+        return context
 
-    if request.method == 'POST':
+    def post(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             messages.error(request, 'Трябва да сте влезли, за да оставите ревю.')
             return redirect('login')
 
+        book = self.get_object()
         if Review.objects.filter(book=book, user=request.user).exists():
             messages.warning(request, 'Вече сте оставили ревю за тази книга.')
-            return redirect('store:book_detail', pk=pk)
+            return redirect('store:book_detail', pk=book.pk)
 
-        form = ReviewForm(request.POST)
+        form = self.get_form()
         if form.is_valid():
             review = form.save(commit=False)
             review.book = book
             review.user = request.user
             review.save()
             messages.success(request, 'Вашето ревю беше успешно добавено!')
-            return redirect('store:book_detail', pk=pk)
-    else:
-        form = ReviewForm()
+            return redirect('store:book_detail', pk=book.pk)
 
-    context = {
-        'book': book,
-        'cartItems': cartItems,
-        'reviews': reviews,
-        'form': form,
-    }
-    return render(request, 'store/book_detail.html', context)
+        context = self.get_context_data(form=form)
+        return self.render_to_response(context)
 
 
 @login_required
@@ -328,16 +317,12 @@ def update_wishlist(request):
         if not all([book_id, action]):
             return JsonResponse({'error': 'Missing bookId or action'}, status=400)
 
-        book = Book.objects.get(id=book_id)
+        book = get_object_or_404(Book, id=book_id)
         wishlist_item, created = WishlistItem.objects.get_or_create(user=request.user, book=book)
 
         if action == 'add':
-            if created:
-                message = 'Книгата е добавена в списъка с желания.'
-                added = True
-            else:
-                message = 'Книгата вече е в списъка с желания.'
-                added = True
+            message = 'Книгата е добавена в списъка с желания.' if created else 'Книгата вече е в списъка с желания.'
+            added = True
         elif action == 'remove':
             if not created:
                 wishlist_item.delete()
@@ -360,94 +345,68 @@ def update_wishlist(request):
 @login_required(login_url='login')
 def wishlist_view(request):
     user_wishlist = WishlistItem.objects.filter(user=request.user)
-    context = {'wishlist_items': user_wishlist}
+    data = cartData(request)
+    cartItems = data['cartItems']
+    context = {'wishlist_items': user_wishlist, 'cartItems': cartItems}
     return render(request, 'store/wishlist.html', context)
 
 
-def search_results(request):
-    data = cartData(request)
-    cartItems = data['cartItems']
-    query = request.GET.get('q')
 
-    books = Book.objects.all()
+class BlogListView(BaseContextMixin, ListView):
+    model = Post
+    template_name = 'store/blog_list.html'
+    context_object_name = 'posts_list'
+    paginate_by = 6
+    queryset = Post.objects.filter(status=1).order_by('-created_on')
 
-    if query:
-        books = books.filter(
-            Q(name__icontains=query) |
-            Q(author__icontains=query) |
-            Q(description__icontains=query)
-        ).distinct()
-
-    context = {
-        'books': books,
-        'cartItems': cartItems,
-        'query': query,
-    }
-    return render(request, 'store/store.html', context)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categories'] = BlogCategory.objects.all()
+        return context
 
 
-def blog_list(request):
-    posts_list = Post.objects.filter(status=1).order_by('-created_on')
-    categories = BlogCategory.objects.all()
+class PostsByCategoryView(BlogListView):
+    def get_queryset(self):
+        category_slug = self.kwargs.get('category_slug')
+        self.category = get_object_or_404(BlogCategory, slug=category_slug)
+        return Post.objects.filter(category=self.category, status=1).order_by('-created_on')
 
-    paginator = Paginator(posts_list, 6)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-
-    context = {
-        'page_obj': page_obj,
-        'is_paginated': True,
-        'categories': categories,
-    }
-    return render(request, 'store/blog_list.html', context)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['current_category'] = self.category
+        return context
 
 
+class BlogDetailView(BaseContextMixin, DetailView, FormView):
+    model = Post
+    template_name = 'store/blog_detail.html'
+    context_object_name = 'post'
+    slug_url_kwarg = 'slug'
+    form_class = CommentForm
 
-def posts_by_category(request, category_slug):
-    category = get_object_or_404(BlogCategory, slug=category_slug)
-    posts = Post.objects.filter(category=category, status=1).order_by('-created_on')
+    def get_object(self, queryset=None):
+        return get_object_or_404(Post, slug=self.kwargs.get('slug'), status=1)
 
-    paginator = Paginator(posts, 6)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['comments'] = self.object.comments.filter(is_approved=True).order_by('-created_on')
+        return context
 
-    categories = BlogCategory.objects.all()
-
-    context = {
-        'page_obj': page_obj,
-        'is_paginated': True,
-        'categories': categories,
-        'current_category': category,
-    }
-    return render(request, 'store/blog_list.html', context)
-
-def blog_detail(request, slug):
-    post = get_object_or_404(Post, slug=slug, status=1)
-
-    comments = post.comments.filter(is_approved=True).order_by('-created_on')
-
-    if request.method == 'POST':
-        if not request.user.is_authenticated:
-            messages.error(request, 'Трябва да сте влезли, за да коментирате.')
+    def form_valid(self, form):
+        if not self.request.user.is_authenticated:
+            messages.error(self.request, 'Трябва да сте влезли, за да коментирате.')
             return redirect('login')
 
-        comment_form = CommentForm(data=request.POST)
-        if comment_form.is_valid():
-            new_comment = comment_form.save(commit=False)
-            new_comment.post = post
-            new_comment.user = request.user
-            new_comment.save()
-            messages.success(request, 'Вашият коментар е изпратен и очаква одобрение.')
-            return redirect('store:blog_detail', slug=slug)
-    else:
-        comment_form = CommentForm()
+        new_comment = form.save(commit=False)
+        new_comment.post = self.get_object()
+        new_comment.user = self.request.user
+        new_comment.save()
+        messages.success(self.request, 'Вашият коментар е изпратен и очаква одобрение.')
+        return redirect('store:blog_detail', slug=self.kwargs.get('slug'))
 
-    context = {
-        'post': post,
-        'comments': comments,
-        'comment_form': comment_form,
-    }
-    return render(request, 'store/blog_detail.html', context)
+    def form_invalid(self, form):
+        context = self.get_context_data(form=form)
+        return self.render_to_response(context)
 
 
 @staff_member_required
@@ -478,10 +437,8 @@ def inventory_report_view(request):
 
 def order_detail(request, order_id):
     order = get_object_or_404(Order, id=order_id)
-
-    if order.customer != request.user.customer:
+    if not request.user.is_authenticated or order.customer != request.user.customer:
         raise Http404("You don't have permission to view this order.")
-        pass
 
     context = {
         'order': order,
