@@ -1,16 +1,11 @@
 import json
-from .models import Book, Order, OrderItem, Customer # Уверете се, че Customer е импортиран
+from decimal import Decimal
+from .models import Book, Order, OrderItem, Customer
 
 def cookieCart(request):
 
     try:
-        cart_json = request.COOKIES.get('cart')
-        if cart_json:
-            cart = json.loads(cart_json)
-            print('DEBUG (cookieCart): Raw cart cookie:', cart_json) # Дебъг принт за суровата бисквитка
-        else:
-            cart = {}
-            print('DEBUG (cookieCart): Cart cookie not found, initializing empty cart.')
+        cart = json.loads(request.COOKIES.get('cart', '{}'))
     except json.JSONDecodeError:
         cart = {}
         print('ERROR (cookieCart): Invalid JSON in cart cookie, initializing empty cart.')
@@ -18,26 +13,22 @@ def cookieCart(request):
         cart = {}
         print(f'ERROR (cookieCart): Unexpected error reading cart cookie: {e}, initializing empty cart.')
 
-    print('DEBUG (cookieCart): Parsed cart dictionary:', cart)
-
     items = []
-    order = {'get_cart_total': 0, 'get_cart_items': 0, 'shipping': False}
+    order = {'get_cart_total': Decimal(0), 'get_cart_items': 0, 'shipping': False}
     cartItems = 0
+    items_to_delete = []
 
-    for book_id_str in list(cart.keys()):
+    for book_id_str, item_data in cart.items():
         try:
-            if cart[book_id_str]['quantity'] > 0:
-                quantity = cart[book_id_str]['quantity']
-                cartItems += quantity
-
+            quantity = item_data.get('quantity', 0)
+            if quantity > 0:
                 product = Book.objects.get(id=int(book_id_str))
-                total = (product.price * quantity)
+                total = product.price * quantity
 
                 order['get_cart_total'] += total
                 order['get_cart_items'] += quantity
 
                 item = {
-                    'id': product.id,
                     'product': {
                         'id': product.id,
                         'name': product.name,
@@ -45,28 +36,27 @@ def cookieCart(request):
                         'imageURL': product.imageURL
                     },
                     'quantity': quantity,
-                    'digital': product.digital,
                     'get_total': float(total),
                 }
                 items.append(item)
 
-                if product.digital == False:
+                if not product.digital:
                     order['shipping'] = True
             else:
-                print(f"DEBUG (cookieCart): Removing item {book_id_str} with non-positive quantity from cart.")
-                del cart[book_id_str]
+                items_to_delete.append(book_id_str)
+
         except Book.DoesNotExist:
             print(f"WARNING (cookieCart): Book with ID {book_id_str} not found in database, removing from cookie cart.")
-            del cart[book_id_str]
+            items_to_delete.append(book_id_str)
         except Exception as e:
             print(f"ERROR (cookieCart): Problem processing item {book_id_str} in cookieCart: {e}")
+            items_to_delete.append(book_id_str)
+
+    for book_id_str in items_to_delete:
+        if book_id_str in cart:
             del cart[book_id_str]
 
-    # print('DEBUG (cookieCart): Final cart items (backend):', cartItems)
-    # print('DEBUG (cookieCart): Final order (backend):', order)
-    # print('DEBUG (cookieCart): Final items list (backend):', items)
-
-    return {'cartItems': cartItems, 'order': order, 'items': items}
+    return {'cartItems': order['get_cart_items'], 'order': order, 'items': items}
 
 
 def cartData(request):
@@ -86,6 +76,7 @@ def cartData(request):
 
 
 def guestOrder(request, data):
+
     print("User is not authenticated")
     print('COOKIES:', request.COOKIES)
     name = data['form']['name']
