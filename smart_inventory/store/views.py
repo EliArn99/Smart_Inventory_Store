@@ -1,21 +1,19 @@
-# TODO: Fix Pagination
 from datetime import time
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, Http404, HttpResponse
+from django.http import JsonResponse, Http404
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.http import require_POST
 from django.contrib import messages
-from django.views.generic import ListView, TemplateView, DetailView, View
+from django.views.generic import ListView, TemplateView, DetailView
 from django.views.generic.edit import FormView
 from .forms import CustomUserCreationForm, ReviewForm, PostForm, CommentForm
-from .models import Book, Order, OrderItem, Category, WishlistItem, Review, ShippingAddress, Post, Banner, Customer, \
+from .models import Book, Order, OrderItem, Category, WishlistItem, Review, ShippingAddress, Post, Banner, \
     BlogCategory
 import json
 from .utils import cartData, cookieCart, guestOrder
 from django.db.models import Q, Count, Avg, F
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
 class CartMixin:
@@ -106,7 +104,6 @@ class BookListView(BaseContextMixin, ListView):
         context['sort_by'] = self.request.GET.get('sort_by', 'name')
         context['order'] = self.request.GET.get('order', 'asc')
         return context
-
 
 
 class AboutUsView(BaseContextMixin, TemplateView):
@@ -349,7 +346,6 @@ def wishlist_view(request):
     cartItems = data['cartItems']
     context = {'wishlist_items': user_wishlist, 'cartItems': cartItems}
     return render(request, 'store/wishlist.html', context)
-
 
 
 class BlogListView(BaseContextMixin, ListView):
