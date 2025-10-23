@@ -234,12 +234,12 @@
         .checkout-body {
             padding: 1rem;
         }
-        
+
         .order-summary-item {
             flex-direction: column;
             text-align: center;
         }
-        
+
         .order-summary-image {
             margin-right: 0;
             margin-bottom: 1rem;
@@ -256,63 +256,63 @@
             <div class="checkout-header">
                 <h2><i class="fas fa-shopping-bag"></i> Поръчка</h2>
             </div>
-            
+
             <div class="checkout-body">
                 <a href="{% url 'store:cart' %}" class="btn btn-outline mb-3">
                     <i class="fas fa-arrow-left"></i> Назад към количката
                 </a>
-                
+
                 <div id="form-wrapper">
                     <form id="form">
                         <!-- User Information -->
                         <div id="user-info">
                             <h3 class="section-title">Данни за клиента</h3>
-                            
+
                             <div class="form-group">
                                 <label for="name" class="form-label">Име и фамилия</label>
                                 <input type="text" id="name" name="name" class="form-control" placeholder="Въведете вашето име" required>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="email" class="form-label">Имейл адрес</label>
                                 <input type="email" id="email" name="email" class="form-control" placeholder="Въведете вашия имейл" required>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="phone" class="form-label">Телефон</label>
                                 <input type="tel" id="phone" name="phone" class="form-control" placeholder="Въведете вашия телефон">
                             </div>
                         </div>
-                        
+
                         <!-- Shipping Information -->
                         <div id="shipping-info">
                             <h3 class="section-title">Адрес за доставка</h3>
-                            
+
                             <div class="form-group">
                                 <label for="address" class="form-label">Адрес</label>
                                 <input type="text" id="address" name="address" class="form-control" placeholder="Улица, номер, вход, етаж, ап.">
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="city" class="form-label">Град</label>
                                 <input type="text" id="city" name="city" class="form-control" placeholder="Въведете град">
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="zipcode" class="form-label">Пощенски код</label>
                                 <input type="text" id="zipcode" name="zipcode" class="form-control" placeholder="Въведете пощенски код">
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="notes" class="form-label">Бележки към поръчката (по избор)</label>
                                 <textarea id="notes" name="notes" class="form-control" rows="3" placeholder="Допълнителни указания за доставка..."></textarea>
                             </div>
                         </div>
-                        
+
                         <!-- Payment Information (initially hidden) -->
                         <div id="payment-info" class="hidden">
                             <h3 class="section-title">Начин на плащане</h3>
-                            
+
                             <div class="payment-methods">
                                 <div class="payment-method active">
                                     <i class="fab fa-cc-paypal payment-icon"></i>
@@ -322,10 +322,10 @@
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div id="paypal-button-container" class="payment-details"></div>
                         </div>
-                        
+
                         <!-- Submit Button -->
                         <button type="submit" id="form-button" class="btn btn-primary w-100 mt-3">
                             <i class="fas fa-lock"></i> Продължи към плащане
@@ -334,45 +334,45 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Order Summary Section -->
         <div class="checkout-section">
             <div class="checkout-header">
                 <h2><i class="fas fa-receipt"></i> Резюме на поръчката</h2>
             </div>
-            
+
             <div class="checkout-body">
                 <div class="order-items-container">
                     {% for item in items %}
                     <div class="order-summary-item">
-                        <img class="order-summary-image" src="{{ item.product.imageURL }}" 
+                        <img class="order-summary-image" src="{{ item.product.imageURL }}"
                              onerror="this.onerror=null;this.src='{% static 'images/placeholder.png' %}'"
                              alt="{{ item.product.name }}">
-                        
+
                         <div class="order-summary-details">
                             <h4 class="order-summary-title">{{ item.product.name }}</h4>
                             <p class="order-summary-quantity">Количество: {{ item.quantity }}</p>
                         </div>
-                        
+
                         <div class="order-summary-price">
                             {{ item.get_total|floatformat:2 }} лв.
                         </div>
                     </div>
                     {% endfor %}
                 </div>
-                
+
                 <div class="order-total">
                     <div class="order-total-row">
                         <span class="order-total-label">Продукти:</span>
                         <span class="order-total-value">{{ order.get_cart_items }}</span>
                     </div>
-                    
+
                     <div class="order-total-row">
                         {# TODO: Work on delivery price logic #}
 {#                        <span class="order-total-label">Доставка:</span>#}
 {#                        <span class="order-total-value">5.00 лв.</span>#}
                     </div>
-                    
+
                     <div class="order-total-row" style="font-size: 1.2rem;">
                         <span class="order-total-label">Общо:</span>
                         <span class="order-total-value">{{ order.get_cart_total|floatformat:2 }} лв.</span>
@@ -440,7 +440,7 @@
         document.getElementById('form-button').classList.add("hidden");
         document.getElementById('payment-info').classList.remove("hidden");
     });
-     
+
     function submitFormData(given_name, transactionId) {
         console.log('Payment button clicked');
         var userFormData = {
@@ -451,43 +451,43 @@
             'total': total,
             'transaction_id': transactionId,
         };
- 
+
         var shippingInfo = {
             'address': null,
             'city': null,
             'zipcode': null,
         };
- 
+
         if (shipping != 'False') {
             shippingInfo.address = form.address.value;
             shippingInfo.city = form.city.value;
             shippingInfo.zipcode = form.zipcode.value;
         }
- 
+
         if (user == 'AnonymousUser') {
             userFormData.name = form.name.value;
             userFormData.email = form.email.value;
         }
- 
+
         console.log('Shipping Info:', shippingInfo);
         console.log('User Info:', userFormData);
- 
+
         var url = "/process_order/";
         fetch(url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': csrftoken,
-            }, 
+            },
             body: JSON.stringify({'form': userFormData, 'shipping': shippingInfo}),
         })
         .then((response) => response.json())
         .then((data) => {
             console.log('Success:', data);
- 
+
             cart = {};
             document.cookie = 'cart=' + JSON.stringify(cart) + ";domain=;path=/";
- 
+
             window.location.href = "{% url 'store:store' %}";
         });
     }
