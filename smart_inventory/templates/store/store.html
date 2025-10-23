@@ -5,8 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>
-        {% block title %}Онлайн Книжарница{% endblock %}
+        {% block title %}BookNook{% endblock %}
     </title>
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
 
     <!-- Bootstrap 5 CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -796,7 +797,7 @@
 <nav class="navbar navbar-expand-lg sticky-top">
     <div class="container">
         <a class="navbar-brand" href="{% url 'store:store' %}">
-            <i class="fas fa-book-open me-2"></i>Книжарница
+            <i class="fas fa-book-open me-2"></i>BookNook
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -1078,34 +1079,41 @@
     {% endblock %}
 </div>
 
-{% if books_on_page.has_other_pages %}
+{% if is_paginated %}
     <nav aria-label="Book pages" class="mt-4">
         <ul class="pagination justify-content-center">
-            {% if books_on_page.has_previous %}
-                <li class="page-item"><a class="page-link"
-                                         href="?page={{ books_on_page.previous_page_number }}&q={{ query|default:'' }}&category_slug={{ active_category_slug|default:'' }}&author={{ author|default:'' }}&year={{ year|default:'' }}&min_price={{ min_price|default:'' }}&max_price={{ max_price|default:'' }}&sort_by={{ sort_by|default:'' }}&order={{ order|default:'' }}">Предишна</a>
+            
+            {% comment %} Previous button {% endcomment %}
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?{{ request.GET.urlencode|cut:'page=' }}&page={{ page_obj.previous_page_number }}">Предишна</a>
                 </li>
             {% else %}
                 <li class="page-item disabled"><span class="page-link">Предишна</span></li>
             {% endif %}
 
-            {% for i in books_on_page.paginator.page_range %}
-                {% if books_on_page.number == i %}
-                    <li class="page-item active" aria-current="page"><span class="page-link">{{ i }}</span></li>
+            {% comment %} Page numbers {% endcomment %}
+            {% for i in page_obj.paginator.page_range %}
+                {% if page_obj.number == i %}
+                    <li class="page-item active" aria-current="page">
+                        <span class="page-link">{{ i }}</span>
+                    </li>
                 {% else %}
-                    <li class="page-item"><a class="page-link"
-                                             href="?page={{ i }}&q={{ query|default:'' }}&category_slug={{ active_category_slug|default:'' }}&author={{ author|default:'' }}&year={{ year|default:'' }}&min_price={{ min_price|default:'' }}&max_price={{ max_price|default:'' }}&sort_by={{ sort_by|default:'' }}&order={{ order|default:'' }}">{{ i }}</a>
+                    <li class="page-item">
+                        <a class="page-link" href="?{{ request.GET.urlencode|cut:'page=' }}&page={{ i }}">{{ i }}</a>
                     </li>
                 {% endif %}
             {% endfor %}
 
-            {% if books_on_page.has_next %}
-                <li class="page-item"><a class="page-link"
-                                         href="?page={{ books_on_page.next_page_number }}&q={{ query|default:'' }}&category_slug={{ active_category_slug|default:'' }}&author={{ author|default:'' }}&year={{ year|default:'' }}&min_price={{ min_price|default:'' }}&max_price={{ max_price|default:'' }}&sort_by={{ sort_by|default:'' }}&order={{ order|default:'' }}">Следваща</a>
+            {% comment %} Next button {% endcomment %}
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?{{ request.GET.urlencode|cut:'page=' }}&page={{ page_obj.next_page_number }}">Следваща</a>
                 </li>
             {% else %}
                 <li class="page-item disabled"><span class="page-link">Следваща</span></li>
             {% endif %}
+            
         </ul>
     </nav>
 {% endif %}
@@ -1114,7 +1122,8 @@
     <div class="container">
         <div class="row">
             <div class="col-md-4 mb-4 mb-md-0">
-                <h5 class="mb-3">Книжарница</h5>
+                <h5 class="mb-3">BookNook
+                </h5>
                 <p>Вашият доверен партньор в света на книгите. Предоставяме богата селекция от заглавия за всички
                     възрасти и интереси.</p>
             </div>
@@ -1139,7 +1148,7 @@
         <hr class="my-4 bg-light">
         <div class="row align-items-center">
             <div class="col-md-6 text-center text-md-start">
-                <p class="mb-0">&copy; 2023 Книжарница. Всички права запазени.</p>
+                <p class="mb-0">&copy; 2023 BookNook. Всички права запазени.</p>
             </div>
             <div class="col-md-6 text-center text-md-end">
                 <a href="#" class="text-decoration-none me-3"><i class="fab fa-facebook-f fa-lg"></i></a>
