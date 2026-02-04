@@ -1,19 +1,22 @@
-from datetime import time
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, Http404
+from django.http import Http404
 from django.shortcuts import render, get_object_or_404, redirect
-from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.views.generic import ListView, TemplateView, DetailView
 from django.views.generic.edit import FormView
 from .forms import CustomUserCreationForm, ReviewForm, PostForm, CommentForm
 from .models import Book, Order, OrderItem, Category, WishlistItem, Review, ShippingAddress, Post, Banner, \
     BlogCategory
-import json
 from .utils import cartData, cookieCart, guestOrder
 from django.db.models import Q, Count, Avg, F
+import uuid
+from django.db import transaction
+from django.db.models import F
+from django.views.decorators.http import require_POST
+from django.http import JsonResponse
+import json
 
 
 class BaseContextMixin:
@@ -164,55 +167,62 @@ def updateItem(request):
 
 @require_POST
 def processOrder(request):
-    transaction_id = str(int(time.time() * 1000))
     data = json.loads(request.body)
 
     try:
+        # 1) customer + order
         if request.user.is_authenticated:
             customer = request.user.customer
-            order, created = Order.objects.get_or_create(customer=customer, complete=False)
+            order, _ = Order.objects.get_or_create(customer=customer, complete=False)
         else:
             customer, order = guestOrder(request, data)
 
-        total = float(order.get_cart_total)
+        # 2) transaction_id (по-стабилно от time.time)
+        order.transaction_id = uuid.uuid4().hex
 
-        order.transaction_id = transaction_id
+        # 3) Atomic транзакция + lock на книгите
+        with transaction.atomic():
+            items = order.orderitem_set.select_related("product").select_for_update()
 
-        order_items = order.orderitem_set.all()
-        for item in order_items:
-            book = item.product
-            if book.stock < item.quantity:
-                return JsonResponse(
-                    {'error': f'Недостатъчна наличност за книга "{book.name}".'},
-                    status=400
+            # Проверка за наличности
+            for item in items:
+                book = item.product
+                if book is None:
+                    return JsonResponse({"error": "Невалиден продукт в поръчката."}, status=400)
+                if book.stock < item.quantity:
+                    return JsonResponse(
+                        {"error": f'Недостатъчна наличност за книга "{book.name}".'},
+                        status=400
+                    )
+
+            # Намаляване на наличности (F expression = безопасно)
+            for item in items:
+                Book.objects.filter(pk=item.product_id).update(stock=F("stock") - item.quantity)
+
+            order.complete = True
+            order.save(update_fields=["transaction_id", "complete"])
+
+            # Shipping address (state може да липсва)
+            if order.shipping:
+                shipping = data.get("shipping", {})
+                ShippingAddress.objects.create(
+                    customer=customer,
+                    order=order,
+                    address=shipping.get("address", ""),
+                    city=shipping.get("city", ""),
+                    state=shipping.get("state", ""),  # важно!
+                    zipcode=shipping.get("zipcode", ""),
                 )
 
-        order.complete = True
+        response = JsonResponse({"message": "Payment submitted successfully"}, status=200)
 
-        for item in order_items:
-            book = item.product
-            book.stock -= item.quantity
-            book.save()
-
-        order.save()
-
-        if order.shipping:
-            ShippingAddress.objects.create(
-                customer=customer,
-                order=order,
-                address=data['shipping']['address'],
-                city=data['shipping']['city'],
-                zipcode=data['shipping']['zipcode'],
-            )
-
-        response = JsonResponse('Payment submitted successfully', safe=False)
         if not request.user.is_authenticated:
-            response.delete_cookie('cart')
+            response.delete_cookie("cart")
 
         return response
 
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
+        return JsonResponse({"error": str(e)}, status=500)
 
 
 def get_cart_data(request):
@@ -251,7 +261,6 @@ def profile_details(request):
     }
     return render(request, 'store/profile_details.html', context)
 
-
 def register(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
@@ -259,12 +268,13 @@ def register(request):
             user = form.save()
             login(request, user)
             return redirect('store:store')
-
+        else:
+            messages.error(request, "Моля, поправете грешките във формата.")
     else:
         form = CustomUserCreationForm()
 
-    context = {'form': form}
-    return render(request, 'registration/register.html', context)
+    return render(request, 'registration/register.html', {'form': form})
+
 
 
 class BookDetailView(BaseContextMixin, DetailView, FormView):
