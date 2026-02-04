@@ -16,21 +16,20 @@ from .utils import cartData, cookieCart, guestOrder
 from django.db.models import Q, Count, Avg, F
 
 
-class CartMixin:
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        data = cartData(self.request)
-        context['cartItems'] = data['cartItems']
-        context['order'] = data['order']
-        context['items'] = data['items']
-        return context
-
-
 class BaseContextMixin:
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         data = cartData(self.request)
         context['cartItems'] = data['cartItems']
+        return context
+
+
+class CartMixin(BaseContextMixin):  # 💡 Наследява BaseContextMixin
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)  # 1. Изпълнява BaseContextMixin, който добавя cartItems
+        data = cartData(self.request)
+        context['order'] = data['order']  # 2. Добавя само order
+        context['items'] = data['items']  # 3. Добавя само items
         return context
 
 
