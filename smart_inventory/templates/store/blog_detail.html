@@ -3,108 +3,137 @@
 
 {% block extra_head %}
 <style>
-    .blog-post-container {
-        max-width: 800px;
+    .book-detail-container {
+        max-width: 1200px;
         margin: 2rem auto;
         padding: 0 1rem;
     }
 
-    .blog-post-header {
-        text-align: center;
-        margin-bottom: 2.5rem;
+    .book-image-container {
         position: relative;
+        overflow: hidden;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
     }
 
-    .blog-post-title {
+    .book-image {
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+        padding: 2rem;
+        transition: transform 0.5s ease;
+    }
+
+    .book-image:hover {
+        transform: scale(1.02);
+    }
+
+    .book-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background-color: var(--accent);
+        color: var(--primary-dark);
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        z-index: 2;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .book-title {
         color: var(--primary-dark);
         font-weight: 800;
-        margin-bottom: 1rem;
-        line-height: 1.3;
-        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        line-height: 1.2;
     }
 
-    .blog-post-meta {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 1.5rem;
-        flex-wrap: wrap;
+    .book-author {
+        color: #6c757d;
+        font-size: 1.25rem;
+        font-style: italic;
         margin-bottom: 1.5rem;
     }
 
-    .meta-item {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        color: #6c757d;
-        font-weight: 500;
-    }
-
-    .meta-item i {
-        color: var(--accent);
-    }
-
-    .blog-post-divider {
-        width: 80px;
-        height: 4px;
-        background: linear-gradient(90deg, var(--accent), var(--primary-dark));
-        margin: 0 auto;
-        border-radius: 2px;
-    }
-
-    .blog-post-content {
-        background: #fff;
-        border-radius: 16px;
-        padding: 2.5rem;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+    .book-description {
+        color: #495057;
+        line-height: 1.7;
+        font-size: 1.05rem;
         margin-bottom: 2rem;
     }
 
-    .post-content {
-        color: #2d3748;
-        line-height: 1.8;
-        font-size: 1.1rem;
-    }
-
-    .post-content p {
-        margin-bottom: 1.5rem;
-    }
-
-    .post-content p:last-child {
-        margin-bottom: 0;
-    }
-
-    .update-info {
-        text-align: right;
-        padding-top: 1.5rem;
-        margin-top: 2rem;
-        border-top: 1px solid #e9ecef;
-        color: #6c757d;
-        font-size: 0.9rem;
+    .price-section {
         display: flex;
         align-items: center;
-        justify-content: flex-end;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .book-price {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: var(--primary-dark);
+        margin: 0;
+    }
+
+    .btn-add-cart {
+        background-color: var(--accent);
+        color: var(--primary-dark);
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
         gap: 0.5rem;
     }
 
-    .update-info i {
-        color: var(--accent);
+    .btn-add-cart:hover {
+        background-color: var(--accent-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
     }
 
-    .navigation-buttons {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 1rem;
-        flex-wrap: wrap;
-    }
-
-    .btn-back {
-        background-color: var(--primary-dark);
+    .btn-out-of-stock {
+        background-color: #6c757d;
         color: white;
         border: none;
         padding: 0.75rem 1.5rem;
-        border-radius: 8px;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .stock-alert {
+        background-color: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 10px;
+        padding: 1rem 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .stock-alert i {
+        color: #f0b400;
+        font-size: 1.25rem;
+    }
+
+    .stock-alert strong {
+        color: #856404;
+    }
+
+    .category-link {
+        color: var(--primary-dark);
         font-weight: 600;
         text-decoration: none;
         transition: all 0.3s ease;
@@ -113,207 +142,276 @@
         gap: 0.5rem;
     }
 
-    .btn-back:hover {
-        background-color: var(--primary-light);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        color: white;
+    .category-link:hover {
+        color: var(--primary-light);
+        transform: translateX(5px);
     }
 
-    .social-sharing {
-        display: flex;
-        gap: 0.75rem;
-    }
-
-    .social-btn {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        text-decoration: none;
-        transition: all 0.3s ease;
-    }
-
-    .social-btn.facebook {
-        background-color: #3b5998;
-    }
-
-    .social-btn.twitter {
-        background-color: #1da1f2;
-    }
-
-    .social-btn.linkedin {
-        background-color: #0077b5;
-    }
-
-    .social-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
-
-    .related-posts {
-        margin-top: 4rem;
+    .reviews-section {
+        margin-top: 3rem;
         padding-top: 3rem;
-        border-top: 1px solid #e9ecef;
+        border-top: 1px solid #eee;
     }
 
-    .related-title {
+    .reviews-title {
         color: var(--primary-dark);
         font-weight: 700;
-        margin-bottom: 1.5rem;
-        text-align: center;
+        margin-bottom: 2rem;
         position: relative;
         padding-bottom: 0.75rem;
     }
 
-    .related-title::after {
+    .reviews-title::after {
         content: '';
         position: absolute;
         bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
+        left: 0;
         width: 60px;
-        height: 3px;
+        height: 4px;
         background-color: var(--accent);
         border-radius: 2px;
     }
 
-    .related-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 1.5rem;
-        margin-top: 2rem;
+    .review-form-card {
+        background-color: #fff;
+        border-radius: 16px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        padding: 2rem;
+        margin-bottom: 2.5rem;
     }
 
-    .related-card {
-        background: #fff;
-        border-radius: 12px;
-        padding: 1.5rem;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
-        transition: all 0.3s ease;
-        text-decoration: none;
-        color: inherit;
-    }
-
-    .related-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-    }
-
-    .related-card-title {
+    .review-form-title {
         color: var(--primary-dark);
-        font-weight: 600;
-        margin-bottom: 0.75rem;
-        font-size: 1.1rem;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
     }
 
-    .related-card-date {
-        color: #6c757d;
-        font-size: 0.85rem;
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: var(--primary-dark);
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control {
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 0.25rem rgba(240, 201, 135, 0.25);
+    }
+
+    .rating-stars {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .rating-stars input[type="radio"] {
+        display: none;
+    }
+
+    .rating-stars label {
+        font-size: 1.5rem;
+        color: #ddd;
+        cursor: pointer;
+        transition: color 0.3s ease;
+    }
+
+    .rating-stars input[type="radio"]:checked ~ label,
+    .rating-stars label:hover,
+    .rating-stars label:hover ~ label {
+        color: #ffc107;
+    }
+
+    .messages {
+        list-style: none;
+        padding: 0;
+        margin-bottom: 1.5rem;
+    }
+
+    .messages li {
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+
+    .messages .success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .messages .error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .review-card {
+        background-color: #fff;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.06);
+        padding: 1.5rem;
+        margin-bottom: 1.25rem;
+        transition: all 0.3s ease;
+        border-left: 4px solid var(--accent);
+    }
+
+    .review-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .review-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .review-user {
+        font-weight: 700;
+        color: var(--primary-dark);
+    }
+
+    .review-rating {
+        color: #ffc107;
+        font-weight: 600;
         display: flex;
         align-items: center;
-        gap: 0.4rem;
+        gap: 0.25rem;
     }
 
-    .related-card-date i {
-        color: var(--accent);
+    .review-date {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    .review-comment {
+        color: #495057;
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    .no-reviews {
+        text-align: center;
+        padding: 2.5rem;
+        background-color: #f9f9f9;
+        border-radius: 12px;
+        border: 2px dashed #eee;
+    }
+
+    .no-reviews i {
+        font-size: 3rem;
+        color: rgba(59, 21, 58, 0.15);
+        margin-bottom: 1rem;
+    }
+
+    .no-reviews h4 {
+        color: var(--primary-dark);
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    .login-prompt {
+        background-color: #e8f5e9;
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .login-prompt a {
+        color: var(--primary-dark);
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .login-prompt a:hover {
+        color: var(--primary-light);
+        transform: translateX(3px);
     }
 
     /* Responsive Design */
-    @media (max-width: 768px) {
-        .blog-post-container {
-            margin: 1.5rem auto;
-        }
-        
-        .blog-post-title {
+    @media (max-width: 992px) {
+        .book-title {
             font-size: 2rem;
         }
-        
-        .blog-post-content {
-            padding: 2rem 1.5rem;
+
+        .book-price {
+            font-size: 1.8rem;
         }
-        
-        .post-content {
-            font-size: 1.05rem;
+    }
+
+    @media (max-width: 768px) {
+        .book-detail-container {
+            margin: 1rem auto;
         }
-        
-        .blog-post-meta {
-            gap: 1rem;
+
+        .book-title {
+            font-size: 1.8rem;
         }
-        
-        .navigation-buttons {
+
+        .book-author {
+            font-size: 1.1rem;
+        }
+
+        .price-section {
             flex-direction: column;
-            align-items: stretch;
+            align-items: flex-start;
         }
-        
-        .social-sharing {
-            justify-content: center;
+
+        .review-form-card {
+            padding: 1.5rem;
+        }
+
+        .review-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
         }
     }
 
     @media (max-width: 576px) {
-        .blog-post-title {
-            font-size: 1.75rem;
+        .book-title {
+            font-size: 1.6rem;
         }
-        
-        .blog-post-content {
-            padding: 1.5rem 1.25rem;
+
+        .book-price {
+            font-size: 1.6rem;
         }
-        
-        .blog-post-meta {
-            flex-direction: column;
-            gap: 0.75rem;
+
+        .btn-add-cart,
+        .btn-out-of-stock {
+            width: 100%;
+            justify-content: center;
         }
-        
-        .related-grid {
-            grid-template-columns: 1fr;
+
+        .review-form-card {
+            padding: 1.25rem;
         }
     }
 
-    /* Typography enhancements */
-    .post-content h2 {
-        color: var(--primary-dark);
-        margin: 2rem 0 1rem;
-        font-weight: 700;
-        font-size: 1.5rem;
-    }
-
-    .post-content h3 {
-        color: var(--primary-dark);
-        margin: 1.5rem 0 0.75rem;
-        font-weight: 600;
-        font-size: 1.25rem;
-    }
-
-    .post-content blockquote {
-        border-left: 4px solid var(--accent);
-        padding-left: 1.5rem;
-        margin: 1.5rem 0;
-        color: #6c757d;
-        font-style: italic;
-    }
-
-    .post-content ul, .post-content ol {
-        margin: 1rem 0;
-        padding-left: 1.5rem;
-    }
-
-    .post-content li {
-        margin-bottom: 0.5rem;
-    }
-
-    /* Animation */
-    @keyframes fadeIn {
+    /* Animation for messages */
+    @keyframes slideIn {
         from {
             opacity: 0;
-            transform: translateY(20px);
+            transform: translateY(-10px);
         }
         to {
             opacity: 1;
@@ -321,79 +419,148 @@
         }
     }
 
-    .blog-post-content {
-        animation: fadeIn 0.6s ease;
+    .messages li {
+        animation: slideIn 0.3s ease;
     }
+
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="blog-post-container">
-    <div class="blog-post-header">
-        <h1 class="blog-post-title">{{ post.title }}</h1>
-        
-        <div class="blog-post-meta">
-            <div class="meta-item">
-                <i class="fas fa-user"></i>
-                <span>{{ post.author.username }}</span>
-            </div>
-            <div class="meta-item">
-                <i class="fas fa-calendar"></i>
-                <span>{{ post.created_on|date:"d.m.Y" }}</span>
-            </div>
-            <div class="meta-item">
-                <i class="fas fa-clock"></i>
-                <span>{{ post.created_on|date:"H:i" }}</span>
-            </div>
-        </div>
-        
-        <div class="blog-post-divider"></div>
-    </div>
+<div class="book-detail-container">
+    <div class="row">
+        <div class="col-lg-5 mb-4 mb-lg-0">
+            <div class="book-image-container">
+                <img src="{{ book.imageURL }}"
+                     onerror="this.onerror=null;this.src='{% static 'images/placeholder.png' %}'"
+                     class="book-image"
+                     alt="{{ book.name }}"
+                     loading="lazy">
 
-    <div class="blog-post-content">
-        <div class="post-content">
-            {{ post.content|linebreaksbr }}
+                {% if book.is_bestseller %}
+                    <span class="book-badge">Бестселър</span>
+                {% elif book.is_new %}
+                    <span class="book-badge">Ново</span>
+                {% endif %}
+            </div>
         </div>
-        
-        <div class="update-info">
-            <i class="fas fa-sync-alt"></i>
-            <span>Последна актуализация: {{ post.updated_on|date:"d.m.Y" }}</span>
-        </div>
-    </div>
 
-    <div class="navigation-buttons">
-        <a href="{% url 'store:blog_list' %}" class="btn-back">
-            <i class="fas fa-arrow-left"></i> Върни се към блога
-        </a>
-        
-        <div class="social-sharing">
-            <a href="#" class="social-btn facebook" title="Сподели във Facebook">
-                <i class="fab fa-facebook-f"></i>
-            </a>
-            <a href="#" class="social-btn twitter" title="Сподели в Twitter">
-                <i class="fab fa-twitter"></i>
-            </a>
-            <a href="#" class="social-btn linkedin" title="Сподели в LinkedIn">
-                <i class="fab fa-linkedin-in"></i>
-            </a>
-        </div>
-    </div>
+        <div class="col-lg-7">
+            <h1 class="book-title">{{ book.name }}</h1>
+            <p class="book-author">{{ book.author|default:"Неизвестен автор" }}</p>
 
-    {% if related_posts %}
-    <div class="related-posts">
-        <h3 class="related-title">Свързани публикации</h3>
-        <div class="related-grid">
-            {% for related_post in related_posts %}
-            <a href="{% url 'store:blog_detail' related_post.slug %}" class="related-card">
-                <h4 class="related-card-title">{{ related_post.title }}</h4>
-                <div class="related-card-date">
-                    <i class="fas fa-calendar"></i>
-                    {{ related_post.created_on|date:"d.m.Y" }}
+            <div class="book-description">
+                {{ book.description|linebreaksbr }}
+            </div>
+
+            <div class="price-section">
+                {% if book.stock > 0 %}
+                    <span class="book-price">{{ book.price|floatformat:2 }} лв.</span>
+                    <button data-product="{{ book.id }}"
+                            data-action="add"
+                            class="btn-add-cart update-cart">
+                        <i class="fas fa-cart-plus"></i> Добави в количката
+                    </button>
+                {% else %}
+                    <span class="book-price text-danger">Изчерпана наличност</span>
+                    <button class="btn-out-of-stock" disabled>
+                        <i class="fas fa-times"></i> Не е налично
+                    </button>
+                {% endif %}
+            </div>
+
+            {% if book.stock <= 15 and book.stock > 0 %}
+                <div class="stock-alert">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div>
+                        <strong>Внимание:</strong> Остават само {{ book.stock }} бройки! Побързайте!
+                    </div>
                 </div>
-            </a>
-            {% endfor %}
+            {% endif %}
+
+            {% if book.category %}
+                <p class="text-muted">
+                    <i class="fas fa-tag me-2"></i>
+                    Категория: <a href="{% url 'store:books_by_category' book.category.slug %}" class="category-link">
+                        {{ book.category.name }} <i class="fas fa-arrow-right"></i>
+                    </a>
+                </p>
+            {% endif %}
         </div>
     </div>
-    {% endif %}
+
+    <div class="reviews-section">
+        <h2 class="reviews-title">Ревюта и оценки</h2>
+
+        {% if user.is_authenticated %}
+            <div class="review-form-card">
+                <h3 class="review-form-title">Оставете вашето ревю</h3>
+
+                {% if messages %}
+                    <ul class="messages">
+                        {% for message in messages %}
+                            <li class="{{ message.tags }}">{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+                <form action="{% url 'store:book_detail' book.pk %}" method="post">
+                    {% csrf_token %}
+
+                    <div class="form-group">
+    <label for="id_rating">Оценка:</label>
+    <div class="rating-stars">
+        {% for i in "54321" %}
+            <input type="radio" id="rating-{{ i }}" name="rating" value="{{ i }}" {% if form.rating.value|stringformat:"s" == i %}checked{% endif %}>
+            <label for="rating-{{ i }}">★</label>
+        {% endfor %}
+    </div>
 </div>
-{% endblock %}
+
+                    <div class="form-group">
+                        <label for="id_comment">Коментар:</label>
+                        <textarea name="comment" id="id_comment" class="form-control" rows="4" placeholder="Споделете вашите впечатления за книгата...">{{ form.comment.value|default:'' }}</textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-accent">
+                        <i class="fas fa-paper-plane me-2"></i> Изпрати ревю
+                    </button>
+                </form>
+            </div>
+        {% else %}
+            <div class="login-prompt">
+                <p class="mb-0">
+                    За да оставите ревю, моля, <a href="{% url 'login' %}?next={{ request.path }}">
+                    <i class="fas fa-sign-in-alt me-1"></i> влезте в профила си</a>.
+                </p>
+            </div>
+        {% endif %}
+
+        {% if reviews %}
+            <div class="reviews-list">
+                {% for review in reviews %}
+                    <div class="review-card">
+                        <div class="review-header">
+                            <span class="review-user">{{ review.user.username }}</span>
+                            <span class="review-rating">
+                                {{ review.rating }} <i class="fas fa-star text-warning"></i>
+                            </span>
+                            <span class="review-date">{{ review.created_at|date:"d.m.Y" }}</span>
+                        </div>
+
+                        {% if review.comment %}
+                            <p class="review-comment">{{ review.comment }}</p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-reviews">
+                <i class="fas fa-comments"></i>
+                <h4>Все още няма ревюта</h4>
+                <p>Бъдете първият, който ще сподели впечатленията си за тази книга!</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock content %}
