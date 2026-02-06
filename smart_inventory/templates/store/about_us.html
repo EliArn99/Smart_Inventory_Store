@@ -417,4 +417,424 @@
         </div>
     </div>
 </div>
+{% endblock content %}{% extends 'store/base.html' %}
+{% load static %}
+
+{% block extra_head %}
+<style>
+    .about-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .hero-section {
+        text-align: center;
+        padding: 3rem 0;
+        background: linear-gradient(135deg, rgba(59, 21, 58, 0.03) 0%, rgba(240, 201, 135, 0.05) 100%);
+        border-radius: 20px;
+        margin-bottom: 3rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(240, 201, 135, 0.1) 0%, transparent 70%);
+        transform: rotate(30deg);
+        pointer-events: none;
+    }
+
+    .hero-title {
+        color: var(--primary-dark);
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+        font-size: 3rem;
+        position: relative;
+        display: inline-block;
+    }
+
+    .hero-title::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 4px;
+        background: linear-gradient(90deg, var(--accent), var(--primary-dark));
+        border-radius: 2px;
+    }
+
+    .hero-subtitle {
+        color: #6c757d;
+        font-size: 1.25rem;
+        max-width: 700px;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+
+    .divider {
+        width: 100px;
+        height: 4px;
+        background: linear-gradient(90deg, var(--accent), var(--primary-dark));
+        margin: 2.5rem auto;
+        border-radius: 2px;
+        opacity: 0.7;
+    }
+
+    .mission-section {
+        text-align: center;
+        padding: 2rem;
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+        margin-bottom: 3rem;
+    }
+
+    .section-title {
+        color: var(--primary-dark);
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        position: relative;
+        display: inline-block;
+    }
+
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: -8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 3px;
+        background-color: var(--accent);
+        border-radius: 2px;
+    }
+
+    .section-text {
+        color: #495057;
+        font-size: 1.1rem;
+        line-height: 1.7;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .team-section {
+        padding: 2rem;
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+        margin-bottom: 3rem;
+    }
+
+    .team-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+
+    .team-member {
+        text-align: center;
+        padding: 2rem 1.5rem;
+        background: #f8f9fa;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        border: 1px solid transparent;
+    }
+
+    .team-member:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        border-color: var(--accent);
+    }
+
+    .member-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-light) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        font-size: 2.5rem;
+        color: white;
+        font-weight: 700;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .member-name {
+        color: var(--primary-dark);
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .member-role {
+        color: var(--accent);
+        font-weight: 600;
+        margin-bottom: 1rem;
+        font-size: 0.95rem;
+    }
+
+    .member-bio {
+        color: #6c757d;
+        line-height: 1.6;
+        font-size: 0.95rem;
+    }
+
+    .values-section {
+        padding: 2rem;
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+    }
+
+    .values-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+
+    .value-card {
+        text-align: center;
+        padding: 2rem 1.5rem;
+        background: #f8f9fa;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .value-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .value-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        font-size: 2rem;
+        color: var(--primary-dark);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .value-title {
+        color: var(--primary-dark);
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .value-description {
+        color: #6c757d;
+        line-height: 1.6;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 992px) {
+        .hero-title {
+            font-size: 2.5rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.15rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .about-container {
+            margin: 1.5rem auto;
+        }
+
+        .hero-title {
+            font-size: 2rem;
+        }
+
+        .hero-section {
+            padding: 2rem 1rem;
+        }
+
+        .mission-section,
+        .team-section,
+        .values-section {
+            padding: 1.5rem;
+        }
+
+        .team-grid,
+        .values-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .hero-title {
+            font-size: 1.8rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.05rem;
+        }
+
+        .section-text {
+            font-size: 1rem;
+        }
+
+        .mission-section,
+        .team-section,
+        .values-section {
+            padding: 1.25rem;
+        }
+
+        .team-member,
+        .value-card {
+            padding: 1.5rem 1rem;
+        }
+
+        .member-avatar {
+            width: 100px;
+            height: 100px;
+            font-size: 2rem;
+        }
+
+        .value-icon {
+            width: 70px;
+            height: 70px;
+            font-size: 1.75rem;
+        }
+    }
+
+    /* Animation */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .hero-section {
+        animation: fadeInUp 0.8s ease;
+    }
+
+    .mission-section {
+        animation: fadeInUp 0.8s ease 0.2s both;
+    }
+
+    .team-section {
+        animation: fadeInUp 0.8s ease 0.4s both;
+    }
+
+    .values-section {
+        animation: fadeInUp 0.8s ease 0.6s both;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="about-container">
+    <div class="hero-section">
+        <h1 class="hero-title">Нашата история</h1>
+        <p class="hero-subtitle">
+            Добре дошли в "BookNook" – мястото, където магията на думите оживява. 
+            Нашият магазин се роди от една малка мечта на група приятели, влюбени в книгите. 
+            Вярваме, че всяка история е приключение, което чака да бъде открито, и нашата мисия 
+            е да ви помогнем да намерите вашето следващо.
+        </p>
+    </div>
+
+    <div class="mission-section">
+        <h2 class="section-title">Нашата мисия</h2>
+        <p class="section-text">
+            Нашата мисия е да вдъхновяваме четенето и да създаваме общност от читатели.
+            Искаме да предоставим на всеки достъп до качествена литература и да предложим 
+            подбрана селекция от класически и съвременни произведения.
+        </p>
+    </div>
+
+    <div class="team-section">
+        <h2 class="section-title">Екипът</h2>
+        <p class="section-text">
+            Нашият екип е съставен от книжни ентусиасти, готови да ви помогнат с препоръки
+            и съвети. Всеки от нас е отдаден на идеята да направи вашето книжно пътешествие
+            незабравимо.
+        </p>
+        
+        <div class="team-grid">
+            <div class="team-member">
+                <div class="member-avatar">МГ</div>
+                <h3 class="member-name">Мария Георгиева</h3>
+                <p class="member-role">Основател & Главен книжар</p>
+                <p class="member-bio">С над 15 години опит в книжарството, Мария вдъхновява целия екип с любовта си към литературата.</p>
+            </div>
+            
+            <div class="team-member">
+                <div class="member-avatar">ИП</div>
+                <h3 class="member-name">Иван Петров</h3>
+                <p class="member-role">Специалист по класическа литература</p>
+                <p class="member-bio">Иван може да ви препоръча перфектната класика, която ще промени начина ви на мислене.</p>
+            </div>
+            
+            <div class="team-member">
+                <div class="member-avatar">ЕД</div>
+                <h3 class="member-name">Елена Димитрова</h3>
+                <p class="member-role">Експерт по съвременна литература</p>
+                <p class="member-bio">Елена винаги е в крак с най-новите книжни тенденции и бестселъри.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="values-section">
+        <h2 class="section-title">Нашите ценности</h2>
+        
+        <div class="values-grid">
+            <div class="value-card">
+                <div class="value-icon">
+                    <i class="fas fa-book-open"></i>
+                </div>
+                <h3 class="value-title">Любов към книгите</h3>
+                <p class="value-description">Вярваме, че всяка книга носи уникална магия и знание, които обогатяват живота ни.</p>
+            </div>
+            
+            <div class="value-card">
+                <div class="value-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3 class="value-title">Общност</h3>
+                <p class="value-description">Създаваме пространство, където читателите могат да се срещат, споделят и вдъхновяват.</p>
+            </div>
+            
+            <div class="value-card">
+                <div class="value-icon">
+                    <i class="fas fa-star"></i>
+                </div>
+                <h3 class="value-title">Качество</h3>
+                <p class="value-description">Подбираме внимателно всяка книга в нашата колекция, за да гарантираме високо качество.</p>
+            </div>
+            
+            <div class="value-card">
+                <div class="value-icon">
+                    <i class="fas fa-heart"></i>
+                </div>
+                <h3 class="value-title">Страст</h3>
+                <p class="value-description">Работим с страст и отдаденост, за да превърнем всяко посещение при нас в незабравимо преживяване.</p>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock content %}
+
