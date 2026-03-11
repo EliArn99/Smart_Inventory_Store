@@ -6,26 +6,29 @@ from django.core.mail import send_mail
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
-from .models import Customer, Book
+from .models import Book, Customer
 
 logger = logging.getLogger(__name__)
+User = get_user_model()
 
 
 @receiver(pre_save, sender=Book)
-def pre_save_book(sender, instance: Book, **kwargs):
-
-    if instance.pk:
-        try:
-            instance._old_stock = Book.objects.values_list("stock", flat=True).get(pk=instance.pk)
-        except Book.DoesNotExist:
-            instance._old_stock = None
-    else:
+def store_previous_book_stock(sender, instance: Book, **kwargs):
+    """Store the previous stock value before saving a Book instance."""
+    if not instance.pk:
         instance._old_stock = None
+        return
+
+    instance._old_stock = (
+        Book.objects.filter(pk=instance.pk)
+        .values_list("stock", flat=True)
+        .first()
+    )
 
 
-@receiver(post_save, sender=get_user_model())
+@receiver(post_save, sender=User)
 def create_customer_profile(sender, instance, created: bool, **kwargs):
-
+    """Create a Customer profile automatically when a new user is created."""
     if not created:
         return
 
@@ -39,22 +42,28 @@ def create_customer_profile(sender, instance, created: bool, **kwargs):
 
 
 @receiver(post_save, sender=Book)
-def check_low_stock(sender, instance: Book, created: bool, **kwargs):
+def send_low_stock_alert(sender, instance: Book, created: bool, **kwargs):
+    """Send an email alert when stock drops below the configured threshold."""
+    if created:
+        return
 
-    alert_email = getattr(settings, "LOW_STOCK_ALERT_EMAIL", None)
+    alert_email = getattr(settings, "LOW_STOCK_ALERT_EMAIL", "")
     if not alert_email:
         return
 
     threshold = getattr(settings, "LOW_STOCK_THRESHOLD", 5)
-
     old_stock = getattr(instance, "_old_stock", None)
-    if created or old_stock is None:
+
+    if old_stock is None:
         return
 
     if old_stock > threshold and instance.stock <= threshold:
-        subject = f"Предупреждение за ниска наличност: {instance.name}"
+        book_name = instance.name or "Неизвестна книга"
+        book_author = instance.author or "Неизвестен автор"
+
+        subject = f"Предупреждение за ниска наличност: {book_name}"
         message = (
-            f'Наличността на книгата "{instance.name}" от автор {instance.author} '
+            f'Наличността на книгата "{book_name}" от автор {book_author} '
             f"е намаляла до {instance.stock} бройки.\n\n"
             f"Моля, поръчайте нови количества."
         )
@@ -68,4 +77,7 @@ def check_low_stock(sender, instance: Book, created: bool, **kwargs):
                 fail_silently=False,
             )
         except Exception:
-            logger.exception("Грешка при изпращане на имейл за ниска наличност (Book id=%s)", instance.pk)
+            logger.exception(
+                "Грешка при изпращане на имейл за ниска наличност (Book id=%s)",
+                instance.pk,
+            )
