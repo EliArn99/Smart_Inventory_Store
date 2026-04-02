@@ -4,28 +4,32 @@ import { initCheckout } from "./cart/checkout.js";
 import { updateCart } from "./cart/cart.js";
 import { updateWishlist } from "./cart/wishlist.js";
 
+console.log("main.js loaded");
+
 document.addEventListener("DOMContentLoaded", () => {
+    console.log("DOMContentLoaded from main.js");
+
     const csrfToken = getCookie("csrftoken");
+    console.log("csrfToken:", csrfToken);
 
-    // Инициализира модала за съобщения
     ensureMessageModal();
-
-    // Инициализира формата за плащане (ако съществува на страницата)
     initCheckout(csrfToken);
 
-    // Глобален слушател за бутони (Event Delegation)
     document.addEventListener("click", (e) => {
-        // Бутон за количка
+        console.log("document click", e.target);
+
         const cartBtn = e.target.closest(".update-cart");
         if (cartBtn) {
+            console.log("cart button clicked");
             const productId = cartBtn.dataset.product;
             const action = cartBtn.dataset.action;
+            console.log({ productId, action });
             updateCart(productId, action, csrfToken);
         }
 
-        // Бутон за списък с желания
         const wishlistBtn = e.target.closest(".update-wishlist");
         if (wishlistBtn) {
+            console.log("wishlist button clicked");
             const bookId = wishlistBtn.dataset.book;
             const action = wishlistBtn.dataset.action;
             updateWishlist(bookId, action, csrfToken);
