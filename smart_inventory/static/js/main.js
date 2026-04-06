@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ensureMessageModal();
     initCheckout(csrfToken);
 
-    document.addEventListener("click", (e) => {
+    document.addEventListener("click", async (e) => {
         console.log("document click", e.target);
 
         const cartBtn = e.target.closest(".update-cart");
@@ -23,8 +23,11 @@ document.addEventListener("DOMContentLoaded", () => {
             console.log("cart button clicked");
             const productId = cartBtn.dataset.product;
             const action = cartBtn.dataset.action;
+
             console.log({ productId, action });
-            updateCart(productId, action, csrfToken);
+
+            await updateCart(productId, action, csrfToken);
+            return;
         }
 
         const wishlistBtn = e.target.closest(".update-wishlist");
@@ -32,7 +35,8 @@ document.addEventListener("DOMContentLoaded", () => {
             console.log("wishlist button clicked");
             const bookId = wishlistBtn.dataset.book;
             const action = wishlistBtn.dataset.action;
-            updateWishlist(bookId, action, csrfToken);
+
+            await updateWishlist(bookId, action, csrfToken);
         }
     });
 });
