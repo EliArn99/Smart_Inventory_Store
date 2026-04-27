@@ -2,7 +2,11 @@ from .base import *
 
 DEBUG = False
 
-ALLOWED_HOSTS = get_list_env("DJANGO_ALLOWED_HOSTS", required=True)
+ALLOWED_HOSTS = get_list_env("DJANGO_ALLOWED_HOSTS")
+
+if not ALLOWED_HOSTS:
+    raise RuntimeError("DJANGO_ALLOWED_HOSTS is not set")
+
 CSRF_TRUSTED_ORIGINS = get_list_env("DJANGO_CSRF_TRUSTED_ORIGINS", "")
 
 if not DATABASES["default"]["PASSWORD"]:
