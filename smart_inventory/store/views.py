@@ -1,5 +1,6 @@
 import json
 import logging
+import random
 import uuid
 
 from django.contrib import messages
@@ -10,7 +11,7 @@ from django.db import transaction
 from django.db.models import Avg, Count, F, Q
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_GET, require_POST
 from django.views.generic import DetailView, ListView, TemplateView
 from django.views.generic.edit import FormView
 
@@ -70,6 +71,21 @@ class BookListView(BaseContextMixin, ListView):
     def get_queryset(self):
         books = (
             Book.objects.select_related("category")
+            .only(
+                "id",
+                "name",
+                "author",
+                "price",
+                "image",
+                "description",
+                "digital",
+                "category",
+                "stock",
+                "publication_year",
+                "category__id",
+                "category__name",
+                "category__slug",
+            )
             .annotate(avg_rating=Avg("reviews__rating"))
             .annotate(reviews_count=Count("reviews"))
         )
@@ -95,14 +111,22 @@ class BookListView(BaseContextMixin, ListView):
             try:
                 books = books.filter(publication_year=int(year))
             except (TypeError, ValueError):
-                pass
+                logger.warning("Invalid publication year filter: %s", year)
 
         min_price = self.request.GET.get("min_price")
         max_price = self.request.GET.get("max_price")
+
         if min_price:
-            books = books.filter(price__gte=min_price)
+            try:
+                books = books.filter(price__gte=min_price)
+            except (TypeError, ValueError):
+                logger.warning("Invalid min_price filter: %s", min_price)
+
         if max_price:
-            books = books.filter(price__lte=max_price)
+            try:
+                books = books.filter(price__lte=max_price)
+            except (TypeError, ValueError):
+                logger.warning("Invalid max_price filter: %s", max_price)
 
         sort_by = self.request.GET.get("sort_by", "name")
         order = self.request.GET.get("order", "asc")
@@ -162,26 +186,49 @@ def update_item(request):
 
     if request.user.is_authenticated:
         customer = get_or_create_customer_for_user(request.user)
-        order, _ = Order.objects.get_or_create(customer=customer, complete=False)
-        order_item, _ = OrderItem.objects.get_or_create(order=order, product=book)
 
-        if action == "add":
-            order_item.quantity = (order_item.quantity or 0) + 1
-            order_item.save()
-        else:
-            order_item.quantity = (order_item.quantity or 0) - 1
-            if order_item.quantity <= 0:
-                order_item.delete()
+        with transaction.atomic():
+            order, _ = Order.objects.select_for_update().get_or_create(
+                customer=customer,
+                complete=False,
+            )
+
+            order_item, _ = OrderItem.objects.select_for_update().get_or_create(
+                order=order,
+                product=book,
+            )
+
+            if action == "add":
+                if book.stock <= 0:
+                    logger.warning("Attempt to add out-of-stock book: %s", book.id)
+                    return JsonResponse(
+                        {"error": "Книгата не е налична.", "cartItems": order.get_cart_items},
+                        status=400,
+                    )
+
+                order_item.quantity = (order_item.quantity or 0) + 1
+                order_item.save(update_fields=["quantity"])
+
             else:
-                order_item.save()
+                order_item.quantity = (order_item.quantity or 0) - 1
+                if order_item.quantity <= 0:
+                    order_item.delete()
+                else:
+                    order_item.save(update_fields=["quantity"])
 
-        return JsonResponse({"cartItems": order.get_cart_items})
+            cart_items = order.get_cart_items
+
+        return JsonResponse({"cartItems": cart_items})
 
     cookie_data = cookieCart(request)
     cart = cookie_data.get("cart", {})
     book_key = str(book_id)
 
     if action == "add":
+        if book.stock <= 0:
+            logger.warning("Anonymous user tried to add out-of-stock book: %s", book.id)
+            return JsonResponse({"error": "Книгата не е налична."}, status=400)
+
         quantity = cart.get(book_key, {"quantity": 0}).get("quantity", 0) + 1
         cart[book_key] = {"quantity": quantity}
     else:
@@ -192,7 +239,13 @@ def update_item(request):
 
     cart_items_count = sum(item.get("quantity", 0) for item in cart.values())
     response = JsonResponse({"cartItems": cart_items_count})
-    response.set_cookie("cart", json.dumps(cart))
+    response.set_cookie(
+        "cart",
+        json.dumps(cart),
+        max_age=60 * 60 * 24 * 30,
+        httponly=False,
+        samesite="Lax",
+    )
     return response
 
 
@@ -218,16 +271,25 @@ def process_order(request):
             for item in items:
                 book = item.product
                 if book is None:
+                    logger.warning("Order item without product. Order ID: %s", order.id)
                     return JsonResponse({"error": "Невалиден продукт в поръчката."}, status=400)
 
                 if book.stock < item.quantity:
+                    logger.warning(
+                        "Insufficient stock. Book ID: %s, stock: %s, requested: %s",
+                        book.id,
+                        book.stock,
+                        item.quantity,
+                    )
                     return JsonResponse(
                         {"error": f'Недостатъчна наличност за книга "{book.name}".'},
                         status=400,
                     )
 
             for item in items:
-                Book.objects.filter(pk=item.product_id).update(stock=F("stock") - item.quantity)
+                Book.objects.filter(pk=item.product_id).update(
+                    stock=F("stock") - item.quantity
+                )
 
             order.complete = True
             order.save(update_fields=["transaction_id", "complete"])
@@ -243,6 +305,8 @@ def process_order(request):
                     zipcode=shipping.get("zipcode", ""),
                 )
 
+        logger.info("Order processed successfully. Order ID: %s", order.id)
+
         response = JsonResponse({"message": "Payment submitted successfully"}, status=200)
 
         if not request.user.is_authenticated:
@@ -252,9 +316,13 @@ def process_order(request):
 
     except Exception:
         logger.exception("Грешка при обработка на поръчка.")
-        return JsonResponse({"error": "Възникна грешка при обработка на поръчката."}, status=500)
+        return JsonResponse(
+            {"error": "Възникна грешка при обработка на поръчката."},
+            status=500,
+        )
 
 
+@require_GET
 def get_cart_data(request):
     data = cartData(request)
     data["order"]["get_cart_total"] = float(data["order"]["get_cart_total"])
@@ -269,23 +337,33 @@ def get_cart_data(request):
 @login_required
 def profile_details(request):
     customer = get_or_create_customer_for_user(request.user)
-    orders = customer.order_set.all().order_by("-date_ordered")
+
+    orders = (
+        customer.order_set
+        .prefetch_related("orderitem_set__product")
+        .order_by("-date_ordered")
+    )
 
     purchased_categories = Category.objects.filter(
         book__orderitem__order__customer=customer
     ).distinct()
 
-    recommended_books = (
+    recommended_books = list(
         Book.objects.filter(category__in=purchased_categories)
         .exclude(orderitem__order__customer=customer)
-        .distinct()
-        .order_by("?")
+        .select_related("category")
+        .distinct()[:20]
     )
 
-    if not recommended_books.exists():
-        recommended_books = Book.objects.all().order_by("?")[:4]
+    if recommended_books:
+        recommended_books = random.sample(
+            recommended_books,
+            min(len(recommended_books), 4),
+        )
     else:
-        recommended_books = recommended_books[:4]
+        recommended_books = list(
+            Book.objects.select_related("category").order_by("id")[:4]
+        )
 
     context = {
         "customer": customer,
@@ -318,9 +396,12 @@ class BookDetailView(BaseContextMixin, DetailView, FormView):
     pk_url_kwarg = "pk"
     form_class = ReviewForm
 
+    def get_queryset(self):
+        return Book.objects.select_related("category").prefetch_related("reviews__user")
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["reviews"] = self.object.reviews.all().order_by("-created_at")
+        context["reviews"] = self.object.reviews.select_related("user").order_by("-created_at")
         return context
 
     def post(self, request, *args, **kwargs):
@@ -362,7 +443,10 @@ def update_wishlist(request):
         return JsonResponse({"error": "Missing or invalid bookId/action."}, status=400)
 
     book = get_object_or_404(Book, id=book_id)
-    wishlist_item, created = WishlistItem.objects.get_or_create(user=request.user, book=book)
+    wishlist_item, created = WishlistItem.objects.get_or_create(
+        user=request.user,
+        book=book,
+    )
 
     if action == "add":
         message = (
@@ -436,11 +520,20 @@ class BlogDetailView(BaseContextMixin, DetailView, FormView):
     form_class = CommentForm
 
     def get_object(self, queryset=None):
-        return get_object_or_404(Post, slug=self.kwargs.get("slug"), status=1)
+        return get_object_or_404(
+            Post.objects.select_related("category", "author"),
+            slug=self.kwargs.get("slug"),
+            status=1,
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["comments"] = self.object.comments.filter(is_approved=True).order_by("-created_on")
+        context["comments"] = (
+            self.object.comments
+            .filter(is_approved=True)
+            .select_related("user")
+            .order_by("-created_on")
+        )
         return context
 
     def form_valid(self, form):
@@ -453,7 +546,10 @@ class BlogDetailView(BaseContextMixin, DetailView, FormView):
         new_comment.user = self.request.user
         new_comment.save()
 
-        messages.success(self.request, "Вашият коментар е изпратен и очаква одобрение.")
+        messages.success(
+            self.request,
+            "Вашият коментар е изпратен и очаква одобрение.",
+        )
         return redirect("store:blog_detail", slug=self.kwargs.get("slug"))
 
     def form_invalid(self, form):
@@ -464,7 +560,7 @@ class BlogDetailView(BaseContextMixin, DetailView, FormView):
 @staff_member_required
 def add_post(request):
     if request.method == "POST":
-        form = PostForm(request.POST)
+        form = PostForm(request.POST, request.FILES)
         if form.is_valid():
             post = form.save(commit=False)
             post.author = request.user
@@ -479,7 +575,12 @@ def add_post(request):
 
 @staff_member_required
 def inventory_report_view(request):
-    low_stock_books = Book.objects.filter(stock__lte=5).order_by("stock")
+    low_stock_books = (
+        Book.objects
+        .select_related("category")
+        .filter(stock__lte=5)
+        .order_by("stock")
+    )
 
     context = {
         "low_stock_books": low_stock_books,
@@ -490,10 +591,12 @@ def inventory_report_view(request):
 @login_required
 def order_detail(request, order_id):
     customer = get_or_create_customer_for_user(request.user)
-    order = get_object_or_404(Order, id=order_id)
 
-    if order.customer != customer:
-        raise Http404("You don't have permission to view this order.")
+    order = get_object_or_404(
+        Order.objects.select_related("customer"),
+        id=order_id,
+        customer=customer,
+    )
 
     context = {
         "order": order,
@@ -502,6 +605,5 @@ def order_detail(request, order_id):
     return render(request, "store/order_detail.html", context)
 
 
-# Backward-compatible aliases if your urls.py still points to the old names.
 updateItem = update_item
 processOrder = process_order
