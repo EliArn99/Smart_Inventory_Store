@@ -4,39 +4,34 @@ import { initCheckout } from "./cart/checkout.js";
 import { updateCart } from "./cart/cart.js";
 import { updateWishlist } from "./cart/wishlist.js";
 
-console.log("main.js loaded");
-
 document.addEventListener("DOMContentLoaded", () => {
-    console.log("DOMContentLoaded from main.js");
-
     const csrfToken = getCookie("csrftoken");
-    console.log("csrfToken:", csrfToken);
 
     ensureMessageModal();
     initCheckout(csrfToken);
 
-    document.addEventListener("click", async (e) => {
-        console.log("document click", e.target);
+    document.addEventListener("click", async (event) => {
+        const cartBtn = event.target.closest(".update-cart");
 
-        const cartBtn = e.target.closest(".update-cart");
         if (cartBtn) {
-            console.log("cart button clicked");
+            event.preventDefault();
+
             const productId = cartBtn.dataset.product;
             const action = cartBtn.dataset.action;
 
-            console.log({ productId, action });
-
-            await updateCart(productId, action, csrfToken);
+            await updateCart(productId, action, csrfToken, cartBtn);
             return;
         }
 
-        const wishlistBtn = e.target.closest(".update-wishlist");
+        const wishlistBtn = event.target.closest(".update-wishlist");
+
         if (wishlistBtn) {
-            console.log("wishlist button clicked");
+            event.preventDefault();
+
             const bookId = wishlistBtn.dataset.book;
             const action = wishlistBtn.dataset.action;
 
-            await updateWishlist(bookId, action, csrfToken);
+            await updateWishlist(bookId, action, csrfToken, wishlistBtn);
         }
     });
 });
