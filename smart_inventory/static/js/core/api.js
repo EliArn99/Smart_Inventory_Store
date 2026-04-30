@@ -3,20 +3,21 @@ export async function postJson(url, payload, csrfToken) {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "X-CSRFToken": csrfToken,
+            "X-CSRFToken": csrfToken || "",
         },
+        credentials: "same-origin",
         body: JSON.stringify(payload),
     });
 
     let data = {};
     try {
         data = await response.json();
-    } catch (error) {
+    } catch {
         data = {};
     }
 
     if (!response.ok) {
-        throw new Error(data.error || "Възникна грешка при заявката.");
+        throw new Error(data.error || data.message || "Възникна грешка при заявката.");
     }
 
     return data;
