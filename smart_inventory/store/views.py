@@ -14,7 +14,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_GET, require_POST
 from django.views.generic import DetailView, ListView, TemplateView
 from django.views.generic.edit import FormView
-
+from .models import Book, OrderItem, ShippingAddress
 from .forms import CommentForm, CustomUserCreationForm, PostForm, ReviewForm
 from .models import (
     Banner,
@@ -266,13 +266,21 @@ def process_order(request):
         with transaction.atomic():
             order.transaction_id = uuid.uuid4().hex
 
-            items = order.orderitem_set.select_related("product").select_for_update()
+            items = list(
+                OrderItem.objects
+                .select_for_update()
+                .filter(order=order)
+            )
 
             for item in items:
                 book = item.product
+
                 if book is None:
                     logger.warning("Order item without product. Order ID: %s", order.id)
-                    return JsonResponse({"error": "Невалиден продукт в поръчката."}, status=400)
+                    return JsonResponse(
+                        {"error": "Невалиден продукт в поръчката."},
+                        status=400,
+                    )
 
                 if book.stock < item.quantity:
                     logger.warning(
@@ -307,7 +315,10 @@ def process_order(request):
 
         logger.info("Order processed successfully. Order ID: %s", order.id)
 
-        response = JsonResponse({"message": "Payment submitted successfully"}, status=200)
+        response = JsonResponse(
+            {"message": "Payment submitted successfully"},
+            status=200,
+        )
 
         if not request.user.is_authenticated:
             response.delete_cookie("cart")
