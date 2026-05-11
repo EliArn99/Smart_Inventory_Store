@@ -14,7 +14,10 @@ class OrderModelTest(TestCase):
             digital=False,
             category=self.category,
         )
-        self.customer = Customer.objects.create(name="Test User", email="test@example.com")
+        self.customer = Customer.objects.create(
+            name="Test User",
+            email="test@example.com",
+        )
         self.order = Order.objects.create(customer=self.customer, complete=False)
         self.order_item = OrderItem.objects.create(
             order=self.order,
