@@ -110,3 +110,77 @@ Smart_Inventory_Store/
 ├── docker-compose.yml
 ├── docker-compose.prod.yml
 └── requirements.txt
+
+
+Installation
+1. Clone the repository
+git clone https://github.com/EliArn99/Smart_Inventory_Store.git
+cd Smart_Inventory_Store
+2. Create .env file
+DJANGO_ENV=dev
+DJANGO_SECRET_KEY=your-secret-key
+DJANGO_ALLOWED_HOSTS=127.0.0.1,localhost
+
+POSTGRES_DB=bookstore
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_HOST=db
+POSTGRES_PORT=5432
+
+LOW_STOCK_ALERT_EMAIL=
+EMAIL_HOST_USER=
+EMAIL_HOST_PASSWORD=
+3. Start with Docker
+docker-compose up --build
+4. Apply migrations
+docker-compose exec web python manage.py migrate
+5. Create superuser
+docker-compose exec web python manage.py createsuperuser
+6. Open the app
+Storefront: http://127.0.0.1:8000/store/
+Admin:      http://127.0.0.1:8000/admin/
+Running Tests
+docker-compose exec web python manage.py test
+Environment Modes
+
+The project uses separated Django settings:
+
+settings/base.py
+settings/dev.py
+settings/prod.py
+
+Set the active environment with:
+
+DJANGO_ENV=dev
+
+or:
+
+DJANGO_ENV=prod
+Screenshots
+Storefront
+
+Cart
+
+Checkout
+
+Admin Inventory
+
+What I Learned
+Structuring a real Django project with separate settings
+Working with PostgreSQL and Docker
+Handling authenticated and guest carts
+Using transactions for order processing
+Reducing stock safely after checkout
+Creating custom Django admin panels
+Writing tests for forms, models, views and URLs
+Using vanilla JavaScript modules with Django templates
+Preparing a Django app for production deployment
+License
+
+This project is licensed under the MIT License.
+
+Contact
+
+Eli Arnautska
+
+GitHub: EliArn99
