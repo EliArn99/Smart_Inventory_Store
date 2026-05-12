@@ -124,5 +124,93 @@ cd Smart_Inventory_Store
 
 Git
 
+2️⃣ Configure Environment Variables
+Create a .env file in the project root:
+
+env
+# Django Configuration
+DJANGO_ENV=dev
+DJANGO_SECRET_KEY=your-super-secret-key-here
+DJANGO_ALLOWED_HOSTS=127.0.0.1,localhost
+
+# Database Configuration
+POSTGRES_DB=bookstore
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=your-db-password
+POSTGRES_HOST=db
+POSTGRES_PORT=5432
+
+# Email Configuration (for low-stock alerts)
+LOW_STOCK_ALERT_EMAIL=admin@example.com
+EMAIL_HOST_USER=your-email@gmail.com
+EMAIL_HOST_PASSWORD=your-app-password
+3️⃣ Build & Run with Docker
+bash
+docker-compose up --build
+⏱️ First build may take a few minutes
+
+4️⃣ Apply Database Migrations
+bash
+docker-compose exec web python manage.py migrate
+5️⃣ Create Admin User
+bash
+docker-compose exec web python manage.py createsuperuser
+6️⃣ Access the Application
+Service	URL
+🏪 Storefront	http://localhost:8000/store/
+👑 Admin Panel	http://localhost:8000/admin/
+📡 API Endpoints	http://localhost:8000/api/
+Running Tests
+bash
+docker-compose exec web python manage.py test
+Stopping the Application
+bash
+docker-compose down
+📸 Screenshots
+Storefront Home	Product Details
+https://via.placeholder.com/400x250?text=Storefront+Screenshot	https://via.placeholder.com/400x250?text=Product+Details
+Shopping Cart	Admin Inventory
+https://via.placeholder.com/400x250?text=Shopping+Cart	https://via.placeholder.com/400x250?text=Admin+Panel
+Replace placeholder images with actual screenshots of your application
+
+🧠 Lessons Learned
+Throughout the development of this project, I gained valuable experience in:
+
+🏗️ Architecture - Structuring a Django project with environment-aware settings (base/dev/prod)
+
+🐘 Database - Integrating PostgreSQL with Django and optimizing queries
+
+🐳 Containerization - Using Docker for consistent development and production environments
+
+🛒 Cart Logic - Implementing dual-mode cart (authenticated + guest) using cookies
+
+🔒 Transactions - Ensuring data integrity with atomic database transactions during checkout
+
+📉 Inventory Management - Reducing stock levels safely after order confirmation
+
+🎛️ Admin Customization - Creating intuitive, custom Django admin interfaces
+
+🧪 Testing - Writing comprehensive tests for all layers (forms, models, views, URLs)
+
+📦 Frontend Integration - Using vanilla JavaScript modules with Django templates
+
+🚀 Deployment - Preparing applications for production with Gunicorn + Nginx
+
+📄 License
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+text
+MIT License
+
+Copyright (c) 2024 Eli Arnautska
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files...
+📫 Contact
+Eli Arnautska
+
+https://img.shields.io/badge/GitHub-EliArn99-181717?style=flat&logo=github
+https://img.shields.io/badge/Email-Contact-red?style=flat&logo=gmail
+
 Installation Steps
 1️⃣ Clone the Repository
