@@ -1,678 +1,112 @@
 # Smart Inventory Store 🛒
 
+Smart Inventory Store is a full-stack Django e-commerce and inventory management application built with Django, PostgreSQL, Docker, Bootstrap and vanilla JavaScript.
 
-
-
-
-
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)  
-
-
-
-[![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)  
-
-
-
-[![Django](https://img.shields.io/badge/Django-092E20?style=for-the-badge&logo=django&logoColor=white)](https://www.djangoproject.com/)  
-
-
-
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-
-
-
-
-
-
-
-Efficient inventory, product, order & supplier management for retail stores — complete public storefront and admin dashboard.
-
-
-
-
-
-
+The project includes a public storefront, shopping cart, checkout flow, wishlist, reviews, blog system, admin inventory management, low-stock email alerts and Docker-based deployment setup.
 
 ---
 
-
-
-
-
-
-
-## Table of Contents
-
-
-
-
-
-
-
-- [About the project](#about-the-project)  
-
-
-
-- [Built With](#built-with)  
-
-
-
-- [Features](#features)  
-
-
-
-- [Getting Started](#getting-started)  
-
-
-
-  - [Prerequisites](#prerequisites)  
-
-
-
-  - [Installation](#installation)  
-
-
-
-- [Usage](#usage)  
-
-
-
-- [Roadmap](#roadmap)  
-
-
-
-- [Contributing](#contributing)  
-
-
-
-- [License](#license)  
-
-
-
-- [Contact](#contact)  
-
-
-
-- [Acknowledgments](#acknowledgments)
-
-
-
-
-
-
-
----
-
-
-
-
-
-
-
-## About the project
-
-
-
-
-
-
-
-Smart Inventory Store е Django базирана уеб платформа за управление на онлайн магазин със вграден склад. Осигурява пълен публичен storefront за клиенти и администраторска част за управление на продукти, наличности, поръчки и доставчици.
-
-
-
-
-
-
-
----
-
-
-
-
-
-
-
-## Built With
-
-
-
-
-
-
-
-- Python 3.x  
-
-
-
-- Django 4.x  
-
-
-
-- PostgreSQL  
-
-
-
-- HTML5, CSS3, JavaScript  
-
-
-
-- Bootstrap  
-
-
-
+## Tech Stack
+
+- Python 3
+- Django 5.2
+- Django REST Framework
+- PostgreSQL
 - Docker & Docker Compose
-
-
-
-
-
-
-
----
-
-
-
-
-
-
-
-## Features in development 🌟
-
-
-
-
-
-
-
-- **Публичен онлайн магазин** – клиенти могат да разглеждат продукти, поставят количка и правят поръчка  
-
-
-
-- **Административен панел** – за управление на продукти, складови наличности, поръчки и доставчици  
-
-
-
-- **Inventory tracking** – автоматично обновяване на наличности при продажби и доставки  
-
-
-
-- **Order management** – администратори могат да преглеждат и обработват поръчки  
-
-
-
-- **Supplier management** – регистриране и преглед на доставчици, с контактна информация  
-
-
-
-- **Dashboard с аналитични данни** – преглед на поръчки, топ продукти и наличности  
-
-
-
-- **Responsive дизайн** – оптимизиран за мобилни и десктоп устройства  
-
-
-
-- **Secure authentication** – логин, регистрация и администраторски права
-
-
-
-
-
-
+- Gunicorn
+- Nginx
+- Whitenoise
+- Bootstrap
+- Vanilla JavaScript
+- HTML/CSS
 
 ---
 
+## Features
 
+### Storefront
+- Product listing with pagination
+- Search by title, author and description
+- Category filtering
+- Price, author and year filters
+- Sorting by name, price, rating and publication year
+- Product detail page
+- Product reviews and ratings
 
+### Cart & Orders
+- Authenticated user cart
+- Guest cart using cookies
+- Add/remove cart items
+- Checkout flow
+- Stock validation before order completion
+- Automatic stock reduction after successful order
+- Shipping address creation when required
 
+### User Features
+- Registration and login
+- User profile page
+- Order history
+- Wishlist
+- Book recommendations based on purchased categories
 
+### Blog
+- Blog post listing
+- Blog categories
+- Blog detail page
+- Comment system with admin approval
+- Staff-only post creation
 
+### Admin & Inventory
+- Customized Django admin
+- Product, order, review, banner and comment management
+- Inventory report for low-stock books
+- Low-stock email notification system
 
-### Demo 🖼️
+### API / Serialization
+- DRF serializers for books, customers, orders and order items
 
+### Testing
+- Tests for forms
+- Tests for models
+- Tests for views
+- Tests for URLs
 
-
-
-
-
-
-Вижте как изглеждат публичната част и административният панел на приложението:
-
-
-
-
-
-
-
-#### Public Storefront
-
-
-
-![Снимка на публичния магазин](images/public_storefront.png)
-
-
-
-
-
-
-
-#### Admin Dashboard
-
-
-
-![Снимка на административния панел](images/admin_dashboard.png)
-
-
-
-
-
-
+### Deployment
+- Dockerfile
+- docker-compose for development
+- docker-compose production setup
+- PostgreSQL service
+- Gunicorn
+- Nginx
+- Static and media volume handling
 
 ---
 
-
-
-
-
-
-
-## Getting Started
-
-
-
-
-
-
-
-Следвай тези стъпки, за да стартираш проекта локално:
-
-
-
-
-
-
-
-### Prerequisites
-
-
-
-
-
-
-
-- Python 3.9+  
-
-
-
-- pip  
-
-
-
-- PostgreSQL  
-
-
-
-- Git  
-
-
-
-- Docker & Docker Compose
-
-
-
-
-
-
-
-### Installation
-
-
-
-
-
-
-
-1. **Clone the repo**
-
-
-
-    ```bash
-
-
-
-    git clone https://github.com/EliArn99/Smart-Inventory-Store.git
-
-
-
-    cd Smart-Inventory-Store
-
-
-
-    ```
-
-
-
-
-
-
-
-2. **Създай база данни** и `.env` файл:
-
-
-
-    ```env
-
-
-
-    SECRET_KEY='your_secret_key'
-
-
-
-    DEBUG=True
-
-
-
-    DB_NAME='inventory_db'
-
-
-
-    DB_USER='your_db_user'
-
-
-
-    DB_PASSWORD='your_db_password'
-
-
-
-    DB_HOST='localhost'
-
-
-
-    DB_PORT='5432'
-
-
-
-    ```
-
-
-
-
-
-
-
-3. **Стартирай контейнерите**
-
-
-
-    ```bash
-
-
-
-    docker-compose up --build -d
-
-
-
-    ```
-
-
-
-
-
-
-
-4. **Прилагай миграции**
-
-
-
-    ```bash
-
-
-
-    docker-compose exec web python manage.py makemigrations
-
-
-
-    docker-compose exec web python manage.py migrate
-
-
-
-    ```
-
-
-
-
-
-
-
-5. **Създай суперпотребител**
-
-
-
-    ```bash
-
-
-
-    docker-compose exec web python manage.py createsuperuser
-
-
-
-    ```
-
-
-
-
-
-
-
-6. **Достъп до приложението**
-
-
-
-    - Публична част: http://127.0.0.1:8000/  
-
-
-
-    - Админ панел: http://127.0.0.1:8000/admin/
-
-
-
-
-
-
-
----
-
-
-
-
-
-
-
-## Usage
-
-
-
-
-
-
-
-- Клиенти могат да разглеждат продукти, добавят в количка и завършват поръчка  
-
-
-
-- Администратори управляват продукти, наличности, поръчки и доставчици  
-
-
-
-- Наличности се обновяват при доставка и продажба  
-
-
-
-- Аналитичен дашборд с ключови метрики (ако е реализиран)
-
-
-
-
-
-
-
----
-
-
-
-
-
-
-
-## Roadmap in development
-
-
-
-
-
-
-
-
-
-
-
----
-
-
-
-
-
-
-
-## Contributing
-
-
-
-
-
-
-
-1. Fork the repo  
-
-
-
-2. Създай нов branch (`git checkout -b feature/awesome-feature`)  
-
-
-
-3. Направи промени и commit (`git commit -m 'feat: Add awesome feature'`)  
-
-
-
-4. Push to GitHub (`git push origin feature/awesome-feature`)  
-
-
-
-5. Отвори Pull Request
-
-
-
-
-
-
-
----
-
-
-
-
-
-
-
-## License
-
-
-
-
-
-
-
-Distributed under the MIT License. See `LICENSE` for more information.
-
-
-
-
-
-
-
----
-
-
-
-
-
-
-
-## Contact
-
-
-
-
-
-
-
-**Eli Arnautska**  
-
-
-
-📧 eli_arnaytska@abv.bg  
-
-
-
-🔗 [Smart Inventory Store GitHub Repo](https://github.com/EliArn99/Smart_Inventory_Store)
-
-
-
-
-
-
-
----
-
-
-
-
-
-
-
-## Acknowledgments
-
-
-
-
-
-
-
-- Django  
-
-
-
-- PostgreSQL  
-
-
-
-- Docker  
-
-
-
-- Shields.io  
-
-
-
-- Bootstrap  
-
-
-
-
-
-
-
----
-
+## Project Structure
+
+```text
+Smart_Inventory_Store/
+├── Smart_Inventory_Store/
+│   ├── settings/
+│   │   ├── base.py
+│   │   ├── dev.py
+│   │   └── prod.py
+│   ├── urls.py
+│   ├── asgi.py
+│   └── wsgi.py
+├── store/
+│   ├── models.py
+│   ├── views.py
+│   ├── forms.py
+│   ├── admin.py
+│   ├── urls.py
+│   ├── utils.py
+│   ├── signals.py
+│   ├── serializers.py
+│   └── tests/
+├── static/
+├── templates/
+├── Dockerfile
+├── docker-compose.yml
+├── docker-compose.prod.yml
+└── requirements.txt
