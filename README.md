@@ -119,6 +119,9 @@ Smart_Inventory_Store/
 Prerequisites
 Docker & Docker Compose
 
+git clone https://github.com/EliArn99/Smart_Inventory_Store.git
+cd Smart_Inventory_Store
+
 Git
 
 Installation Steps
