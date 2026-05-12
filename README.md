@@ -1,186 +1,115 @@
-# Smart Inventory Store 🛒
+# 📚 Smart Inventory Store
 
-Smart Inventory Store is a full-stack Django e-commerce and inventory management application built with Django, PostgreSQL, Docker, Bootstrap and vanilla JavaScript.
+[![Python](https://img.shields.io/badge/Python-3.11-blue?style=for-the-badge&logo=python)](https://www.python.org/)
+[![Django](https://img.shields.io/badge/Django-5.2-green?style=for-the-badge&logo=django)](https://www.djangoproject.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue?style=for-the-badge&logo=postgresql)](https://www.postgresql.org/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker)](https://www.docker.com/)
+[![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 
-The project includes a public storefront, shopping cart, checkout flow, wishlist, reviews, blog system, admin inventory management, low-stock email alerts and Docker-based deployment setup.
+> **A Production-Ready Full-Stack E-Commerce & Inventory Management System**
 
----
+Smart Inventory Store is a feature-rich web application that combines an elegant customer storefront with powerful inventory management capabilities. Built with Django, PostgreSQL, Docker, and vanilla JavaScript.
 
-## Tech Stack
-
-- Python 3
-- Django 5.2
-- Django REST Framework
-- PostgreSQL
-- Docker & Docker Compose
-- Gunicorn
-- Nginx
-- Whitenoise
-- Bootstrap
-- Vanilla JavaScript
-- HTML/CSS
+**[Live Demo](#)** • **[Report Bug](#)** • **[Request Feature](#)**
 
 ---
 
-## Features
+## 📋 Table of Contents
 
-### Storefront
-- Product listing with pagination
-- Search by title, author and description
-- Category filtering
-- Price, author and year filters
-- Sorting by name, price, rating and publication year
-- Product detail page
-- Product reviews and ratings
-
-### Cart & Orders
-- Authenticated user cart
-- Guest cart using cookies
-- Add/remove cart items
-- Checkout flow
-- Stock validation before order completion
-- Automatic stock reduction after successful order
-- Shipping address creation when required
-
-### User Features
-- Registration and login
-- User profile page
-- Order history
-- Wishlist
-- Book recommendations based on purchased categories
-
-### Blog
-- Blog post listing
-- Blog categories
-- Blog detail page
-- Comment system with admin approval
-- Staff-only post creation
-
-### Admin & Inventory
-- Customized Django admin
-- Product, order, review, banner and comment management
-- Inventory report for low-stock books
-- Low-stock email notification system
-
-### API / Serialization
-- DRF serializers for books, customers, orders and order items
-
-### Testing
-- Tests for forms
-- Tests for models
-- Tests for views
-- Tests for URLs
-
-### Deployment
-- Dockerfile
-- docker-compose for development
-- docker-compose production setup
-- PostgreSQL service
-- Gunicorn
-- Nginx
-- Static and media volume handling
+- [✨ Features](#-features)
+- [🛠️ Tech Stack](#️-tech-stack)
+- [📁 Project Structure](#-project-structure)
+- [🚀 Quick Start](#-quick-start)
+- [📸 Screenshots](#-screenshots)
+- [🧠 Lessons Learned](#-lessons-learned)
+- [📄 License](#-license)
+- [📫 Contact](#-contact)
 
 ---
 
-## Project Structure
+## ✨ Features
 
-```text
+### 🏪 Storefront
+- 📄 Product listing with pagination
+- 🔍 Full-text search by title, author, and description
+- 🗂️ Category-based filtering
+- 🎚️ Advanced filters (price range, author, publication year)
+- 🔃 Multi-criteria sorting (name, price, rating, year)
+- ⭐ Product detail page with user reviews & ratings
+
+### 🛒 Cart & Orders
+- 👤 Persistent cart for authenticated users
+- 🍪 Guest cart support via cookies
+- ➕/➖ Dynamic cart item management
+- ✅ Real-time stock validation before checkout
+- 📦 Automatic inventory reduction after successful orders
+- 🏠 Shipping address management
+
+### 👤 User Features
+- 🔐 Secure registration and login system
+- 👤 Personalized user profile
+- 📜 Complete order history
+- ❤️ Wishlist functionality
+- 🎯 Smart recommendations based on purchase history
+
+### 📝 Blog System
+- 📰 Blog post listing with category filters
+- 📄 Detailed blog post pages
+- 💬 Comment system with admin moderation
+- ✍️ Staff-only content creation
+
+### 🛠️ Admin & Inventory
+- 🧰 Fully customized Django admin panel
+- 📊 Low-stock inventory reports
+- 📧 Automated low-stock email alerts
+
+### 🔌 API
+- 📡 RESTful API with Django REST Framework
+- 🔄 Serializers for books, customers, orders, and order items
+
+### 🧪 Testing
+- ✅ Comprehensive tests for forms
+- ✅ Model validation tests
+- ✅ View and URL routing tests
+
+---
+
+## 🛠️ Tech Stack
+
+| Category | Technologies |
+|----------|--------------|
+| **Backend** | ![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python) ![Django](https://img.shields.io/badge/Django-5.2-092E20?logo=django) ![DRF](https://img.shields.io/badge/DRF-3.15-a30000?logo=django) |
+| **Database** | ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql) |
+| **Frontend** | ![Bootstrap](https://img.shields.io/badge/Bootstrap-5-7952B3?logo=bootstrap) ![JavaScript](https://img.shields.io/badge/JavaScript-Vanilla-F7DF1E?logo=javascript) |
+| **Server** | ![Gunicorn](https://img.shields.io/badge/Gunicorn-21.2-499848?logo=gunicorn) ![Nginx](https://img.shields.io/badge/Nginx-1.24-009639?logo=nginx) |
+| **DevOps** | ![Docker](https://img.shields.io/badge/Docker-24.0-2496ED?logo=docker) ![Docker Compose](https://img.shields.io/badge/Compose-2.20-2496ED?logo=docker) |
+
+---
+
+## 📁 Project Structure
+
+```bash
 Smart_Inventory_Store/
-├── Smart_Inventory_Store/
+├── Smart_Inventory_Store/          # Project configuration
 │   ├── settings/
-│   │   ├── base.py
-│   │   ├── dev.py
-│   │   └── prod.py
-│   ├── urls.py
-│   ├── asgi.py
-│   └── wsgi.py
-├── store/
-│   ├── models.py
-│   ├── views.py
-│   ├── forms.py
-│   ├── admin.py
-│   ├── urls.py
-│   ├── utils.py
-│   ├── signals.py
-│   ├── serializers.py
-│   └── tests/
-├── static/
-├── templates/
-├── Dockerfile
-├── docker-compose.yml
-├── docker-compose.prod.yml
-└── requirements.txt
-
-
-Installation
-1. Clone the repository
-git clone https://github.com/EliArn99/Smart_Inventory_Store.git
-cd Smart_Inventory_Store
-2. Create .env file
-DJANGO_ENV=dev
-DJANGO_SECRET_KEY=your-secret-key
-DJANGO_ALLOWED_HOSTS=127.0.0.1,localhost
-
-POSTGRES_DB=bookstore
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=postgres
-POSTGRES_HOST=db
-POSTGRES_PORT=5432
-
-LOW_STOCK_ALERT_EMAIL=
-EMAIL_HOST_USER=
-EMAIL_HOST_PASSWORD=
-3. Start with Docker
-docker-compose up --build
-4. Apply migrations
-docker-compose exec web python manage.py migrate
-5. Create superuser
-docker-compose exec web python manage.py createsuperuser
-6. Open the app
-Storefront: http://127.0.0.1:8000/store/
-Admin:      http://127.0.0.1:8000/admin/
-Running Tests
-docker-compose exec web python manage.py test
-Environment Modes
-
-The project uses separated Django settings:
-
-settings/base.py
-settings/dev.py
-settings/prod.py
-
-Set the active environment with:
-
-DJANGO_ENV=dev
-
-or:
-
-DJANGO_ENV=prod
-Screenshots
-Storefront
-
-Cart
-
-Checkout
-
-Admin Inventory
-
-What I Learned
-Structuring a real Django project with separate settings
-Working with PostgreSQL and Docker
-Handling authenticated and guest carts
-Using transactions for order processing
-Reducing stock safely after checkout
-Creating custom Django admin panels
-Writing tests for forms, models, views and URLs
-Using vanilla JavaScript modules with Django templates
-Preparing a Django app for production deployment
-License
-
-This project is licensed under the MIT License.
-
-Contact
-
-Eli Arnautska
-
-GitHub: EliArn99
+│   │   ├── base.py                 # Shared settings (DRY principle)
+│   │   ├── dev.py                  # Development environment
+│   │   └── prod.py                 # Production environment
+│   ├── urls.py                     # Main URL configuration
+│   └── wsgi.py                     # WSGI entry point
+├── store/                          # Main application
+│   ├── models.py                   # Database models
+│   ├── views.py                    # Business logic
+│   ├── forms.py                    # Form validation
+│   ├── admin.py                    # Admin interface
+│   ├── urls.py                     # App routing
+│   ├── utils.py                    # Helper functions
+│   ├── signals.py                  # Event handlers
+│   ├── serializers.py              # DRF serializers
+│   └── tests/                      # Unit tests
+├── static/                         # Static assets (CSS, JS, images)
+├── templates/                      # HTML templates
+├── Dockerfile                      # Docker image definition
+├── docker-compose.yml              # Development setup
+├── docker-compose.prod.yml         # Production setup
+└── requirements.txt                # Python dependencies
