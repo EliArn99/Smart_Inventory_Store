@@ -256,5 +256,3 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 - GitHub: https://github.com/EliArn99
 - Repository: https://github.com/EliArn99/Smart_Inventory_Store
 
-Installation Steps
-1️⃣ Clone the Repository
