@@ -113,3 +113,13 @@ Smart_Inventory_Store/
 ├── docker-compose.yml              # Development setup
 ├── docker-compose.prod.yml         # Production setup
 └── requirements.txt                # Python dependencies
+
+
+🚀 Quick Start
+Prerequisites
+Docker & Docker Compose
+
+Git
+
+Installation Steps
+1️⃣ Clone the Repository
