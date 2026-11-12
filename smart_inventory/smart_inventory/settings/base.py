@@ -60,7 +60,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "Smart_Inventory_Store.urls"
+ROOT_URLCONF = "smart_inventory.urls"
 
 TEMPLATES = [
     {
@@ -77,8 +77,8 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "Smart_Inventory_Store.wsgi.application"
-ASGI_APPLICATION = "Smart_Inventory_Store.asgi.application"
+WSGI_APPLICATION = "smart_inventory.wsgi.application"
+ASGI_APPLICATION = "smart_inventory.asgi.application"
 
 DATABASES = {
     "default": {
