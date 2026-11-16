@@ -1,7 +1,7 @@
-from django.test import TestCase
 from django.contrib.auth.models import User
+from django.test import TestCase
 
-from ..forms import CustomUserCreationForm, ReviewForm, PostForm, CommentForm
+from ..forms import CommentForm, CustomUserCreationForm, PostForm, ReviewForm
 
 
 class CustomUserCreationFormTest(TestCase):

@@ -9,12 +9,12 @@ from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.db.models import Avg, Count, F, Q
-from django.http import Http404, JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_GET, require_POST
 from django.views.generic import DetailView, ListView, TemplateView
 from django.views.generic.edit import FormView
-from .models import Book, OrderItem, ShippingAddress
+
 from .forms import CommentForm, CustomUserCreationForm, PostForm, ReviewForm
 from .models import (
     Banner,

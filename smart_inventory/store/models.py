@@ -1,7 +1,7 @@
-from django.core.validators import MinValueValidator, MaxValueValidator
+
 from django.contrib.auth.models import User
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.conf import settings
 
 
 class Customer(models.Model):
@@ -39,7 +39,12 @@ class Book(models.Model):
     image = models.ImageField(null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     digital = models.BooleanField(default=False, null=True, blank=False)
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
     stock = models.IntegerField(default=0)
     publication_year = models.IntegerField(null=True, blank=True)
 
@@ -49,14 +54,18 @@ class Book(models.Model):
     @property
     def imageURL(self):
         try:
-            url = self.image.url
-        except:
-            url = ''
-        return url
+            return self.image.url
+        except ValueError:
+            return ""
 
 
 class Order(models.Model):
-    customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True)
+    customer = models.ForeignKey(
+        Customer,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
     date_ordered = models.DateTimeField(auto_now_add=True)
     complete = models.BooleanField(default=False)
     transaction_id = models.CharField(max_length=200, null=True, blank=True)
@@ -68,9 +77,11 @@ class Order(models.Model):
     def shipping(self):
         shipping = False
         orderitems = self.orderitem_set.all()
+
         for i in orderitems:
-            if i.product.digital == False:
+            if i.product.digital is False:
                 shipping = True
+
         return shipping
 
     @property
@@ -87,8 +98,16 @@ class Order(models.Model):
 
 
 class OrderItem(models.Model):
-    product = models.ForeignKey(Book, on_delete=models.SET_NULL, null=True)
-    order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True)
+    product = models.ForeignKey(
+        Book,
+        on_delete=models.SET_NULL,
+        null=True
+    )
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.SET_NULL,
+        null=True
+    )
     quantity = models.IntegerField(default=0, null=True, blank=True)
     date_added = models.DateTimeField(auto_now_add=True)
 
@@ -99,8 +118,18 @@ class OrderItem(models.Model):
 
 
 class ShippingAddress(models.Model):
-    customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True)
-    order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True, blank=True)
+    customer = models.ForeignKey(
+        Customer,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
     address = models.CharField(max_length=200, null=False)
     city = models.CharField(max_length=200, null=False)
     state = models.CharField(max_length=200, null=False)
@@ -112,7 +141,11 @@ class ShippingAddress(models.Model):
 
 
 class WishlistItem(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='wishlist')
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='wishlist'
+    )
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
     added_at = models.DateTimeField(auto_now_add=True)
 
@@ -126,7 +159,11 @@ class WishlistItem(models.Model):
 
 
 class Review(models.Model):
-    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name='reviews')
+    book = models.ForeignKey(
+        Book,
+        on_delete=models.CASCADE,
+        related_name='reviews'
+    )
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     rating = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(5)],
@@ -158,9 +195,17 @@ class BlogCategory(models.Model):
 class Post(models.Model):
     title = models.CharField(max_length=200, unique=True)
     slug = models.SlugField(max_length=200, unique=True)
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='blog_posts')
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='blog_posts'
+    )
     content = models.TextField()
-    image = models.ImageField(upload_to='blog_images/', blank=True, null=True)
+    image = models.ImageField(
+        upload_to='blog_images/',
+        blank=True,
+        null=True
+    )
     category = models.ForeignKey(
         BlogCategory,
         on_delete=models.SET_NULL,
@@ -170,7 +215,10 @@ class Post(models.Model):
     views = models.IntegerField(default=0)
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
-    status = models.IntegerField(choices=[(0, "Draft"), (1, "Published")], default=0)
+    status = models.IntegerField(
+        choices=[(0, "Draft"), (1, "Published")],
+        default=0
+    )
 
     class Meta:
         ordering = ['-created_on']
@@ -180,7 +228,11 @@ class Post(models.Model):
 
 
 class Comment(models.Model):
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        related_name='comments'
+    )
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.TextField()
     is_approved = models.BooleanField(default=False)
@@ -199,13 +251,17 @@ class Banner(models.Model):
     image = models.ImageField(upload_to='banners/')
     is_active = models.BooleanField(default=True)
     url = models.URLField(blank=True, null=True)
-    order = models.IntegerField(default=0, help_text="По-ниското число се показва по-рано")
+    order = models.IntegerField(
+        default=0,
+        help_text="По-ниското число се показва по-рано"
+    )
 
     class Meta:
         ordering = ['order']
 
     def __str__(self):
         return self.title
+
 
 # TODO: Finish
 # class UserListManager(models.Manager):
@@ -219,7 +275,7 @@ class Banner(models.Model):
 # class UserList(models.Model):
 #
 #     user = models.ForeignKey(
-#         settings.AUTH_USER_MODEL,
+#         User,
 #         on_delete=models.CASCADE,
 #         related_name='custom_lists',
 #         verbose_name='Потребител'
@@ -242,7 +298,6 @@ class Banner(models.Model):
 #     class Meta:
 #         verbose_name = 'Потребителски списък'
 #         verbose_name_plural = 'Потребителски списъци'
-#         # Гарантира, че потребителят може да има само един основен списък.
 #         constraints = [
 #             models.UniqueConstraint(
 #                 fields=['user'],
@@ -280,4 +335,4 @@ class Banner(models.Model):
 #         ordering = ['-added_at']
 #
 #     def __str__(self):
-#         return f"Книга '{self.book.title}' в '{self.user_list.name}'"
+#         return f"Книга '{self.book.name}' в '{self.user_list.name}'"
