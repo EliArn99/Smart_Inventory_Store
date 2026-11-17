@@ -243,6 +243,7 @@ class Post(models.Model):
         return self.title
 
 
+
 class Comment(models.Model):
     post = models.ForeignKey(
         Post,
@@ -252,7 +253,7 @@ class Comment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.TextField()
     is_approved = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_on = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ['created_on']
