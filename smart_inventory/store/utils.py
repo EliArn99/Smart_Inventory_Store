@@ -4,7 +4,7 @@ from decimal import Decimal
 
 from django.db import transaction
 
-from .models import Book, Customer, Order, OrderItem
+from .models import Customer, Order, OrderItem, Product
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +55,7 @@ def cookieCart(request):
         except (TypeError, ValueError, AttributeError):
             logger.warning("Invalid cart item skipped: %s", book_id_str)
 
-    books = Book.objects.filter(id__in=book_ids).in_bulk()
+    books = Product.objects.filter(id__in=book_ids).in_bulk()
 
     for book_id_str, item_data in valid_cart.items():
         book_id = int(book_id_str)
@@ -151,7 +151,7 @@ def guestOrder(request, data):
     )
 
     book_ids = [item["product"]["id"] for item in items]
-    books = Book.objects.filter(id__in=book_ids).in_bulk()
+    books = Product.objects.filter(id__in=book_ids).in_bulk()
 
     order_items = []
 

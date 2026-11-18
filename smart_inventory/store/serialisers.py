@@ -1,13 +1,13 @@
 from rest_framework import serializers
 
-from .models import Book, Customer, Order, OrderItem
+from .models import Customer, Order, OrderItem, Product
 
 
 class BookSerializer(serializers.ModelSerializer):
     imageURL = serializers.SerializerMethodField()
 
     class Meta:
-        model = Book
+        model = Product
         fields = ['id', 'name', 'author', 'price', 'digital', 'description', 'imageURL']
 
     def get_imageURL(self, obj):

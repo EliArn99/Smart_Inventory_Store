@@ -2,13 +2,13 @@ from decimal import Decimal
 
 from django.test import TestCase
 
-from ..models import Book, Category, Customer, Order, OrderItem
+from ..models import Category, Customer, Order, OrderItem, Product
 
 
 class OrderModelTest(TestCase):
     def setUp(self):
         self.category = Category.objects.create(name="Fantasy", slug="fantasy")
-        self.book = Book.objects.create(
+        self.book = Product.objects.create(
             name="The Hobbit",
             price=Decimal("15.00"),
             digital=False,
