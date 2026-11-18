@@ -9,7 +9,7 @@ from django.test import TransactionTestCase
 class BookSkuMigrationTests(TransactionTestCase):
     migrate_from = ("store", "0017_book_is_active_book_sku")
     migrate_to = ("store", "0018_populate_book_sku")
-    migrate_latest = ("store", "0019_alter_book_sku")
+    migrate_latest = ("store", "0020_rename_book_product")
 
     def test_existing_books_receive_sku(self):
         executor = MigrationExecutor(connection)

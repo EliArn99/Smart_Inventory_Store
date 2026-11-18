@@ -19,12 +19,12 @@ from .forms import CommentForm, CustomUserCreationForm, PostForm, ReviewForm
 from .models import (
     Banner,
     BlogCategory,
-    Book,
     Category,
     Customer,
     Order,
     OrderItem,
     Post,
+    Product,
     Review,
     ShippingAddress,
     WishlistItem,
@@ -63,14 +63,14 @@ class CartMixin(BaseContextMixin):
 
 
 class BookListView(BaseContextMixin, ListView):
-    model = Book
+    model = Product
     template_name = "store/store.html"
     context_object_name = "books_on_page"
     paginate_by = 12
 
     def get_queryset(self):
         books = (
-            Book.objects.select_related("category")
+            Product.objects.select_related("category")
             .only(
                 "id",
                 "name",
@@ -144,7 +144,7 @@ class BookListView(BaseContextMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["categories"] = Category.objects.annotate(book_count=Count("book"))
+        context["categories"] = Category.objects.annotate(book_count=Count("product"))
         context["banners"] = Banner.objects.filter(is_active=True).order_by("order")
         context["active_category_slug"] = self.kwargs.get("category_slug")
         context["query"] = self.request.GET.get("q")
@@ -182,7 +182,7 @@ def update_item(request):
     if not book_id or action not in {"add", "remove"}:
         return JsonResponse({"error": "Невалидни входни данни."}, status=400)
 
-    book = get_object_or_404(Book, pk=book_id)
+    book = get_object_or_404(Product, pk=book_id)
 
     if request.user.is_authenticated:
         customer = get_or_create_customer_for_user(request.user)
@@ -284,7 +284,7 @@ def process_order(request):
 
                 if book.stock < item.quantity:
                     logger.warning(
-                        "Insufficient stock. Book ID: %s, stock: %s, requested: %s",
+                        "Insufficient stock. Product ID: %s, stock: %s, requested: %s",
                         book.id,
                         book.stock,
                         item.quantity,
@@ -295,7 +295,7 @@ def process_order(request):
                     )
 
             for item in items:
-                Book.objects.filter(pk=item.product_id).update(
+                Product.objects.filter(pk=item.product_id).update(
                     stock=F("stock") - item.quantity
                 )
 
@@ -356,11 +356,11 @@ def profile_details(request):
     )
 
     purchased_categories = Category.objects.filter(
-        book__orderitem__order__customer=customer
+        product__orderitem__order__customer=customer
     ).distinct()
 
     recommended_books = list(
-        Book.objects.filter(category__in=purchased_categories)
+        Product.objects.filter(category__in=purchased_categories)
         .exclude(orderitem__order__customer=customer)
         .select_related("category")
         .distinct()[:20]
@@ -373,7 +373,7 @@ def profile_details(request):
         )
     else:
         recommended_books = list(
-            Book.objects.select_related("category").order_by("id")[:4]
+            Product.objects.select_related("category").order_by("id")[:4]
         )
 
     context = {
@@ -401,14 +401,14 @@ def register(request):
 
 
 class BookDetailView(BaseContextMixin, DetailView, FormView):
-    model = Book
+    model = Product
     template_name = "store/book_detail.html"
     context_object_name = "book"
     pk_url_kwarg = "pk"
     form_class = ReviewForm
 
     def get_queryset(self):
-        return Book.objects.select_related("category").prefetch_related("reviews__user")
+        return Product.objects.select_related("category").prefetch_related("reviews__user")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -453,7 +453,7 @@ def update_wishlist(request):
     if not book_id or action not in {"add", "remove"}:
         return JsonResponse({"error": "Missing or invalid bookId/action."}, status=400)
 
-    book = get_object_or_404(Book, id=book_id)
+    book = get_object_or_404(Product, id=book_id)
     wishlist_item, created = WishlistItem.objects.get_or_create(
         user=request.user,
         book=book,
@@ -587,7 +587,7 @@ def add_post(request):
 @staff_member_required
 def inventory_report_view(request):
     low_stock_books = (
-        Book.objects
+        Product.objects
         .select_related("category")
         .filter(stock__lte=5)
         .order_by("stock")

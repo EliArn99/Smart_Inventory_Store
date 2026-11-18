@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from ..models import Book, Category, Order, OrderItem
+from ..models import Category, Order, OrderItem, Product
 
 
 class StoreViewTest(TestCase):
@@ -16,14 +16,14 @@ class StoreViewTest(TestCase):
             slug="fantasy",
         )
 
-        self.book1 = Book.objects.create(
+        self.book1 = Product.objects.create(
             name="The Hobbit",
             price=15.00,
             category=self.category,
             stock=10,
         )
 
-        self.book2 = Book.objects.create(
+        self.book2 = Product.objects.create(
             name="The Lord of the Rings",
             price=30.00,
             category=self.category,
@@ -49,7 +49,7 @@ class StoreViewTest(TestCase):
 
 class BookDetailViewTest(TestCase):
     def setUp(self):
-        self.book = Book.objects.create(
+        self.book = Product.objects.create(
             name="Test Book",
             price=10,
             stock=1,
@@ -83,7 +83,7 @@ class UpdateItemViewTest(TestCase):
 
         self.customer = self.user.customer
 
-        self.book = Book.objects.create(
+        self.book = Product.objects.create(
             name="Test Book",
             price=10,
             stock=10,
@@ -196,7 +196,7 @@ class WishlistTests(TestCase):
             password="password123",
         )
 
-        self.book = Book.objects.create(
+        self.book = Product.objects.create(
             name="Test Book",
             price=10,
         )
@@ -238,7 +238,7 @@ class UpdateWishlistViewTest(TestCase):
             password="password123",
         )
 
-        self.book = Book.objects.create(
+        self.book = Product.objects.create(
             name="Test Book",
             price=10,
             stock=5,
@@ -287,7 +287,7 @@ class ProcessOrderViewTest(TestCase):
 
         self.customer = self.user.customer
 
-        self.book = Book.objects.create(
+        self.book = Product.objects.create(
             name="Test Book",
             price=10,
             stock=5,

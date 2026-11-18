@@ -6,21 +6,21 @@ from django.core.mail import send_mail
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
-from .models import Book, Customer
+from .models import Customer, Product
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
-@receiver(pre_save, sender=Book)
-def store_previous_book_stock(sender, instance: Book, **kwargs):
+@receiver(pre_save, sender=Product)
+def store_previous_book_stock(sender, instance: Product, **kwargs):
     """Store the previous stock value before saving a Book instance."""
     if not instance.pk:
         instance._old_stock = None
         return
 
     instance._old_stock = (
-        Book.objects.filter(pk=instance.pk)
+        Product.objects.filter(pk=instance.pk)
         .values_list("stock", flat=True)
         .first()
     )
@@ -41,8 +41,8 @@ def create_customer_profile(sender, instance, created: bool, **kwargs):
     )
 
 
-@receiver(post_save, sender=Book)
-def send_low_stock_alert(sender, instance: Book, created: bool, **kwargs):
+@receiver(post_save, sender=Product)
+def send_low_stock_alert(sender, instance: Product, created: bool, **kwargs):
     """Send an email alert when stock drops below the configured threshold."""
     if created:
         return

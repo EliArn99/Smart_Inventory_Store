@@ -38,7 +38,7 @@ class Category(models.Model):
         return f'/category/{self.slug}/'
 
 
-class Book(models.Model):
+class Product(models.Model):
     name = models.CharField(max_length=200, null=True)
 
     sku = models.CharField(
@@ -73,6 +73,8 @@ class Book(models.Model):
             return self.image.url
         except ValueError:
             return ""
+
+
 
 
 class Order(models.Model):
@@ -115,10 +117,11 @@ class Order(models.Model):
 
 class OrderItem(models.Model):
     product = models.ForeignKey(
-        Book,
+        Product,
         on_delete=models.SET_NULL,
         null=True
     )
+
     order = models.ForeignKey(
         Order,
         on_delete=models.SET_NULL,
@@ -162,7 +165,7 @@ class WishlistItem(models.Model):
         on_delete=models.CASCADE,
         related_name='wishlist'
     )
-    book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    book = models.ForeignKey(Product, on_delete=models.CASCADE)
     added_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -176,9 +179,9 @@ class WishlistItem(models.Model):
 
 class Review(models.Model):
     book = models.ForeignKey(
-        Book,
+        Product,
         on_delete=models.CASCADE,
-        related_name='reviews'
+        related_name="reviews"
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     rating = models.IntegerField(

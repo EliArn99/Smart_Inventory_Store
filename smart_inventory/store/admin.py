@@ -4,21 +4,21 @@ from django.utils.html import format_html
 from .models import (
     Banner,
     BlogCategory,
-    Book,
     Category,
     Comment,
     Customer,
     Order,
     OrderItem,
     Post,
+    Product,
     Review,
     ShippingAddress,
     WishlistItem,
 )
 
 
-@admin.register(Book)
-class BookAdmin(admin.ModelAdmin):
+@admin.register(Product)
+class ProductAdmin(admin.ModelAdmin):
     list_display = ("name", "author", "price", "stock", "category", "is_digital", "image_tag")
     list_editable = ("price", "stock")
     list_filter = ("category", "digital", "stock")
