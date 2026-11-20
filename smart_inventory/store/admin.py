@@ -17,13 +17,47 @@ from .models import (
 )
 
 
+class StockLevelFilter(admin.SimpleListFilter):
+    title = "Складова наличност"
+    parameter_name = "stock_level"
+
+    def lookups(self, request, model_admin):
+        return (
+            ("available", "Налични (над 5)"),
+            ("low", "Ниска наличност (1–5)"),
+            ("out", "Изчерпани"),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == "available":
+            return queryset.filter(stock__gt=5)
+
+        if self.value() == "low":
+            return queryset.filter(stock__gte=1, stock__lte=5)
+
+        if self.value() == "out":
+            return queryset.filter(stock__lte=0)
+
+        return queryset
+
+
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ("name", "author", "price", "stock", "category", "is_digital", "image_tag")
-    list_editable = ("price", "stock")
-    list_filter = ("category", "digital", "stock")
-    search_fields = ("name", "author", "description")
-    search_help_text = "Търсене по име, автор или описание"
+    list_display = (
+        "name",
+        "sku",
+        "author",
+        "price",
+        "stock",
+        "category",
+        "is_active",
+        "is_digital",
+        "image_tag",
+    )
+    list_editable = ("price", "stock", "is_active")
+    list_filter = ("category", "digital", "is_active", StockLevelFilter)
+    search_fields = ("name", "sku", "author", "description")
+    search_help_text = "Търсене по име, SKU, автор или описание"
     list_select_related = ("category",)
     ordering = ("name",)
     list_per_page = 25
@@ -60,9 +94,20 @@ class OrderItemInline(admin.TabularInline):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ("id", "customer", "date_ordered", "complete", "get_cart_total_display", "transaction_id")
+    list_display = (
+        "id",
+        "customer",
+        "date_ordered",
+        "complete",
+        "get_cart_total_display",
+        "transaction_id",
+    )
     list_filter = ("complete", "date_ordered")
-    search_fields = ("customer__name", "customer__user__username", "transaction_id")
+    search_fields = (
+        "customer__name",
+        "customer__user__username",
+        "transaction_id",
+    )
     search_help_text = "Търсене по клиент или transaction ID"
     inlines = (OrderItemInline,)
     readonly_fields = ("get_cart_total_display", "date_ordered")
@@ -94,7 +139,15 @@ class CustomerAdmin(admin.ModelAdmin):
 
 @admin.register(ShippingAddress)
 class ShippingAddressAdmin(admin.ModelAdmin):
-    list_display = ("id", "customer", "order", "city", "state", "zipcode", "date_added")
+    list_display = (
+        "id",
+        "customer",
+        "order",
+        "city",
+        "state",
+        "zipcode",
+        "date_added",
+    )
     search_fields = ("customer__name", "order__id", "city", "zipcode")
     list_filter = ("city", "state", "date_added")
     list_select_related = ("customer", "order")
