@@ -257,46 +257,122 @@ def process_order(request):
         return JsonResponse({"error": "Невалиден JSON."}, status=400)
 
     try:
+
         if request.user.is_authenticated:
             customer = get_or_create_customer_for_user(request.user)
-            order, _ = Order.objects.get_or_create(customer=customer, complete=False)
+
+            # Checkout requires an existing active order.
+            order = (
+                Order.objects
+                .filter(customer=customer, complete=False)
+                .order_by("-pk")
+                .first()
+            )
+
+            if order is None:
+                return JsonResponse(
+                    {"error": "Няма активна поръчка за обработка."},
+                    status=409,
+                )
         else:
             customer, order = guestOrder(request, data)
 
-        with transaction.atomic():
-            order.transaction_id = uuid.uuid4().hex
 
+        with transaction.atomic():
+            # Lock the order to prevent concurrent processing.
+            order = Order.objects.select_for_update().get(pk=order.pk)
+
+            # Prevent processing an already completed order.
+            if order.complete:
+                return JsonResponse(
+                    {"error": "Поръчката вече е обработена."},
+                    status=409,
+                )
+
+            # Lock order items during checkout.
             items = list(
                 OrderItem.objects
                 .select_for_update()
                 .filter(order=order)
             )
 
-            for item in items:
-                book = item.product
+            # Do not process an empty cart.
+            if not items:
+                return JsonResponse(
+                    {"error": "Количката е празна."},
+                    status=400,
+                )
 
-                if book is None:
-                    logger.warning("Order item without product. Order ID: %s", order.id)
+            order.transaction_id = uuid.uuid4().hex
+
+            # Validate order items and calculate required stock.
+            required_stock = {}
+
+            for item in items:
+                if item.product_id is None:
+                    logger.warning(
+                        "Order item without product. Order ID: %s",
+                        order.id,
+                    )
                     return JsonResponse(
                         {"error": "Невалиден продукт в поръчката."},
                         status=400,
                     )
 
-                if book.stock < item.quantity:
-                    logger.warning(
-                        "Insufficient stock. Product ID: %s, stock: %s, requested: %s",
-                        book.id,
-                        book.stock,
-                        item.quantity,
-                    )
+                if item.quantity is None or item.quantity <= 0:
                     return JsonResponse(
-                        {"error": f'Недостатъчна наличност за книга "{book.name}".'},
+                        {"error": "Невалидно количество в поръчката."},
                         status=400,
                     )
 
-            for item in items:
-                Product.objects.filter(pk=item.product_id).update(
-                    stock=F("stock") - item.quantity
+
+                required_stock[item.product_id] = (
+                    required_stock.get(item.product_id, 0)
+                    + item.quantity
+                )
+
+
+            # Lock products in a consistent order to reduce deadlock risk.
+            products = {
+                product.pk: product
+                for product in (
+                    Product.objects
+                    .select_for_update()
+                    .filter(pk__in=required_stock)
+                    .order_by("pk")
+                )
+            }
+
+            # Check availability while product rows are locked.
+            for product_id, quantity in required_stock.items():
+                product = products.get(product_id)
+
+                if product is None:
+                    return JsonResponse(
+                        {"error": "Продуктът не съществува."},
+                        status=400,
+                    )
+
+                if product.stock < quantity:
+                    logger.warning(
+                        "Insufficient stock. Product ID: %s, stock: %s, requested: %s",
+                        product.id,
+                        product.stock,
+                        quantity,
+                    )
+                    return JsonResponse(
+                        {
+                            "error": (
+                                f'Недостатъчна наличност за продукт "{product.name}".'
+                            )
+                        },
+                        status=400,
+                    )
+
+            # All stock checks passed. Update stock atomically.
+            for product_id, quantity in required_stock.items():
+                Product.objects.filter(pk=product_id).update(
+                    stock=F("stock") - quantity
                 )
 
             order.complete = True
@@ -313,7 +389,10 @@ def process_order(request):
                     zipcode=shipping.get("zipcode", ""),
                 )
 
-        logger.info("Order processed successfully. Order ID: %s", order.id)
+        logger.info(
+            "Order processed successfully. Order ID: %s",
+            order.id,
+        )
 
         response = JsonResponse(
             {"message": "Payment submitted successfully"},
