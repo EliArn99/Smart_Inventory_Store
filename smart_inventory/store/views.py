@@ -1,3 +1,4 @@
+import hashlib
 import json
 import logging
 import random
@@ -7,7 +8,7 @@ from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.db.models import Avg, Count, F, Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -253,86 +254,252 @@ def update_item(request):
 def process_order(request):
     try:
         data = json.loads(request.body)
-    except json.JSONDecodeError:
+    except (json.JSONDecodeError, UnicodeDecodeError):
         return JsonResponse({"error": "Невалиден JSON."}, status=400)
 
-    try:
+    if not isinstance(data, dict):
+        return JsonResponse({"error": "Невалидни данни."}, status=400)
 
-        if request.user.is_authenticated:
-            customer = get_or_create_customer_for_user(request.user)
+    # Validate the optional checkout idempotency key.
+    raw_key = data.get("idempotency_key")
+    checkout_key = None
 
-            # Checkout requires an existing active order.
-            order = (
-                Order.objects
-                .filter(customer=customer, complete=False)
-                .order_by("-pk")
-                .first()
+    if raw_key is not None:
+        try:
+            checkout_key = uuid.UUID(str(raw_key))
+        except (TypeError, ValueError, AttributeError):
+            return JsonResponse(
+                {"error": "Невалиден идентификатор на поръчката."},
+                status=400,
             )
 
-            if order is None:
+        # Fingerprint the checkout request to prevent key reuse
+        # with different order contents.
+        checkout_fingerprint = None
+
+        if checkout_key is not None:
+            try:
+                guest_cart = (
+                    json.loads(request.COOKIES.get("cart", "{}"))
+                    if not request.user.is_authenticated
+                    else None
+                )
+            except (TypeError, json.JSONDecodeError):
                 return JsonResponse(
-                    {"error": "Няма активна поръчка за обработка."},
+                    {"error": "Невалидна количка."},
+                    status=400,
+                )
+
+            fingerprint_payload = {
+                "request": {
+                    key: value
+                    for key, value in data.items()
+                    if key != "idempotency_key"
+                },
+                "guest_cart": guest_cart,
+            }
+
+            canonical_payload = json.dumps(
+                fingerprint_payload,
+                sort_keys=True,
+                separators=(",", ":"),
+                ensure_ascii=False,
+            )
+
+            checkout_fingerprint = hashlib.sha256(
+                canonical_payload.encode("utf-8")
+            ).hexdigest()
+
+    def existing_checkout_response():
+        if checkout_key is None:
+            return None
+
+        previous = (
+            Order.objects
+            .select_related("customer")
+            .filter(idempotency_key=checkout_key)
+            .first()
+        )
+
+        if previous is None:
+            return None
+
+        # A key belonging to another customer must not be reused.
+        if request.user.is_authenticated:
+            if (
+                    previous.customer is None
+                    or previous.customer.user_id != request.user.pk
+            ):
+                return JsonResponse(
+                    {"error": "Идентификаторът вече се използва."},
                     status=409,
                 )
-        else:
-            customer, order = guestOrder(request, data)
 
+            # An old checkout key cannot be reused for a new cart.
+            new_active_order = (
+                Order.objects
+                .filter(customer_id=previous.customer_id, complete=False)
+                .exclude(pk=previous.pk)
+                .exists()
+            )
+
+            if new_active_order:
+                return JsonResponse(
+                    {"error": "Този ключ принадлежи на предишна поръчка."},
+                    status=409,
+                )
+
+        else:
+            form = data.get("form")
+            email = form.get("email", "") if isinstance(form, dict) else ""
+            previous_email = (
+                previous.customer.email if previous.customer else ""
+            )
+
+            if (
+                    not isinstance(email, str)
+                    or not email.strip()
+                    or email.strip().casefold()
+                    != (previous_email or "").strip().casefold()
+            ):
+                return JsonResponse(
+                    {"error": "Идентификаторът вече се използва."},
+                    status=409,
+                )
+
+            if previous.idempotency_fingerprint != checkout_fingerprint:
+                return JsonResponse(
+                    {
+                        "error": (
+                            "Този идентификатор вече е използван "
+                            "за различна поръчка."
+                        )
+                    },
+                    status=409,
+                )
+
+        if not previous.complete:
+            return JsonResponse(
+                {"error": "Поръчката се обработва."},
+                status=409,
+            )
+
+        response = JsonResponse(
+            {"message": "Payment submitted successfully"},
+            status=200,
+        )
+
+        if not request.user.is_authenticated:
+            response.delete_cookie("cart")
+
+        return response
+
+    try:
+        # Return an earlier successful result without creating a new order.
+        previous_response = existing_checkout_response()
+        if previous_response is not None:
+            return previous_response
 
         with transaction.atomic():
-            # Lock the order to prevent concurrent processing.
+            if request.user.is_authenticated:
+                customer = get_or_create_customer_for_user(request.user)
+
+                order = (
+                    Order.objects
+                    .filter(customer=customer, complete=False)
+                    .order_by("-pk")
+                    .first()
+                )
+
+                if order is None:
+                    previous_response = existing_checkout_response()
+                    transaction.set_rollback(True)
+
+                    if previous_response is not None:
+                        return previous_response
+
+                    return JsonResponse(
+                        {"error": "Няма активна поръчка за обработка."},
+                        status=409,
+                    )
+            else:
+                # Guest order creation is part of the same transaction.
+                customer, order = guestOrder(request, data)
+
             order = Order.objects.select_for_update().get(pk=order.pk)
 
-            # Prevent processing an already completed order.
             if order.complete:
+
+                if (
+                    checkout_key is not None
+                    and order.idempotency_key == checkout_key
+                    and order.idempotency_fingerprint == checkout_fingerprint
+                ):
+
+                    return JsonResponse(
+                        {"message": "Payment submitted successfully"},
+                        status=200,
+                    )
+
+                transaction.set_rollback(True)
                 return JsonResponse(
                     {"error": "Поръчката вече е обработена."},
                     status=409,
                 )
 
-            # Lock order items during checkout.
+            # Reserve the key using PostgreSQL's unique constraint.
+            if checkout_key is not None:
+                if order.idempotency_key not in (None, checkout_key):
+                    transaction.set_rollback(True)
+                    return JsonResponse(
+                        {"error": "Друг идентификатор вече е използван."},
+                        status=409,
+                    )
+
+                order.idempotency_key = checkout_key
+                order.idempotency_fingerprint = checkout_fingerprint
+                order.save(
+                    update_fields=[
+                        "idempotency_key",
+                        "idempotency_fingerprint",
+                    ]
+                )
+
             items = list(
                 OrderItem.objects
                 .select_for_update()
                 .filter(order=order)
             )
 
-            # Do not process an empty cart.
             if not items:
+                transaction.set_rollback(True)
                 return JsonResponse(
                     {"error": "Количката е празна."},
                     status=400,
                 )
 
-            order.transaction_id = uuid.uuid4().hex
-
-            # Validate order items and calculate required stock.
             required_stock = {}
 
             for item in items:
                 if item.product_id is None:
-                    logger.warning(
-                        "Order item without product. Order ID: %s",
-                        order.id,
-                    )
+                    transaction.set_rollback(True)
                     return JsonResponse(
                         {"error": "Невалиден продукт в поръчката."},
                         status=400,
                     )
 
                 if item.quantity is None or item.quantity <= 0:
+                    transaction.set_rollback(True)
                     return JsonResponse(
                         {"error": "Невалидно количество в поръчката."},
                         status=400,
                     )
 
-
                 required_stock[item.product_id] = (
-                    required_stock.get(item.product_id, 0)
-                    + item.quantity
+                        required_stock.get(item.product_id, 0)
+                        + item.quantity
                 )
 
-
-            # Lock products in a consistent order to reduce deadlock risk.
             products = {
                 product.pk: product
                 for product in (
@@ -343,11 +510,11 @@ def process_order(request):
                 )
             }
 
-            # Check availability while product rows are locked.
             for product_id, quantity in required_stock.items():
                 product = products.get(product_id)
 
                 if product is None:
+                    transaction.set_rollback(True)
                     return JsonResponse(
                         {"error": "Продуктът не съществува."},
                         status=400,
@@ -360,6 +527,8 @@ def process_order(request):
                         product.stock,
                         quantity,
                     )
+
+                    transaction.set_rollback(True)
                     return JsonResponse(
                         {
                             "error": (
@@ -369,12 +538,12 @@ def process_order(request):
                         status=400,
                     )
 
-            # All stock checks passed. Update stock atomically.
             for product_id, quantity in required_stock.items():
                 Product.objects.filter(pk=product_id).update(
                     stock=F("stock") - quantity
                 )
 
+            order.transaction_id = uuid.uuid4().hex
             order.complete = True
             order.save(update_fields=["transaction_id", "complete"])
 
@@ -403,6 +572,24 @@ def process_order(request):
             response.delete_cookie("cart")
 
         return response
+
+    except IntegrityError:
+        # A concurrent request may have committed the same unique key.
+        previous_response = existing_checkout_response()
+        if previous_response is not None:
+            return previous_response
+
+        logger.exception("Database integrity error during checkout.")
+        return JsonResponse(
+            {"error": "Грешка при записване на поръчката."},
+            status=500,
+        )
+
+    except ValueError:
+        return JsonResponse(
+            {"error": "Невалидни данни за поръчката."},
+            status=400,
+        )
 
     except Exception:
         logger.exception("Грешка при обработка на поръчка.")

@@ -88,6 +88,23 @@ class Order(models.Model):
     complete = models.BooleanField(default=False)
     transaction_id = models.CharField(max_length=200, null=True, blank=True)
 
+    idempotency_key = models.UUIDField(
+        unique=True,
+        null=True,
+        blank=True,
+        editable=False,
+    )
+
+
+    idempotency_fingerprint = models.CharField(
+        max_length=64,
+        null=True,
+        blank=True,
+        editable=False,
+    )
+
+
+
     def __str__(self):
         return str(self.id)
 
