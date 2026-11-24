@@ -1,8 +1,9 @@
+import hashlib
 import json
 import logging
 import random
 import uuid
-import hashlib
+
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import login

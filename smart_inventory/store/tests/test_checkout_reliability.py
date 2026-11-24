@@ -1,9 +1,11 @@
 import json
-from decimal import Decimal
 import uuid
+from decimal import Decimal
+
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.test import RequestFactory, TestCase
-from django.contrib.auth import get_user_model
+
 from store.models import Customer, Order, OrderItem, Product
 from store.views import process_order
 
