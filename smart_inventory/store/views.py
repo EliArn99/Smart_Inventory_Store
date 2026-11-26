@@ -28,6 +28,7 @@ from .models import (
     Product,
     Review,
     ShippingAddress,
+    StockMovement,
     WishlistItem,
 )
 from .utils import cartData, cookieCart, guestOrder
@@ -431,11 +432,10 @@ def process_order(request):
             if order.complete:
 
                 if (
-                    checkout_key is not None
-                    and order.idempotency_key == checkout_key
-                    and order.idempotency_fingerprint == checkout_fingerprint
+                        checkout_key is not None
+                        and order.idempotency_key == checkout_key
+                        and order.idempotency_fingerprint == checkout_fingerprint
                 ):
-
                     return JsonResponse(
                         {"message": "Payment submitted successfully"},
                         status=200,
@@ -538,12 +538,35 @@ def process_order(request):
                         status=400,
                     )
 
+            # Update stock and prepare audit records.
+            stock_movements = []
+
             for product_id, quantity in required_stock.items():
+                product = products[product_id]
+
+                stock_before = product.stock
+                stock_after = stock_before - quantity
+
                 Product.objects.filter(pk=product_id).update(
                     stock=F("stock") - quantity
                 )
 
+                stock_movements.append(
+                    StockMovement(
+                        product=product,
+                        order=order,
+                        reason=StockMovement.Reason.SALE,
+                        quantity_change=-quantity,
+                        stock_before=stock_before,
+                        stock_after=stock_after,
+                    )
+                )
+
+            # Save stock history in the same database transaction.
+            StockMovement.objects.bulk_create(stock_movements)
+
             order.transaction_id = uuid.uuid4().hex
+
             order.complete = True
             order.save(update_fields=["transaction_id", "complete"])
 
