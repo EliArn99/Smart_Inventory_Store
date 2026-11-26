@@ -1,4 +1,3 @@
-
 from uuid import uuid4
 
 from django.contrib.auth.models import User
@@ -75,8 +74,6 @@ class Product(models.Model):
             return ""
 
 
-
-
 class Order(models.Model):
     customer = models.ForeignKey(
         Customer,
@@ -95,15 +92,12 @@ class Order(models.Model):
         editable=False,
     )
 
-
     idempotency_fingerprint = models.CharField(
         max_length=64,
         null=True,
         blank=True,
         editable=False,
     )
-
-
 
     def __str__(self):
         return str(self.id)
@@ -263,7 +257,6 @@ class Post(models.Model):
         return self.title
 
 
-
 class Comment(models.Model):
     post = models.ForeignKey(
         Post,
@@ -299,6 +292,60 @@ class Banner(models.Model):
     def __str__(self):
         return self.title
 
+
+class StockMovement(models.Model):
+    class Reason(models.TextChoices):
+        SALE = "sale", "Продажба"
+        RESTOCK = "restock", "Зареждане"
+        ADJUSTMENT = "adjustment", "Корекция"
+
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.PROTECT,
+        related_name="stock_movements",
+    )
+
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="stock_movements",
+    )
+
+    reason = models.CharField(
+        max_length=20,
+        choices=Reason.choices,
+    )
+
+    quantity_change = models.IntegerField()
+
+    stock_before = models.PositiveIntegerField()
+    stock_after = models.PositiveIntegerField()
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("-created_at",)
+        indexes = [
+            models.Index(
+                fields=["product", "-created_at"],
+                name="stock_move_product_idx",
+            ),
+        ]
+        constraints = [
+            models.CheckConstraint(
+                condition=~models.Q(quantity_change=0),
+                name="stock_move_nonzero_qty",
+            ),
+        ]
+
+    def __str__(self):
+        return (
+            f"{self.product_id}: "
+            f"{self.quantity_change:+d} "
+            f"({self.get_reason_display()})"
+        )
 
 # TODO: Finish
 # class UserListManager(models.Manager):

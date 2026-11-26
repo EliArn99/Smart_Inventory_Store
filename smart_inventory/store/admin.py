@@ -1,4 +1,6 @@
+from django import forms
 from django.contrib import admin
+from django.db import transaction
 from django.utils.html import format_html
 
 from .models import (
@@ -13,6 +15,7 @@ from .models import (
     Product,
     Review,
     ShippingAddress,
+    StockMovement,
     WishlistItem,
 )
 
@@ -41,6 +44,59 @@ class StockLevelFilter(admin.SimpleListFilter):
         return queryset
 
 
+
+class ProductAdminForm(forms.ModelForm):
+    stock = forms.IntegerField(
+        min_value=0,
+        label="Складова наличност",
+    )
+
+    original_stock = forms.IntegerField(
+        required=False,
+        widget=forms.HiddenInput,
+    )
+
+    class Meta:
+        model = Product
+        fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if self.instance.pk:
+            self.fields["original_stock"].initial = self.instance.stock
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        if not self.instance.pk:
+            return cleaned_data
+
+        original_stock = cleaned_data.get("original_stock")
+
+        if original_stock is None:
+            raise forms.ValidationError(
+                "Липсва началната наличност. Презаредете страницата."
+            )
+
+        current_stock = (
+            Product.objects.select_for_update()
+            .values_list("stock", flat=True)
+            .get(pk=self.instance.pk)
+        )
+
+        if current_stock != original_stock:
+            raise forms.ValidationError(
+                "Наличността е променена от друга операция. "
+                "Презаредете страницата и опитайте отново."
+            )
+
+        return cleaned_data
+
+
+
+
+
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = (
@@ -61,6 +117,60 @@ class ProductAdmin(admin.ModelAdmin):
     list_select_related = ("category",)
     ordering = ("name",)
     list_per_page = 25
+    change_list_template = "store/change_list.html"
+
+
+    form = ProductAdminForm
+
+    def get_changelist_form(self, request, **kwargs):
+        return ProductAdminForm
+
+
+    def changelist_view(self, request, extra_context=None):
+        if request.method == "POST" and "_save" in request.POST:
+            with transaction.atomic():
+                return super().changelist_view(
+                    request,
+                    extra_context=extra_context,
+                )
+
+        return super().changelist_view(
+            request,
+            extra_context=extra_context,
+        )
+
+
+    @transaction.atomic
+    def save_model(self, request, obj, form, change):
+        # Read the current stock while holding a database lock.
+        if change:
+            stock_before = (
+                Product.objects
+                .select_for_update()
+                .values_list("stock", flat=True)
+                .get(pk=obj.pk)
+            )
+        else:
+            stock_before = 0
+
+        # Save the product using Django Admin's normal behavior.
+        super().save_model(request, obj, form, change)
+
+        stock_after = obj.stock
+        quantity_change = stock_after - stock_before
+
+        # No audit record is needed when stock did not change.
+        if quantity_change == 0:
+            return
+
+        StockMovement.objects.create(
+            product=obj,
+            reason=StockMovement.Reason.ADJUSTMENT,
+            quantity_change=quantity_change,
+            stock_before=stock_before,
+            stock_after=stock_after,
+        )
+
 
     def image_tag(self, obj):
         if obj.image:
@@ -216,3 +326,55 @@ class CommentAdmin(admin.ModelAdmin):
     @admin.action(description="Одобри избраните коментари")
     def approve_comments(self, request, queryset):
         queryset.update(is_approved=True)
+
+
+
+
+@admin.register(StockMovement)
+class StockMovementAdmin(admin.ModelAdmin):
+    list_display = (
+        "created_at",
+        "product",
+        "reason",
+        "quantity_change",
+        "stock_before",
+        "stock_after",
+        "order",
+    )
+
+    list_filter = (
+        "reason",
+        "created_at",
+    )
+
+    search_fields = (
+        "product__name",
+        "product__sku",
+        "order__id",
+    )
+
+    list_select_related = (
+        "product",
+        "order",
+    )
+
+    readonly_fields = (
+        "product",
+        "order",
+        "reason",
+        "quantity_change",
+        "stock_before",
+        "stock_after",
+        "created_at",
+    )
+
+    ordering = ("-created_at", "-pk")
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
